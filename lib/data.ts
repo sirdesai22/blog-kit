@@ -92,12 +92,12 @@ export const pageManagementSidebarData = {
   navMain: [
     {
       title: 'Dashboard',
-      url: '#',
+      url: '#', // Will resolve to /{workspaceSlug}/blogs/{blogId}
       icon: Gauge,
     },
     {
       title: 'Post Management',
-      url: '#',
+      url: '#', // Will resolve to /{workspaceSlug}/blogs/{blogId}
       icon: FileText,
       items: [
         {
@@ -106,31 +106,31 @@ export const pageManagementSidebarData = {
         },
         {
           title: 'Published',
-          url: '#',
+          url: 'published',
         },
         {
           title: 'Drafts',
-          url: '#',
+          url: 'drafts',
         },
         {
           title: 'Scheduled',
-          url: '#',
+          url: 'scheduled',
         },
       ],
     },
     {
       title: 'Posts',
-      url: '#',
+      url: '#', // Will resolve to /{workspaceSlug}/blogs/{blogId}
       icon: FileText,
     },
     {
       title: 'Categories',
-      url: 'categories',
+      url: 'categories', // Will resolve to /{workspaceSlug}/blogs/{blogId}/categories
       icon: FolderOpen,
     },
     {
       title: 'Authors',
-      url: '#',
+      url: 'authors', // Will resolve to /{workspaceSlug}/blogs/{blogId}/authors
       icon: Users,
     },
     {

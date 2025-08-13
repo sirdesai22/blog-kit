@@ -138,7 +138,7 @@ export function PageCard({ page, workspaceSlug }: PageCardProps) {
               className="flex-1 text-xs"
               asChild
             >
-              <Link href={`/${workspaceSlug}/pages/${page.id}`}>Edit</Link>
+              <Link href={`/${workspaceSlug}/blogs/${page.id}`}>Edit</Link>
             </Button>
             <Button variant="ghost" size="sm" className="p-2">
               <Eye className="w-4 h-4" />

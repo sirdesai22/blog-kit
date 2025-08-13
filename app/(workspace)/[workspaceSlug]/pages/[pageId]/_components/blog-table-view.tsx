@@ -40,6 +40,7 @@ import {
   headingVariants,
   subtitleVariants,
 } from '@/components/ui/heading';
+import { useRouter } from 'next/navigation';
 
 interface BlogPost {
   id: string;
@@ -70,7 +71,7 @@ export function BlogTableView({
 }: BlogTableViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-
+  const router = useRouter();
   const filteredPosts = posts.filter((post) => {
     const matchesSearch = post.title
       .toLowerCase()
@@ -99,9 +100,11 @@ export function BlogTableView({
       growth: Math.floor(Math.random() * 100) - 50, // -50 to +50
     };
   };
-
+  const newPage = () => {
+    router.push(`/${workspaceSlug}/blogs/${currentPage.id}/new`);
+  };
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen ">
       {/* Header */}
       <div className="">
         <div className="max-w-7xl mx-auto px-4 py-6">
@@ -124,7 +127,7 @@ export function BlogTableView({
                 Posts
               </Heading>
             </div>
-            <Button>
+            <Button onClick={newPage}>
               <Plus className="w-4 h-4 mr-2" />
               New Post
             </Button>

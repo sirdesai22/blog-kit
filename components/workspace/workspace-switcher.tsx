@@ -75,15 +75,9 @@ export function WorkSpaceSwitcher() {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                <Building2 className="size-4" />
-              </div>
               <div className="flex flex-col gap-0.5 leading-none">
                 <span className="font-medium">
                   {displayWorkspace?.name || 'Select Workspace'}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {displayWorkspace?.role?.toLowerCase() || ''}
                 </span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />

@@ -3,7 +3,7 @@ import React from 'react';
 import {
   getBlogCategories,
   getWorkspaceAuthors,
-  getBlogPostsByBlogId, // Updated import
+  getBlogPostsByBlogId,
 } from '@/lib/actions/blog-actions';
 import { BlogEditor } from '@/components/blogs/blog-editor';
 
@@ -30,7 +30,7 @@ export default async function NewPostPage({ params }: NewPostPageProps) {
       blogId={blogId}
       categories={categories}
       authors={authors}
-      allPosts={blogPosts} // Now contains only posts from this specific blog
+      allPosts={blogPosts}
       isNewPost={true}
     />
   );

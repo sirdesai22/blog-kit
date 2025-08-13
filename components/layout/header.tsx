@@ -15,7 +15,7 @@ import {
 import { useSession, signOut } from 'next-auth/react';
 
 import { LogOut, User } from 'lucide-react';
-import { WorkSpaceSwitcher } from '../workspace/workspace-switcher';
+import { BreadcrumbNav } from './breadcrumb-nav';
 
 export function SiteHeader() {
   const { toggleSidebar } = useSidebar();
@@ -25,13 +25,13 @@ export function SiteHeader() {
 
   return (
     <header className="bg-background sticky top-0 z-50 flex w-full items-center border-b">
-      <div className="flex h-[--header-height] justify-between w-full items-center gap-2 px-2">
-        {/* Workspace Switcher */}
-        <div className="flex">
-          <WorkSpaceSwitcher />
+      <div className="flex h-[--header-height] justify-between w-full items-center gap-4 px-4">
+        {/* Breadcrumb Navigation */}
+        <div className="flex items-center flex-1">
+          <BreadcrumbNav />
         </div>
 
-        {/* User Info - existing code */}
+        {/* User Info */}
         <div className="flex items-center space-x-2">
           <Popover>
             <PopoverTrigger asChild>

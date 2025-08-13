@@ -279,7 +279,9 @@ export default function AuthorsPage({ params }: AuthorsPageProps) {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-between">
-                        <span className="font-medium">{author.posts} Posts</span>
+                        <span className="font-medium">
+                          {author.posts} Posts
+                        </span>
                         <div className="flex items-center gap-2">
                           <Button
                             variant="outline"
