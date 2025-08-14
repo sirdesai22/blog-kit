@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, MoreVertical, RefreshCw } from 'lucide-react';
 import { BlogEditorSidebar, BlogPost, Author } from './blog-editor-sidebar';
 import Link from 'next/link';
+import { TiptapEditor } from '@/components/ui/tiptap-editor';
 
 interface BlogEditorProps {
   workspaceSlug: string;
@@ -16,6 +17,7 @@ interface BlogEditorProps {
   categories: string[];
   authors: Author[];
   allPosts: BlogPost[];
+  tags: string[]; // Add this line
   isNewPost?: boolean;
 }
 
@@ -26,6 +28,7 @@ export function BlogEditor({
   categories,
   authors,
   allPosts,
+  tags, // Add this line
   isNewPost = true,
 }: BlogEditorProps) {
   const [post, setPost] = useState<BlogPost>({
@@ -144,15 +147,15 @@ export function BlogEditor({
                 </Card>
               </div>
 
-              {/* Editor Placeholder */}
+              {/* Tiptap Editor */}
               <div className="mt-8">
-                <Card className="bg-white">
-                  <CardContent className="p-8">
-                    <div className="text-gray-400 text-center py-12">
-                      <p>Press '/' for commands</p>
-                    </div>
-                  </CardContent>
-                </Card>
+                <TiptapEditor
+                  content={post.content}
+                  onChange={(content) => handlePostChange({ ...post, content })}
+                  placeholder="Press '/' for commands or start typing..."
+                  minHeight="400px"
+                  className="min-h-[400px]"
+                />
               </div>
             </div>
           </div>
@@ -165,6 +168,7 @@ export function BlogEditor({
             categories={categories}
             authors={authors}
             allPosts={allPosts}
+            tags={tags} // Add this line
             onPostChange={handlePostChange}
             onSave={handleSave}
             onPublish={handlePublish}

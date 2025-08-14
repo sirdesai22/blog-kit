@@ -3,7 +3,7 @@ import {
   getPageById,
   getWorkspaceWithPages,
 } from '@/lib/actions/workspace-actions';
-import { BlogTableView } from '../../pages/[pageId]/_components/blog-table-view';
+import { BlogTableView } from './_components/blog-table-view';
 
 interface PageProps {
   params: Promise<{

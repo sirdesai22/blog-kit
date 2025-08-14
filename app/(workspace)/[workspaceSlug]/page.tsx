@@ -64,11 +64,12 @@ async function PagesContent({ workspaceSlug }: { workspaceSlug: string }) {
 }
 
 // Main page component
-export default function WorkspacePage({
-  params,
-}: {
-  params: { workspaceSlug: string };
-}) {
+export default async function WorkspacePage(
+  props: {
+    params: Promise<{ workspaceSlug: string }>;
+  }
+) {
+  const params = await props.params;
   return (
     <Suspense fallback={<PagesLoading />}>
       <PagesContent workspaceSlug={params.workspaceSlug} />

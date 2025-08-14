@@ -177,7 +177,8 @@ model WorkspaceConfig {
   
   // Page type settings
   enabledPageTypes  PageType[]
-  blogCategories    Json      // Changed from String[] to Json
+  blogCategories    Json      
+  blogTags         Json? 
   helpdeskCategories String[]
   customFields      Json?
   

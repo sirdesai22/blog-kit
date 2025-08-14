@@ -3,7 +3,8 @@ import {
   getPageById,
   getWorkspaceBlogCategories,
 } from '@/lib/actions/workspace-actions';
-import { BlogCategoriesView } from './_components/blog-categories-view';
+import { CategoriesAndTagsView } from './_components/categories-and-tags-view';
+import { getWorkspaceBlogTags } from '@/lib/actions/tag-actions';
 
 interface PageProps {
   params: Promise<{
@@ -15,20 +16,22 @@ interface PageProps {
 export default async function CategoriesPage({ params }: PageProps) {
   const { workspaceSlug, blogId } = await params;
 
-  const [page, categoriesData] = await Promise.all([
+  const [page, categoriesData, tagsData] = await Promise.all([
     getPageById(workspaceSlug, blogId),
     getWorkspaceBlogCategories(workspaceSlug),
+    getWorkspaceBlogTags(workspaceSlug),
   ]);
 
-  if (!page || !categoriesData || !workspaceSlug) {
+  if (!page || !categoriesData || !tagsData || !workspaceSlug) {
     notFound();
   }
 
   return (
-    <BlogCategoriesView
+    <CategoriesAndTagsView
       workspaceSlug={workspaceSlug}
       blogId={blogId}
       categories={categoriesData.categories}
+      tags={tagsData.tags}
     />
   );
 }

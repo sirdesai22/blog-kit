@@ -217,7 +217,9 @@ export async function publishBlogPost(pageId: string, workspaceSlug: string) {
   return updatedPage;
 }
 
-export async function getBlogCategories(workspaceSlug: string) {
+export async function getBlogCategories(
+  workspaceSlug: string
+): Promise<string[]> {
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -242,7 +244,18 @@ export async function getBlogCategories(workspaceSlug: string) {
     return [];
   }
 
-  return workspace.config.blogCategories || [];
+  const blogCategories = workspace.config.blogCategories;
+
+  // Type guard to ensure we return string[]
+  if (
+    Array.isArray(blogCategories) &&
+    blogCategories.every((item) => typeof item === 'string')
+  ) {
+    return blogCategories;
+  }
+
+  // If the data is not in the expected format, return empty array
+  return [];
 }
 
 export async function getWorkspaceAuthors(workspaceSlug: string) {
@@ -364,4 +377,43 @@ export async function getBlogPosts(workspaceSlug: string) {
   });
 
   return pages;
+}
+
+export async function getBlogTags(workspaceSlug: string): Promise<string[]> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    redirect('/auth/signin');
+  }
+
+  const workspace = await db.workspace.findFirst({
+    where: {
+      slug: workspaceSlug,
+      members: {
+        some: {
+          userId: session.user.id,
+        },
+      },
+    },
+    include: {
+      config: true,
+    },
+  });
+
+  if (!workspace?.config) {
+    return [];
+  }
+
+  const blogTags = workspace.config.blogTags;
+
+  // Type guard to ensure we return string[]
+  if (
+    Array.isArray(blogTags) &&
+    blogTags.every((item) => typeof item === 'string')
+  ) {
+    return blogTags;
+  }
+
+  // If the data is not in the expected format, return empty array
+  return [];
 }

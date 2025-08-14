@@ -1,103 +1,217 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { Button } from '@/components/ui/button';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+
+export default function HomePage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  const handleGetStarted = async () => {
+    if (status === 'loading') return;
+
+    if (session?.user?.id) {
+      // User is authenticated - use smart redirect
+      try {
+        const response = await fetch('/api/auth/redirect');
+        if (response.ok) {
+          const { redirectTo } = await response.json();
+          router.push(redirectTo);
+        } else {
+          // Fallback to onboarding if API fails
+          router.push('/onboarding');
+        }
+      } catch (error) {
+        router.push('/onboarding');
+      }
+    } else {
+      // User is not authenticated - redirect to sign in
+      router.push('/auth/signin');
+    }
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen">
+      {/* Header */}
+      <header className=" px-6 py-4">
+        <div className="flex items-center justify-between max-w-7xl mx-auto">
+          <div className="flex items-center gap-8">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-black rounded flex items-center justify-center">
+                <svg
+                  className="w-5 h-5 text-yellow-400"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <span className="font-bold text-lg text-black">Blog Boast</span>
+            </div>
+            <nav className="hidden md:flex items-center gap-6">
+              <a href="#" className="text-black hover:text-gray-700">
+                How it Works
+              </a>
+              <a href="#" className="text-black hover:text-gray-700">
+                Examples
+              </a>
+              <a href="#" className="text-black hover:text-gray-700">
+                Blog
+              </a>
+              <a href="#" className="text-black hover:text-gray-700">
+                Pricing
+              </a>
+            </nav>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              className="bg-transparent border-black text-black hover:bg-black hover:text-white"
+            >
+              Book a call
+            </Button>
+            <Button
+              className="bg-black text-white hover:bg-gray-800"
+              onClick={handleGetStarted}
+            >
+              Get Started →
+            </Button>
+          </div>
+        </div>
+      </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      <main className="bg-white px-6 pt-16 pb-16">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="bg-gray-100 text-xs px-3 py-1 rounded-full inline-block mb-8 text-gray-600">
+            Free Blog Content Strategies
+          </div>
+
+          <h1 className="text-5xl md:text-6xl font-bold text-black mb-6 leading-tight">
+            Publish high-quality blog posts
+            <br />
+            that drive SEO traffic on autopilot
+          </h1>
+
+          <p className="text-lg text-gray-700 mb-8 max-w-2xl mx-auto">
+            Blog Boast delivers well-researched, SEO-optimized blog posts every
+            day,
+            <br />
+            driving high-intent traffic to your business while you sleep.
+          </p>
+
+          <Button
+            className="bg-black text-white hover:bg-gray-800 text-lg px-8 py-3 mb-4"
+            onClick={handleGetStarted}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            Get Started →
+          </Button>
+
+          <p className="text-sm text-gray-600">
+            Try 5 articles for just $1 - Upgrade later
+          </p>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      <div className="bg-yellow-400 px-6 py-16">
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden mb-8">
+            <Image
+              src="/screenshot.png"
+              alt="AI-Powered Blog Setup interface showing progress steps and form fields"
+              width={1000}
+              height={600}
+              className="w-full h-auto"
+            />
+          </div>
+
+          <div className="flex justify-center gap-8">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-black rounded flex items-center justify-center mb-2 mx-auto">
+                <svg
+                  className="w-6 h-6 text-yellow-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  />
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-black">
+                Topic Planner
+              </span>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-black rounded flex items-center justify-center mb-2 mx-auto">
+                <svg
+                  className="w-6 h-6 text-yellow-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                  />
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-black">Post Ideas</span>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-black rounded flex items-center justify-center mb-2 mx-auto">
+                <svg
+                  className="w-6 h-6 text-yellow-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                  />
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-black">
+                Post Editor
+              </span>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-black rounded flex items-center justify-center mb-2 mx-auto">
+                <svg
+                  className="w-6 h-6 text-yellow-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"
+                  />
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-black">
+                Blog Hosting
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

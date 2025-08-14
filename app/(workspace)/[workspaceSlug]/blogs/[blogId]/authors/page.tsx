@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -59,13 +59,14 @@ interface AuthorFormData {
 }
 
 interface AuthorsPageProps {
-  params: {
+  params: Promise<{
     workspaceSlug: string;
     blogId: string;
-  };
+  }>;
 }
 
-export default function AuthorsPage({ params }: AuthorsPageProps) {
+export default function AuthorsPage(props: AuthorsPageProps) {
+  const params = use(props.params);
   const [authors, setAuthors] = useState<Author[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);

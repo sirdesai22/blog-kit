@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { CalendarDays, Clock, X, Settings2 } from 'lucide-react';
+import { CalendarDays, Clock, X, Settings2, Plus, Check } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export interface BlogPost {
@@ -43,7 +43,8 @@ interface BlogEditorSidebarProps {
   post: BlogPost;
   categories: string[];
   authors: Author[];
-  allPosts: BlogPost[]; // Now contains only posts from the specific blog
+  allPosts: BlogPost[];
+  tags: string[]; // Add this line
   onPostChange: (post: BlogPost) => void;
   onSave: () => void;
   onPublish: () => void;
@@ -57,7 +58,8 @@ export function BlogEditorSidebar({
   post,
   categories,
   authors,
-  allPosts, // This now contains only posts from the current blog
+  allPosts,
+  tags, // Add this line
   onPostChange,
   onSave,
   onPublish,
@@ -70,11 +72,31 @@ export function BlogEditorSidebar({
     BlogPost[]
   >([]);
   const [tagInput, setTagInput] = useState('');
+  const [tagSelectOpen, setTagSelectOpen] = useState(false);
+  const [tagSearch, setTagSearch] = useState('');
 
   // SEO fields
   const [seoTitle, setSeoTitle] = useState('');
   const [seoDescription, setSeoDescription] = useState('');
   const [seoKeywords, setSeoKeywords] = useState('');
+
+  const tagSelectRef = useRef<HTMLDivElement>(null);
+
+  // Add click outside handler
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        tagSelectRef.current &&
+        !tagSelectRef.current.contains(event.target as Node)
+      ) {
+        setTagSelectOpen(false);
+        setTagSearch('');
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const postAuthors = authors.filter((author) =>
@@ -158,30 +180,132 @@ export function BlogEditorSidebar({
         </Select>
       </div>
 
-      {/* Tags */}
+      {/* Tags - Updated to use multiselect */}
       <div>
-        <Label className="text-sm font-medium text-gray-700">Tag</Label>
+        <Label className="text-sm font-medium text-gray-700">Tags</Label>
         <div className="mt-2">
-          <Input
-            value={tagInput}
-            onChange={(e) => setTagInput(e.target.value)}
-            onKeyDown={handleAddTag}
-            placeholder="Select Tags"
-            className="mb-2"
-          />
-          <div className="flex flex-wrap gap-1">
-            {post.tags.map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-xs">
-                {tag}
-                <button
-                  onClick={() => handleRemoveTag(tag)}
-                  className="ml-1 hover:text-red-500"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </Badge>
-            ))}
+          {/* Custom multiselect for tags */}
+          <div className="relative" ref={tagSelectRef}>
+            <div
+              className="min-h-[40px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+              onClick={() => setTagSelectOpen(!tagSelectOpen)}
+            >
+              <div className="flex flex-wrap gap-1">
+                {post.tags.length === 0 ? (
+                  <span className="text-muted-foreground">Select tags...</span>
+                ) : (
+                  post.tags.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="text-xs">
+                      {tag}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveTag(tag);
+                        }}
+                        className="ml-1 hover:text-red-500"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Dropdown */}
+            {tagSelectOpen && (
+              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                <div className="p-2">
+                  {/* Search input */}
+                  <Input
+                    placeholder="Search tags..."
+                    value={tagSearch}
+                    onChange={(e) => setTagSearch(e.target.value)}
+                    className="mb-2"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+
+                  {/* Tag options */}
+                  <div className="space-y-1">
+                    {tags
+                      .filter(
+                        (tag) =>
+                          tag.toLowerCase().includes(tagSearch.toLowerCase()) &&
+                          !post.tags.includes(tag)
+                      )
+                      .map((tag) => (
+                        <div
+                          key={tag}
+                          className="flex items-center justify-between p-2 hover:bg-gray-100 rounded cursor-pointer"
+                          onClick={() => {
+                            onPostChange({
+                              ...post,
+                              tags: [...post.tags, tag],
+                            });
+                            setTagSearch('');
+                          }}
+                        >
+                          <span className="text-sm">{tag}</span>
+                          <Plus className="w-4 h-4 text-gray-400" />
+                        </div>
+                      ))}
+
+                    {/* Show message if no tags available */}
+                    {tags.filter(
+                      (tag) =>
+                        tag.toLowerCase().includes(tagSearch.toLowerCase()) &&
+                        !post.tags.includes(tag)
+                    ).length === 0 && (
+                      <div className="text-sm text-gray-500 text-center py-2">
+                        {tagSearch ? 'No tags found' : 'No tags available'}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Add new tag option */}
+                  {tagSearch && !tags.includes(tagSearch) && (
+                    <div
+                      className="flex items-center justify-between p-2 hover:bg-gray-100 rounded cursor-pointer border-t border-gray-200 mt-2 pt-2"
+                      onClick={() => {
+                        onPostChange({
+                          ...post,
+                          tags: [...post.tags, tagSearch],
+                        });
+                        setTagSearch('');
+                      }}
+                    >
+                      <span className="text-sm text-blue-600">
+                        Create "{tagSearch}"
+                      </span>
+                      <Plus className="w-4 h-4 text-blue-600" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* Selected tags summary */}
+          {post.tags.length > 0 && (
+            <div className="mt-2">
+              <div className="text-xs text-gray-600 mb-1">
+                Selected tags ({post.tags.length}):
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {post.tags.map((tag) => (
+                  <Badge key={tag} variant="secondary" className="text-xs">
+                    {tag}
+                    <button
+                      onClick={() => handleRemoveTag(tag)}
+                      className="ml-1 hover:text-red-500"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
