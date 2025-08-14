@@ -24,10 +24,12 @@ export default async function Page({ params }: PageProps) {
 
   const blogPosts = workspace.pages.filter((p) => p.type === 'BLOG');
   return (
-    <BlogTableView
-      posts={blogPosts}
-      workspaceSlug={workspaceSlug}
-      currentPage={page}
-    />
+    <div className="max-w-[80vw] overflow-x-hidden">
+      <BlogTableView
+        posts={blogPosts}
+        workspaceSlug={workspaceSlug}
+        currentPage={page}
+      />
+    </div>
   );
 }

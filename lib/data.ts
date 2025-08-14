@@ -92,12 +92,12 @@ export const pageManagementSidebarData = {
   navMain: [
     {
       title: 'Dashboard',
-      url: '#', // Will resolve to /{workspaceSlug}/blogs/{blogId}
+      url: '/',
       icon: Gauge,
     },
     {
       title: 'Post Management',
-      url: '#', // Will resolve to /{workspaceSlug}/blogs/{blogId}
+      url: '#',
       icon: FileText,
       items: [
         {

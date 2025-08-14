@@ -170,7 +170,7 @@ enum Role {
   VIEWER
 }
 
-// Add workspace-level configuration
+//  workspace-level configuration
 model WorkspaceConfig {
   id           String      @id @default(cuid())
   workspaceId  String      @unique
