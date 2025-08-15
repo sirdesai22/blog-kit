@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import LogoWithText, { GitHubIcon, GoogleIcon } from '@/components/icons/icons';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 export default function SignInPage() {
   const [email, setEmail] = useState('');
@@ -16,10 +16,17 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // Smart redirect function
+  const inputBaseClasses = "h-12 px-4 rounded-xl border-hovered hover:bg-secondary text-muted-foreground focus-visible:outline-none focus-visible:ring-[0.2px] focus-visible:ring-ring focus-visible:ring-offset-[0.2px]";
+  const placeholderClasses = "placeholder:text-muted-foreground";
+  const primaryButtonBaseClasses = "w-full h-12 hover:cursor- rounded-xl font-medium text-base";
+  const socialButtonClasses = "w-full hover:cursor-pointer h-12 flex items-center justify-center px-4 rounded-xl border-hovered hover:bg-secondary text-muted-foreground";
+  const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+
   const getRedirectDestination = async (): Promise<string> => {
     try {
       const response = await fetch('/api/auth/redirect');
@@ -30,11 +37,9 @@ export default function SignInPage() {
     } catch (error) {
       console.error('Error getting redirect destination:', error);
     }
-    // Fallback to onboarding
     return '/onboarding';
   };
 
-  // Handle session-based redirect
   useEffect(() => {
     if (status === 'authenticated' && session?.user?.id) {
       getRedirectDestination().then((redirectTo) => {
@@ -45,15 +50,29 @@ export default function SignInPage() {
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
-    // Use a simple callback that will trigger useEffect for smart redirect
-    await signIn('google', { callbackUrl: window.location.origin + '/auth/signin' });
+    setError('');
+    await signIn('google', { callbackUrl: window.location.origin + '/' });
   };
 
   const handleGitHubSignIn = async () => {
     setLoading(true);
-    // Use a simple callback that will trigger useEffect for smart redirect  
-    await signIn('github', { callbackUrl: window.location.origin + '/auth/signin' });
+    setError('');
+    await signIn('github', { callbackUrl: window.location.origin + '/' });
   };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!recaptchaToken && siteKey) {
+        setError('Please complete the CAPTCHA.');
+        return;
+    }
+
+    if (isSignUp) {
+        await handleSignUp();
+    } else {
+        await handleEmailSignIn();
+    }
+  }
 
   const handleEmailSignIn = async () => {
     if (!email || !password) {
@@ -81,6 +100,8 @@ export default function SignInPage() {
       setError('An error occurred. Please try again.');
     } finally {
       setLoading(false);
+      recaptchaRef.current?.reset();
+      setRecaptchaToken(null);
     }
   };
 
@@ -96,14 +117,8 @@ export default function SignInPage() {
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-          name,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name }),
       });
 
       const data = await response.json();
@@ -113,7 +128,6 @@ export default function SignInPage() {
         return;
       }
 
-      // After successful registration, sign in the user
       const result = await signIn('credentials', {
         email,
         password,
@@ -121,141 +135,117 @@ export default function SignInPage() {
       });
 
       if (result?.ok) {
-        // New users always go to onboarding
         router.push('/onboarding');
       }
     } catch (error) {
       setError('An error occurred. Please try again.');
     } finally {
       setLoading(false);
+      recaptchaRef.current?.reset();
+      setRecaptchaToken(null);
     }
   };
 
-  // Show loading while checking session
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen">
         <div>Loading...</div>
       </div>
     );
   }
 
-  // If user is already authenticated, show redirecting message
   if (status === 'authenticated') {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen">
         <div>Redirecting...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <Card className="border border-gray-200 shadow-sm">
-          <CardHeader className="space-y-1 pb-6">
-            <div className="flex justify-center mb-6">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-black rounded-sm flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">L</span>
-                </div>
-                <span className="text-xl font-semibold text-gray-900">
-                  logoipsum
-                </span>
-              </div>
+    <div className="flex flex-col items-center justify-between py-10 min-h-screen font-sans bg-background">
+        <div>
+            <div className="w-full flex items-center justify-center mb-0">
+                <LogoWithText />
             </div>
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                {isSignUp ? 'Create your account' : 'Sign in to your account'}
-              </p>
-            </div>
-          </CardHeader>
+            <h2 className="text-center text-muted-foreground mb-6 text-md italic">
+             {isSignUp ? 'Create your account' : 'Sign in to your account'}
+            </h2>
+        </div>
 
-          <CardContent className="space-y-4">
-            {/* Error Message */}
+        <div className="w-full max-w-sm px-4">
+            <p className="text-center text-muted-foreground text-md mt-4 mb-2">
+                Get started - Sign-in or create an account
+            </p>
+
+            <div className='space-y-3 mb-3'>
+                <Button onClick={handleGoogleSignIn} variant="outline" className={socialButtonClasses} disabled={loading}>
+                    <GoogleIcon className="mr-2.5 h-5 w-5" /> Continue with Google
+                </Button>
+                <Button onClick={handleGitHubSignIn} variant="outline" className={socialButtonClasses} disabled={loading}>
+                    <GitHubIcon className="mr-2.5 h-5 w-5" /> Continue with GitHub
+                </Button>
+            </div>
+
+            <div className="relative my-3">
+                <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-hovered"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                    <span className="bg-background px-3 text-muted-foreground">Or</span>
+                </div>
+            </div>
+
             {error && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+              <div className="p-3 my-2 text-sm text-center text-red-600 bg-red-50 border border-red-200 rounded-xl">
                 {error}
               </div>
             )}
-
-            {/* Google Sign In */}
-            <Button
-              onClick={handleGoogleSignIn}
-              disabled={loading}
-              variant="outline"
-              className="w-full h-11 border-gray-300 hover:bg-gray-50"
-            >
-              Continue with Google
-            </Button>
-
-            {/* GitHub Sign In */}
-            <Button
-              onClick={handleGitHubSignIn}
-              disabled={loading}
-              variant="outline"
-              className="w-full h-11 border-gray-300 hover:bg-gray-50"
-            >
-              Continue with GitHub
-            </Button>
-
-            {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <Separator className="w-full" />
+            
+            <form onSubmit={handleSubmit} className="space-y-5">
+                {isSignUp && (
+                    <Input type="text" placeholder="Enter your name" value={name} onChange={(e) => setName(e.target.value)} className={`${inputBaseClasses} ${placeholderClasses}`} disabled={loading}/>
+                )}
+                <Input type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} className={`${inputBaseClasses} ${placeholderClasses}`} disabled={loading}/>
+                <Input type="password" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} className={`${inputBaseClasses} ${placeholderClasses}`} disabled={loading}/>
+                  {siteKey && (
+              <div className="flex justify-center">
+                <div
+                  className={`
+                    relative 
+                    rounded-xl
+                  `}
+                >
+                  <div className="rounded-xl overflow-hidden">
+                   <ReCAPTCHA
+                                ref={recaptchaRef}
+                                sitekey={siteKey}
+                                onChange={setRecaptchaToken}
+                                // theme='light'
+                            />
+                  </div>
+                  <div className="absolute inset-[-15px] rounded-xl border-x-[20px] border-y-[0px] h-20 mt-[14px] border-recaptcha pointer-events-none"></div>
+                  <div className="absolute inset-x-[-22px] inset-y-[-1px] rounded-xl border-x-[15px] border-y-[10px]  border-recaptcha pointer-events-none"></div>
+                </div>
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-gray-500">Or</span>
-              </div>
-            </div>
+            )}
 
-            {/* Email/Password Form */}
-            <div className="space-y-4">
-              {isSignUp && (
-                <Input
-                  type="text"
-                  placeholder="Enter your name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                />
-              )}
+                <Button type="submit" className={primaryButtonBaseClasses} disabled={loading}>
+                    {loading ? 'Loading...' : isSignUp ? 'Create Account' : 'Continue with email'}
+                </Button>
+            </form>
 
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-              />
-
-              <Input
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-              />
-
-              <Button
-                onClick={isSignUp ? handleSignUp : handleEmailSignIn}
-                disabled={loading}
-                className="w-full h-11 bg-black hover:bg-gray-800 text-white"
-              >
-                {loading ? 'Loading...' : isSignUp ? 'Create Account' : 'Sign In'}
-              </Button>
-            </div>
-
-            {/* Toggle between Sign In and Sign Up */}
-            <div className="text-center">
+            <div className="text-center mt-4">
               <button
                 onClick={() => {
                   setIsSignUp(!isSignUp);
                   setError('');
                   setPassword('');
                   setName('');
+                  setRecaptchaToken(null);
+                  recaptchaRef.current?.reset();
                 }}
-                className="text-sm text-blue-600 hover:underline"
+                className="text-sm text-primary hover:underline"
               >
                 {isSignUp 
                   ? 'Already have an account? Sign in' 
@@ -263,21 +253,19 @@ export default function SignInPage() {
                 }
               </button>
             </div>
+        </div>
 
-            {/* Terms and Privacy */}
-            <div className="text-xs text-center text-gray-500 pt-4">
-              By continuing you agree to the{' '}
-              <Link href="/terms" className="text-blue-600 hover:underline">
+        <div className="text-xs text-muted-foreground mt-8 text-center">
+            By continuing you agree to the{" "} <br />
+            <Link href="/terms" className="underline hover:text-primary">
                 Terms of Use
-              </Link>{' '}
-              and{' '}
-              <Link href="/privacy" className="text-blue-600 hover:underline">
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="underline hover:text-primary">
                 Privacy Policy
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </Link>
+            .
+        </div>
     </div>
   );
 }
