@@ -38,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${notoSans.variable} ${notoSansMono.variable} antialiased`}
+        className={`${notoSans.variable} ${notoSansMono.variable} antialiased `}
       >
         <QueryProvider>
           <SessionProvider>{children}</SessionProvider>
