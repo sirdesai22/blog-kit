@@ -1,10 +1,12 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
+
 const primaryButtonBaseClasses =
-  "w-full h-13 rounded-xl font-medium text-base"
+  "w-full h-12 rounded-xl font-medium text-base flex items-center justify-center"
+
 const socialButtonClasses =
-  "w-full h-13 flex items-center hover:cursor-pointer justify-center px-4 rounded-xl border border-input text-muted-foreground hover:bg-secondary"
+  "w-full h-12 flex items-center hover:cursor-pointer justify-center px-4 rounded-xl border border-input text-muted-foreground hover:bg-secondary"
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "social"

@@ -91,7 +91,7 @@ export default function SignInPage() {
         const redirectTo = await getRedirectDestination();
         router.push(redirectTo);
       }
-    } catch (error) {
+    } catch (err) {
       setError("An error occurred. Please try again.");
     } finally {
       setLoading(false);

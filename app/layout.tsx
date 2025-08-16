@@ -1,15 +1,16 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono, Noto_Sans, Noto_Sans_Mono } from 'next/font/google';
+import { Noto_Sans, Noto_Sans_Mono } from 'next/font/google';
+// import { Geist, Geist_Mono } from 'next/font/google';
 
 import './globals.css';
 import { SessionProvider } from 'next-auth/react';
 import { QueryProvider } from '@/providers/tanstack-query-provider';
 // import { AuthProvider } from '@/providers/auth-provider';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
+// const geistSans = Geist({
+//   variable: '--font-geist-sans',
+//   subsets: ['latin'],
+// });
 
 const notoSans = Noto_Sans({
   variable: '--font-noto-sans',
@@ -20,10 +21,10 @@ const notoSansMono = Noto_Sans_Mono({
   subsets: ['latin'],
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
+// const geistMono = Geist_Mono({
+//   variable: '--font-geist-mono',
+//   subsets: ['latin'],
+// });
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -38,7 +39,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${notoSans.variable} ${notoSansMono.variable} antialiased `}
+        className={`${notoSans.variable} ${notoSansMono.variable} antialiased dark`}
       >
         <QueryProvider>
           <SessionProvider>{children}</SessionProvider>
