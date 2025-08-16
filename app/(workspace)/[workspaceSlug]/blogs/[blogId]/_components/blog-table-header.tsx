@@ -21,19 +21,20 @@ export function BlogTableHeader({
   };
 
   return (
-    <div className="border-b border-gray-200 bg-white">
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="flex items-center justify-between">
+    <div className="border-b border-border bg-background">
+      <div className="px-4 py-6 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
           <div>
             <Heading
               level="h1"
               variant="default"
               subtitleVariant="muted"
               subtitleSize="xs"
+              className='text-primary'
               subtitle={
                 <>
-                  Create and edit and pin posts.{' '}
-                  <span className="text-blue-600 cursor-pointer hover:underline">
+                  Create, edit, and pin posts.{' '}
+                  <span className="cursor-pointer text-primary hover:underline">
                     Watch tutorial (2 mins)
                   </span>
                 </>
@@ -42,11 +43,8 @@ export function BlogTableHeader({
               Posts
             </Heading>
           </div>
-          <Button
-            onClick={newPage}
-            className="bg-black hover:bg-gray-800 text-white"
-          >
-            <Plus className="w-4 h-4 mr-2" />
+          <Button onClick={newPage}>
+            <Plus className="mr-2 h-4 w-4" />
             New Post
           </Button>
         </div>

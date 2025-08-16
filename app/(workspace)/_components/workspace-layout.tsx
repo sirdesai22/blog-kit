@@ -25,7 +25,7 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
 
   return (
     <div className="[--header-height:calc(--spacing(12))]">
-      <SidebarProvider className="flex flex-col">
+      <SidebarProvider className="flex flex-col max-w-screen overflow-x-hidden">
         <SiteHeader />
         <div className="flex flex-1 ">
           <MainSidebar

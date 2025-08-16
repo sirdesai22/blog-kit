@@ -45,7 +45,7 @@ export function NavMain({
   };
 
   return (
-    <SidebarMenu>
+    <SidebarMenu className='pt-2'>
       {items.map((item) => (
         <SidebarMenuItem key={item.title}>
           <SidebarMenuButton asChild isActive={item.isActive}>

@@ -1,9 +1,9 @@
+
 'use client';
 
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
@@ -13,18 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Heading } from '@/components/ui/heading';
 import { useRouter } from 'next/navigation';
-
-interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  type: string;
-  status: 'DRAFT' | 'PUBLISHED' | 'SCHEDULED';
-  createdAt: Date;
-  updatedAt: Date;
-  author: string;
-  publishedAt: Date | null;
-}
+import { BlogPost } from '@/lib/mock-data';
 
 interface BlogTableContentProps {
   posts: BlogPost[];
@@ -45,8 +34,8 @@ export function BlogTableContent({
 
   if (posts.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="max-w-md mx-auto">
+      <div className="py-12 text-center">
+        <div className="mx-auto max-w-md">
           <Heading
             level="h3"
             variant="default"
@@ -57,7 +46,7 @@ export function BlogTableContent({
             No blog posts found
           </Heading>
           <Button onClick={newPage}>
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="mr-2 h-4 w-4" />
             New Post
           </Button>
         </div>
@@ -66,48 +55,34 @@ export function BlogTableContent({
   }
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-gray-50 hover:bg-gray-50">
-            <TableHead className="w-12 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></TableHead>
-            <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Posts
-            </TableHead>
-            <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Status
-            </TableHead>
-            <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Category
-            </TableHead>
-            <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Tags
-            </TableHead>
-            <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Author
-            </TableHead>
-            <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Published / Modified
-            </TableHead>
-            <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Traffic
-            </TableHead>
-            <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Leads
-            </TableHead>
-            <TableHead className="w-12 px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {posts.map((post) => (
-            <BlogTableRow
-              key={post.id}
-              post={post}
-              workspaceSlug={workspaceSlug}
-            />
-          ))}
-        </TableBody>
-      </Table>
+    <div className="overflow-hidden rounded-lg border border-border">
+      <div className="relative w-full overflow-x-auto">
+        <Table className="">
+         <TableHeader>
+  <TableRow className="bg-muted/50 hover:bg-muted/50">
+    <TableHead className="w-14"></TableHead>
+    <TableHead>Posts</TableHead>
+    <TableHead>Status</TableHead>
+    <TableHead>Category</TableHead>
+    <TableHead>Tags</TableHead>
+    <TableHead>Author</TableHead>
+    <TableHead>Published / Modified</TableHead>
+    <TableHead>Traffic</TableHead>
+    <TableHead>Leads</TableHead>
+    <TableHead className="sticky right-0 w-12 bg-muted/50 text-center"></TableHead>
+  </TableRow>
+</TableHeader>
+          <TableBody>
+            {posts.map((post) => (
+              <BlogTableRow
+                key={post.id}
+                post={post}
+                workspaceSlug={workspaceSlug}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

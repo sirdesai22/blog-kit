@@ -10,21 +10,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Edit2, Pin, Copy, Trash2, Eye } from 'lucide-react';
+import {
+  MoreHorizontal,
+  Edit2,
+  Pin,
+  Copy,
+  Trash2,
+  Eye,
+  GripVertical,
+} from 'lucide-react';
 import Link from 'next/link';
-import { formatDistanceToNow } from 'date-fns';
-
-interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  type: string;
-  status: 'DRAFT' | 'PUBLISHED' | 'SCHEDULED';
-  createdAt: Date;
-  updatedAt: Date;
-  author: string;
-  publishedAt: Date | null;
-}
+import { BlogPost } from '@/lib/mock-data';
+import { useBlogTable } from '@/contexts/BlogTableContext';
+import { cn } from '@/lib/utils';
 
 interface BlogTableRowProps {
   post: BlogPost;
@@ -32,6 +30,9 @@ interface BlogTableRowProps {
 }
 
 export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
+  const { pinnedIds, togglePin } = useBlogTable();
+  const isPinned = pinnedIds.has(post.id);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'PUBLISHED':
@@ -54,7 +55,6 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
         : 0;
     const growth =
       post.status === 'DRAFT' ? 0 : Math.floor(Math.random() * 30) + 10;
-
     return {
       views: baseViews + Math.floor(Math.random() * 200),
       growth,
@@ -71,63 +71,80 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
       case 'DRAFT':
         return 'Draft';
       case 'SCHEDULED':
-        return 'Staged';
+        return 'Scheduled';
       default:
         return status;
     }
   };
 
   return (
-    <TableRow className="hover:bg-gray-50">
-      <TableCell className="px-4 py-4"></TableCell>
-      <TableCell className="px-4 py-4">
+    <TableRow className="group hover:bg-muted/50">
+      <TableCell>
+        <div className="flex items-center space-x-2">
+          <GripVertical className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              'h-6 w-6 transition-opacity',
+              isPinned ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            )}
+            onClick={() => togglePin(post.id)}
+          >
+            <Pin
+              className={cn(
+                'h-4 w-4',
+                isPinned
+                  ? 'fill-current text-foreground'
+                  : 'text-muted-foreground'
+              )}
+            />
+          </Button>
+        </div>
+      </TableCell>
+      <TableCell>
         <div>
           <Link
-            href={`/${workspaceSlug}/pages/${post.id}`}
-            className="text-sm font-medium text-gray-900 hover:text-blue-600"
+            href={`/${workspaceSlug}/blogs/${post.id}`}
+            className="text-sm font-medium text-foreground hover:text-primary"
           >
             {post.title}
           </Link>
         </div>
       </TableCell>
-
-      <TableCell className="px-4 py-4">
+      <TableCell>
         <span
-          className={`inline-flex px-2 py-1 text-xs font-medium rounded-xl ${getStatusColor(
+          className={`inline-flex items-center rounded-xl px-2 py-1 text-xs font-medium ${getStatusColor(
             post.status
           )}`}
         >
           {getStatusLabel(post.status)}
         </span>
       </TableCell>
-
-      <TableCell className="px-4 py-4">
-        <span className="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-xl border border-gray-200">
+      <TableCell>
+        <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-1 text-xs font-medium text-muted-foreground">
           Category
         </span>
-        <span className="text-xs text-gray-400 ml-1">+2</span>
+        <span className="ml-1 text-xs text-muted-foreground">+2</span>
       </TableCell>
-
-      <TableCell className="px-4 py-4">
-        <span className="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-xl border border-gray-200">
+      <TableCell>
+        <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-1 text-xs font-medium text-muted-foreground">
           Tag Name
         </span>
-        <span className="text-xs text-gray-400 ml-1">+2</span>
+        <span className="ml-1 text-xs text-muted-foreground">+2</span>
       </TableCell>
-
-      <TableCell className="px-4 py-4">
+      <TableCell>
         <div className="flex items-center space-x-2">
-          <Avatar className="w-6 h-6">
-            <AvatarFallback className="text-xs bg-gray-200 text-gray-700">
+          <Avatar className="h-6 w-6">
+            <AvatarFallback className="bg-muted text-xs text-muted-foreground">
               {post.author}
             </AvatarFallback>
           </Avatar>
-          <span className="text-xs text-gray-400">+2</span>
+          <span className="text-xs text-muted-foreground">+2</span>
         </div>
       </TableCell>
-
-      <TableCell className="px-4 py-4">
-        <div className="text-xs text-gray-500">
+      <TableCell>
+        <div className="text-xs text-muted-foreground">
           <div>
             {post.publishedAt
               ? new Date(post.publishedAt).toLocaleDateString('en-US', {
@@ -145,30 +162,27 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
           </div>
         </div>
       </TableCell>
-
-      <TableCell className="px-4 py-4">
+      <TableCell>
         <div className="flex items-center space-x-2">
           <div className="flex items-center space-x-1">
-            <Eye className="w-3 h-3 text-gray-400" />
-            <span className="text-xs font-medium text-gray-900">
+            <Eye className="h-3 w-3 text-muted-foreground" />
+            <span className="text-xs font-medium text-foreground">
               {(trafficData.views / 1000).toFixed(1)}k
             </span>
           </div>
           <div className="flex items-center">
-            <span className="text-xs text-green-600 bg-green-50 px-1 rounded">
+            <span className="rounded bg-green-50 px-1 text-xs text-green-600">
               +{trafficData.growth}%
             </span>
           </div>
         </div>
       </TableCell>
-
-      <TableCell className="px-4 py-4">
-        <span className="text-xs font-medium text-red-600 bg-red-50 px-1 rounded">
+      <TableCell>
+        <span className="rounded bg-red-50 px-1 text-xs font-medium text-red-600">
           {trafficData.leads} -{Math.floor(Math.random() * 5) + 1}%
         </span>
       </TableCell>
-
-      <TableCell className="px-4 py-4">
+      <TableCell className="sticky right-0 z-10 bg-background text-center group-hover:bg-muted">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-6 w-6 p-0">
@@ -180,9 +194,9 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
               <Edit2 className="mr-2 h-4 w-4" />
               Edit Post
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => togglePin(post.id)}>
               <Pin className="mr-2 h-4 w-4" />
-              Pin / Unpin
+              {isPinned ? 'Unpin' : 'Pin'}
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Copy className="mr-2 h-4 w-4" />

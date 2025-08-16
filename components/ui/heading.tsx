@@ -5,10 +5,10 @@ import { cn } from '@/lib/utils';
 const headingVariants = cva('font-semibold tracking-tight', {
   variants: {
     variant: {
-      default: 'text-gray-900',
-      muted: 'text-gray-600',
-      destructive: 'text-red-600',
-      primary: 'text-blue-600',
+      default: 'text-foreground',
+      muted: 'text-muted-foreground',
+      destructive: 'text-destructive',
+      primary: 'text-primary',
     },
     size: {
       xs: 'text-xs',
@@ -39,10 +39,10 @@ const headingVariants = cva('font-semibold tracking-tight', {
 const subtitleVariants = cva('font-normal tracking-normal mt-1', {
   variants: {
     variant: {
-      default: 'text-gray-600',
-      muted: 'text-gray-500',
-      destructive: 'text-red-500',
-      primary: 'text-blue-500',
+      default: 'text-muted-foreground',
+      muted: 'text-muted-foreground/80',
+      destructive: 'text-destructive/90',
+      primary: 'text-primary/90',
     },
     size: {
       xs: 'text-xs',

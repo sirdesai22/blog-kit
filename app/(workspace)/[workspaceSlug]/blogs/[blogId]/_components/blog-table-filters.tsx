@@ -33,31 +33,29 @@ export function BlogTableFilters({
   postsCount,
 }: BlogTableFiltersProps) {
   return (
-    <div className="mb-6 flex items-center space-x-2">
-      <div className="flex items-center space-x-4">
-        <div className="text-sm font-medium text-gray-700">
+    <div className="mb-6 flex flex-wrap items-center gap-2">
+      <div className="flex items-center gap-4">
+        <div className="text-sm font-medium">
           {postsCount} Posts
         </div>
-
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <Input
             placeholder="Search Posts..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 w-64 h-8 text-sm"
+            className="h-8 w-64 pl-10 text-sm"
           />
         </div>
       </div>
 
-      <div className="flex items-center space-x-2">
-        {/* Category Filter */}
+      <div className="flex flex-wrap items-center gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="h-8 text-xs">
-              <Hash className="w-3 h-3 mr-1" />
+              <Hash className="mr-1 h-3 w-3" />
               Category
-              <ChevronDown className="w-3 h-3 ml-1" />
+              <ChevronDown className="ml-1 h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
@@ -67,13 +65,12 @@ export function BlogTableFilters({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Tags Filter */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="h-8 text-xs">
-              <Hash className="w-3 h-3 mr-1" />
+              <Hash className="mr-1 h-3 w-3" />
               Tags
-              <ChevronDown className="w-3 h-3 ml-1" />
+              <ChevronDown className="ml-1 h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
@@ -82,13 +79,12 @@ export function BlogTableFilters({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Status Filter */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="h-8 text-xs">
-              <Circle className="w-3 h-3 mr-1" />
+              <Circle className="mr-1 h-3 w-3" />
               Status
-              <ChevronDown className="w-3 h-3 ml-1" />
+              <ChevronDown className="ml-1 h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
@@ -107,13 +103,12 @@ export function BlogTableFilters({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Author Filter */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="h-8 text-xs">
-              <User className="w-3 h-3 mr-1" />
+              <User className="mr-1 h-3 w-3" />
               Authors
-              <ChevronDown className="w-3 h-3 ml-1" />
+              <ChevronDown className="ml-1 h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
@@ -122,13 +117,12 @@ export function BlogTableFilters({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Sort */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="h-8 text-xs">
-              <ArrowUpDown className="w-3 h-3 mr-1" />
+              <ArrowUpDown className="mr-1 h-3 w-3" />
               Recent on top
-              <ChevronDown className="w-3 h-3 ml-1" />
+              <ChevronDown className="ml-1 h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">

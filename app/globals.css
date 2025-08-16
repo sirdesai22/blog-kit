@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -41,22 +41,20 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-
   --color-recaptcha: var(--recaptcha);
   --color-muted-dark: var(--muted-dark);
-
   --height-header: var(--header-height);
-  --padding-header: var(--header-padding);
+  --padding-header-horizontal: var(--header-horizontal-padding);
 }
 
 :root {
-  --header-height: 1rem; 
-  --header-padding: 0rem; 
+  --header-height: 3.5rem;
+  --header-horizontal-padding: 1.5rem;
 
-  --gap-xs: 0.25rem; 
-  --gap-sm: 0.5rem; 
-  --gap-md: 1rem; 
-  --gap-lg: 1.5rem; 
+  --gap-xs: 0.25rem;
+  --gap-sm: 0.5rem;
+  --gap-md: 1rem;
+  --gap-lg: 1.5rem;
 
   --radius: 0.625rem;
 
@@ -91,12 +89,11 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
-  --recaptcha: #F8F9F8;
-  --muted-dark: #8B8A8A;
+  --recaptcha: #f8f9f8;
+  --muted-dark: #8b8a8a;
 }
 
 .dark {
-  /* Dark Theme Colors */
   --background: #181819;
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.21 0.006 285.885);
@@ -143,12 +140,12 @@
 
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
-
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
   background: var(--muted-dark);
 }

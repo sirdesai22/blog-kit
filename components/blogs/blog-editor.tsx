@@ -72,7 +72,7 @@ export function BlogEditor({
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className=" bg-white flex flex-col">
       {/* Top Navbar */}
 
       {/* Main Content Area */}

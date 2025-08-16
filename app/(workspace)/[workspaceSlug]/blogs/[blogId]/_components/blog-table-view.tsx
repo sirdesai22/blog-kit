@@ -1,61 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { BlogTableHeader } from './blog-table-header';
 import { BlogTableFilters } from './blog-table-filters';
 import { BlogTableContent } from './blog-table-content';
-
-// Dummy data
-const dummyPosts = [
-  {
-    id: '1',
-    title: 'How to market B2B products on Reddit',
-    slug: 'how-to-market-b2b-products-on-reddit-1',
-    type: 'BLOG',
-    status: 'PUBLISHED' as const,
-    createdAt: new Date('2025-06-25'),
-    updatedAt: new Date('2025-06-28'),
-    author: 'A',
-    publishedAt: new Date('2025-06-25'),
-  },
-  {
-    id: '2',
-    title: 'How to market B2B products on Reddit',
-    slug: 'how-to-market-b2b-products-on-reddit-2',
-    type: 'BLOG',
-    status: 'DRAFT' as const,
-    createdAt: new Date('2025-06-30'),
-    updatedAt: new Date('2025-06-30'),
-    author: 'A',
-    publishedAt: null,
-  },
-  {
-    id: '3',
-    title: 'How to market B2B products on Reddit',
-    slug: 'how-to-market-b2b-products-on-reddit-3',
-    type: 'BLOG',
-    status: 'SCHEDULED' as const,
-    createdAt: new Date('2025-06-28'),
-    updatedAt: new Date('2025-06-30'),
-    author: 'A',
-    publishedAt: new Date('2025-06-28'),
-  },
-];
-
-interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  type: string;
-  status: 'DRAFT' | 'PUBLISHED' | 'SCHEDULED';
-  createdAt: Date;
-  updatedAt: Date;
-  author: string;
-  publishedAt: Date | null;
-}
+import { blogPostsMock, BlogPost } from '@/lib/mock-data';
+import { BlogTableProvider, useBlogTable } from '@/contexts/BlogTableContext';
 
 interface BlogTableViewProps {
-  posts?: BlogPost[];
   workspaceSlug: string;
   currentPage: {
     id: string;
@@ -64,47 +16,67 @@ interface BlogTableViewProps {
   };
 }
 
-export function BlogTableView({
+function BlogTable({
   workspaceSlug,
   currentPage,
-}: BlogTableViewProps) {
+}: Omit<BlogTableViewProps, 'posts'>) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const { pinnedIds } = useBlogTable();
 
-  // Use dummy data for now
-  const posts = dummyPosts;
+  const posts = blogPostsMock;
 
-  const filteredPosts = posts.filter((post) => {
-    const matchesSearch = post.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === 'all' || post.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const filteredAndSortedPosts = useMemo(() => {
+    const filtered = posts.filter((post) => {
+      const matchesSearch = post.title
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchesStatus =
+        statusFilter === 'all' ||
+        post.status.toLowerCase() === statusFilter.toLowerCase();
+      return matchesSearch && matchesStatus;
+    });
+
+    return filtered.sort((a, b) => {
+      const aIsPinned = pinnedIds.has(a.id);
+      const bIsPinned = pinnedIds.has(b.id);
+      if (aIsPinned && !bIsPinned) return -1;
+      if (!aIsPinned && bIsPinned) return 1;
+      return 0;
+    });
+  }, [posts, searchTerm, statusFilter, pinnedIds]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="flex h-full flex-col bg-background ">
       <BlogTableHeader
         workspaceSlug={workspaceSlug}
         currentPageId={currentPage.id}
       />
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <BlogTableFilters
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-          postsCount={posts.length}
-        />
-
-        <BlogTableContent
-          posts={filteredPosts}
-          workspaceSlug={workspaceSlug}
-          currentPageId={currentPage.id}
-        />
+      <div className="flex-1 overflow-y-auto">
+        <div className=" md:w-[80vw] px-4 py-6 sm:px-6 lg:px-8">
+          <BlogTableFilters
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            postsCount={posts.length}
+          />
+          <BlogTableContent
+            posts={filteredAndSortedPosts}
+            workspaceSlug={workspaceSlug}
+            currentPageId={currentPage.id}
+          />
+        </div>
       </div>
     </div>
+  );
+}
+
+export function BlogTableView(props: BlogTableViewProps) {
+  return (
+    <BlogTableProvider>
+      <BlogTable {...props} />
+    </BlogTableProvider>
   );
 }
