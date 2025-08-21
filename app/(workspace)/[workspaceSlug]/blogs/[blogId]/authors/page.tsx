@@ -208,14 +208,20 @@ export default function AuthorsPage(props: AuthorsPageProps) {
       <div className="flex items-center justify-between">
         <div className="w-full">
           <div className="max-w-7xl mx-auto py-6">
-            <div className="flex items-center w-full justify-between">
+            <div className="flex items-start w-full justify-between">
               <div>
                 <Heading
                   level="h1"
                   variant="default"
                   subtitleVariant="muted"
                   subtitleSize="xs"
-                  subtitle="Manage authors who can write and be attributed to blog posts in your workspace."
+                  subtitle=
+                  {
+                    <div className=" ml-1">
+                      <p className="text-xs">Manage authors who can write and be attributed</p>
+                      <p className="text-xs">to blog posts in your workspace.</p>
+                    </div>
+                  }
                 >
                   Authors
                 </Heading>
@@ -230,16 +236,15 @@ export default function AuthorsPage(props: AuthorsPageProps) {
       </div>
 
       {/* Authors Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
+       <CardTitle className="flex items-center justify-between mb-2 ml-1">
             <span>{authors.length} Authors</span>
           </CardTitle>
-        </CardHeader>
-        <CardContent>
+      <Card className='p-0'>
+       
+        <CardContent className='p-0'>
           <Table>
             <TableHeader>
-              <TableRow>
+              <TableRow className='bg-muted'>
                 <TableHead>Author</TableHead>
                 <TableHead>Posts</TableHead>
               </TableRow>
