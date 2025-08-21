@@ -28,7 +28,7 @@ function Input({ className, type, suffix, ...props }: InputProps) {
         {...props}
       />
       {suffix && (
-        <div className="h-12 px-3 flex items-center border-l border-input rounded-r-xl bg-muted text-sm text-muted-foreground">
+        <div className="h-12 px-3 flex items-center border-l border-input rounded-r-xl bg-muted text-md text-muted-foreground">
           {suffix}
         </div>
       )}
