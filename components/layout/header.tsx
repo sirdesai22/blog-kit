@@ -46,33 +46,32 @@ export function SiteHeader() {
   const initial = user.name?.charAt(0).toUpperCase() || '?';
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background p-3">
-      <div className="flex  items-center justify-between ">
+    <header className="sticky top-0 z-50 w-full border-b bg-background px-3 py-2">
+      <div className="flex h-[--header-height] items-center justify-between px-[--header-horizontal-padding]">
         <div className="flex flex-1 items-center">
           <BreadcrumbNav />
         </div>
 
-        <div className="hidden items-center gap-[--gap-sm] md:flex">
-          <Button variant="ghost" size="sm" asChild>
+        <div className="hidden items-center  md:flex">
+          <Button variant="ghost" size="sm" asChild className='rounded-full mx-1 hover:border-primary/20 hover:border-1'>
             <Link href="#">
               View Blog
-              <ArrowUpRight className="ml-1 h-4 w-4" />
+              <ArrowUpRight className=" h-4 w-4 text-muted-foreground hover:text-primary" />
             </Link>
           </Button>
           <Button
             variant="secondary"
             size="sm"
-            className="rounded-full px-3 h-8"
+            className="h-8 rounded-full px-3 bg-transparent border-primary/20 border-1"
           >
-            <MessageSquare className="mr-2 h-4 w-4" />
             Feedback
           </Button>
           <TooltipProvider>
-            <div className="flex items-center gap-[--gap-xs]">
+            <div className="flex items-center gap-[--gap-xs] border-primary/20 border-1 mx-2 rounded-full  ">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <LifeBuoy className="h-4 w-4" />
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary bg-transparent rounded-full">
+                    <LifeBuoy className="h-4 w-4 " /> 
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -81,7 +80,7 @@ export function SiteHeader() {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary bg-transparent rounded-full">
                     <Inbox className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
@@ -89,17 +88,17 @@ export function SiteHeader() {
                   <p>Inbox</p>
                 </TooltipContent>
               </Tooltip>
-              <ThemeToggle />
+              {/* <ThemeToggle /> */}
             </div>
           </TooltipProvider>
           <Popover>
             <PopoverTrigger asChild>
               <button
                 aria-label="User menu"
-                className="flex items-center justify-center rounded-full"
+                className="flex items-center justify-center rounded-full border-primary/20 border-1"
               >
-                <Avatar className="h-8 w-8 cursor-pointer">
-                  <AvatarImage src={user.image || session.user?.image || ''} alt={user.name || ''} />
+                <Avatar className="h-8 w-8 cursor-pointer ">
+                  <AvatarImage src={user.image || ''} alt={user.name || ''} />
                   <AvatarFallback className="bg-muted text-xs font-medium text-muted-foreground">
                     {initial}
                   </AvatarFallback>
@@ -138,8 +137,8 @@ export function SiteHeader() {
         <div className="md:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className=''>
+                <Menu className="h-5 w-5 text-muted-foreground hover:text-primary bg-transparent rounded-full" />
                 <span className="sr-only">Open menu</span>
               </Button>
             </SheetTrigger>
@@ -151,7 +150,7 @@ export function SiteHeader() {
                       src={user.image || ''}
                       alt={user.name || ''}
                     />
-                    <AvatarFallback className="bg-muted font-medium text-muted-foreground">
+                    <AvatarFallback className="bg-muted font-medium text-muted-foreground ">
                       {initial}
                     </AvatarFallback>
                   </Avatar>
@@ -167,34 +166,34 @@ export function SiteHeader() {
                   <SheetClose asChild>
                     <Button
                       variant="ghost"
-                      className="w-full justify-start"
+                      className="w-full justify-start text-muted-foreground hover:text-primary bg-transparent rounded-full"
                       asChild
                     >
                       <Link href="#">
-                        <ArrowUpRight className="mr-2 h-4 w-4" />
+                        <ArrowUpRight className="mr-2 h-4 w-4 text-muted-foreground hover:text-primary" />
                         View Blog
                       </Link>
                     </Button>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Button variant="ghost" className="w-full justify-start">
+                    <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-primary bg-transparent rounded-full">
                       <MessageSquare className="mr-2 h-4 w-4" />
                       Feedback
                     </Button>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Button variant="ghost" className="w-full justify-start">
+                    <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-primary bg-transparent rounded-full">
                       <LifeBuoy className="mr-2 h-4 w-4" />
                       Support
                     </Button>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Button variant="ghost" className="w-full justify-start">
+                    <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-primary bg-transparent rounded-full">
                       <Inbox className="mr-2 h-4 w-4" />
                       Inbox
                     </Button>
                   </SheetClose>
-                  <ThemeToggle showText={true} />
+                  {/* <ThemeToggle showText={true} /> */}
                 </div>
                 <Separator />
                 <div className="pt-4">

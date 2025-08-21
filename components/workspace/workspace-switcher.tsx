@@ -65,10 +65,10 @@ export function WorkSpaceSwitcher() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto p-1 text-sm font-medium hover:bg-transparent hover:cursor-pointer"
+          className="h-auto p-1 text-sm font-medium hover:bg-transparent hover:cursor-pointer focus-visible:ring-0"
         >
           <span>{displayWorkspace?.name || 'Select Workspace'}</span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 " />
+          <ChevronsUpDown className="ml-2 h-4 w-4 text-muted-foreground " />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent

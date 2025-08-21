@@ -56,11 +56,11 @@ export function BlogTableContent({
 
   return (
     <div className="overflow-hidden rounded-lg border border-border">
-      <div className="relative w-full overflow-x-auto">
+      <div className="relative w-full overflow-x-auto custom-scrollbar">
         <Table className="">
          <TableHeader>
   <TableRow className="bg-muted/50 hover:bg-muted/50">
-    <TableHead className="w-14"></TableHead>
+    <TableHead></TableHead>
     <TableHead>Posts</TableHead>
     <TableHead>Status</TableHead>
     <TableHead>Category</TableHead>

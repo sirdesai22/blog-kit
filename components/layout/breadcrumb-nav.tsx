@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useParams, usePathname, useRouter } from 'next/navigation';
-import { ChevronDown, Beef } from 'lucide-react'; // Changed Command to Beef icon
+import { ChevronDown, Beef, ChevronsUpDown, Slash } from 'lucide-react'; // Changed Command to Beef icon
 
 import {
   DropdownMenu,
@@ -86,7 +86,7 @@ export function BreadcrumbNav() {
       {/* Render Breadcrumb Items */}
       {breadcrumbItems.map((item, index) => (
         <div key={index} className="flex items-center gap-[--gap-sm] ">
-          <span className="text-muted-foreground">/</span>
+          <Slash className="w-4 h-4 text-muted-foreground/80 rotate-[170deg]" />
 
           {item.isDropdown ? (
             item.label === 'Blog' && item.dropdownItems ? (
@@ -96,10 +96,10 @@ export function BreadcrumbNav() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-auto p-1 text-sm font-medium hover:bg-transparent"
+                    className="h-auto p-1 text-sm font-medium hover:cursor-pointer focus-visible:ring-0 hover:bg-transparent"
                   >
                     <span>{item.label}</span>
-                    <ChevronDown className="ml-1 h-4 w-4 " />
+                    <ChevronsUpDown className="ml-1 h-4 w-4 text-muted-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-48">

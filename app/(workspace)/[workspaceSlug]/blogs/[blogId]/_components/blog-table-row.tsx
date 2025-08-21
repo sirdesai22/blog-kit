@@ -79,14 +79,14 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
 
   return (
     <TableRow className="group hover:bg-muted/50">
-      <TableCell>
-        <div className="flex items-center space-x-2">
-          <GripVertical className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+      <TableCell className='p-0  m-0 pl-1'>
+        <div className="flex items-center space-x-0">
+          <GripVertical className="h-4 w-4 hover:cursor-grab text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
           <Button
             variant="ghost"
             size="icon"
             className={cn(
-              'h-6 w-6 transition-opacity',
+              'h-4 w-4 transition-opacity  hover:cursor-pointer',
               isPinned ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
             )}
             onClick={() => togglePin(post.id)}
