@@ -33,7 +33,7 @@ export function BlogTableFilters({
   postsCount,
 }: BlogTableFiltersProps) {
   return (
-    <div className="mb-6 flex flex-wrap items-center gap-2">
+    <div className="px-4 py-6 sm:px-6 lg:px-8 pt-0 flex flex-wrap items-center gap-2">
       <div className="flex items-center gap-4">
         <div className="text-sm font-medium">
           {postsCount} Posts

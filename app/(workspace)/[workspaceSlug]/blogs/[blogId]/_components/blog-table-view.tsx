@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useMemo } from 'react';
-import { BlogTableHeader } from './blog-table-header';
-import { BlogTableFilters } from './blog-table-filters';
-import { BlogTableContent } from './blog-table-content';
-import { blogPostsMock, BlogPost } from '@/lib/mock-data';
-import { BlogTableProvider, useBlogTable } from '@/contexts/BlogTableContext';
+import { useState, useMemo } from "react";
+import { BlogTableHeader } from "./blog-table-header";
+import { BlogTableFilters } from "./blog-table-filters";
+import { BlogTableContent } from "./blog-table-content";
+import { blogPostsMock, BlogPost } from "@/lib/mock-data";
+import { BlogTableProvider, useBlogTable } from "@/contexts/BlogTableContext";
 
 interface BlogTableViewProps {
   workspaceSlug: string;
@@ -19,9 +19,9 @@ interface BlogTableViewProps {
 function BlogTable({
   workspaceSlug,
   currentPage,
-}: Omit<BlogTableViewProps, 'posts'>) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+}: Omit<BlogTableViewProps, "posts">) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const { pinnedIds } = useBlogTable();
 
   const posts = blogPostsMock;
@@ -32,7 +32,7 @@ function BlogTable({
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
       const matchesStatus =
-        statusFilter === 'all' ||
+        statusFilter === "all" ||
         post.status.toLowerCase() === statusFilter.toLowerCase();
       return matchesSearch && matchesStatus;
     });
@@ -52,23 +52,18 @@ function BlogTable({
         workspaceSlug={workspaceSlug}
         currentPageId={currentPage.id}
       />
-
-      <div className="flex-1 overflow-y-auto">
-        <div className=" md:w-[80vw] px-4 py-6 sm:px-6 lg:px-8">
-          <BlogTableFilters
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            postsCount={posts.length}
-          />
-          <BlogTableContent
-            posts={filteredAndSortedPosts}
-            workspaceSlug={workspaceSlug}
-            currentPageId={currentPage.id}
-          />
-        </div>
-      </div>
+      <BlogTableFilters
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        postsCount={posts.length}
+      />
+      <BlogTableContent
+        posts={filteredAndSortedPosts}
+        workspaceSlug={workspaceSlug}
+        currentPageId={currentPage.id}
+      />
     </div>
   );
 }

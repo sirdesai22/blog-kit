@@ -67,10 +67,10 @@ export function SiteHeader() {
             Feedback
           </Button>
           <TooltipProvider>
-            <div className="flex items-center gap-[--gap-xs] border-primary/20 border-1 mx-2 rounded-full  ">
+            <div className="flex items-center gap-[--gap-xs]  mx-2 rounded-full  ">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary bg-transparent rounded-full">
+                  <Button variant="ghost" size="icon" className="h-8 w-8  hover:text-primary bg-transparent rounded-full">
                     <LifeBuoy className="h-4 w-4 " /> 
                   </Button>
                 </TooltipTrigger>
@@ -80,7 +80,7 @@ export function SiteHeader() {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary bg-transparent rounded-full">
+                  <Button variant="ghost" size="icon" className="h-8 w-8  hover:text-primary bg-transparent rounded-full">
                     <Inbox className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
@@ -166,29 +166,29 @@ export function SiteHeader() {
                   <SheetClose asChild>
                     <Button
                       variant="ghost"
-                      className="w-full justify-start text-muted-foreground hover:text-primary bg-transparent rounded-full"
+                      className="w-full justify-start hover:text-primary bg-transparent rounded-full"
                       asChild
                     >
                       <Link href="#">
-                        <ArrowUpRight className="mr-2 h-4 w-4 text-muted-foreground hover:text-primary" />
+                        <ArrowUpRight className="mr-2 h-4 w-4  hover:text-primary" />
                         View Blog
                       </Link>
                     </Button>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-primary bg-transparent rounded-full">
+                    <Button variant="ghost" className="w-full justify-start  hover:text-primary bg-transparent rounded-full">
                       <MessageSquare className="mr-2 h-4 w-4" />
                       Feedback
                     </Button>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-primary bg-transparent rounded-full">
+                    <Button variant="ghost" className="w-full justify-start  hover:text-primary bg-transparent rounded-full">
                       <LifeBuoy className="mr-2 h-4 w-4" />
                       Support
                     </Button>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-primary bg-transparent rounded-full">
+                    <Button variant="ghost" className="w-full justify-start  hover:text-primary bg-transparent rounded-full">
                       <Inbox className="mr-2 h-4 w-4" />
                       Inbox
                     </Button>

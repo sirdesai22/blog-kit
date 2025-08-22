@@ -86,7 +86,7 @@ export function BreadcrumbNav() {
       {/* Render Breadcrumb Items */}
       {breadcrumbItems.map((item, index) => (
         <div key={index} className="flex items-center gap-[--gap-sm] ">
-          <Slash className="w-4 h-4 text-muted-foreground/80 rotate-[170deg]" />
+          <Slash className="w-3 h-3 text-muted-foreground/80 rotate-[170deg]" />
 
           {item.isDropdown ? (
             item.label === 'Blog' && item.dropdownItems ? (
@@ -96,7 +96,7 @@ export function BreadcrumbNav() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-auto p-1 text-sm font-medium hover:cursor-pointer focus-visible:ring-0 hover:bg-transparent"
+                    className="h-auto p-1 text-sm  hover:cursor-pointer focus-visible:ring-0 hover:bg-transparent"
                   >
                     <span>{item.label}</span>
                     <ChevronsUpDown className="ml-1 h-4 w-4 text-muted-foreground" />

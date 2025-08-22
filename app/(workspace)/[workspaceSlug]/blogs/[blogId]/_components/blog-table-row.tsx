@@ -182,7 +182,7 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
           {trafficData.leads} -{Math.floor(Math.random() * 5) + 1}%
         </span>
       </TableCell>
-      <TableCell className="sticky right-0 z-10 bg-background text-center group-hover:bg-muted">
+      <TableCell className="text-center group-hover:bg-muted">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-6 w-6 p-0">

@@ -268,11 +268,11 @@ export function BlogCategoriesView({
 
   return (
     <>
-          <CardTitle className="text-base font-semibold mb-2 ml-1">
+          <CardTitle className="text-base font-semibold ml-8 mb-2">
             {categories.length}{' '}
             <span className="text-muted-foreground">Categories</span>
           </CardTitle>
-      <Card className='p-0'>
+      <Card className='shadow-none border-none p-0'>
         
         <CardContent className="p-0">
           <DndContext

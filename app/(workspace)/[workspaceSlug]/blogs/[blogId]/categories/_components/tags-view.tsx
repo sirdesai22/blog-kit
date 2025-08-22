@@ -259,10 +259,10 @@ export function BlogTagsView({
 
   return (
     <>
-      <CardTitle className="text-base font-semibold mb-2 ml-1">
+      <CardTitle className="text-base font-semibold mb-2 ml-8">
         {tags.length} <span className="text-muted-foreground">Tags</span>
       </CardTitle>
-      <Card className="p-0">
+      <Card className="p-0 border-none shadow-none">
         <CardContent className="p-0">
           <DndContext
             sensors={sensors}
