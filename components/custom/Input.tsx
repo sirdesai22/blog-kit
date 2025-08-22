@@ -13,7 +13,7 @@ function Input({ className, type, suffix, ...props }: InputProps) {
   return (
     <div
       className={cn(
-        "flex w-full rounded-xl border border-input focus-within:ring-[0.2px] focus-within:ring-ring focus-within:ring-offset-[0.2px]"
+        "flex w-full rounded-xl border border-input focus-within:ring-[0.5px] focus-within:ring-ring focus-within:ring-offset-[0.2px]"
       )}
     >
       <input

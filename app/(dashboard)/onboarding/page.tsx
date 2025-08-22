@@ -63,9 +63,7 @@ export default function OnboardingPage() {
       const data = await response.json();
 
       if (!data.available) {
-        setError(
-          "The name is already taken."
-        );
+        setError("The name is already taken.");
       } else {
         setError("");
       }
@@ -91,7 +89,7 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-screen">
       {/* Navigation Bar */}
-       <SiteHeader />
+      <SiteHeader />
       {/* Main Content */}
       <div className="flex items-center justify-center px-4 py-8">
         <div className="max-w-lg w-full">
@@ -104,8 +102,11 @@ export default function OnboardingPage() {
 
             <CardContent className="space-y-3">
               {/* Workspace Name */}
-              <div className="space-y-3">
-                <label htmlFor="workspaceName" className="text-sm ml-1 font-semibold text-gray-800">
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor="workspaceName"
+                  className="text-sm font-semibold text-gray-800"
+                >
                   Workspace Name*
                 </label>
                 <Input
@@ -117,8 +118,11 @@ export default function OnboardingPage() {
               </div>
 
               {/* Workspace Address */}
-              <div className="space-y-3">
-                <label htmlFor="workspaceAddress" className="text-sm ml-1 font-semibold text-gray-800">
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor="workspaceAddress"
+                  className="text-sm font-semibold text-gray-800"
+                >
                   Workspace Address*
                 </label>
                 <Input
@@ -128,18 +132,21 @@ export default function OnboardingPage() {
                   onChange={(e) => handleWorkspaceAddressChange(e.target.value)}
                   suffix=".blogkit.test"
                 />
-                {error && <p className="text-sm text-red-500 mt-1 ml-1">{error}</p>}
+                {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
               </div>
 
               {/* Description */}
-              <div className="space-y-1">
-                <div className="flex gap-2 items-baseline ">
-                  <label htmlFor="description" className="text-sm ml-1 font-semibold text-gray-800">
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2 items-baseline">
+                  <label
+                    htmlFor="description"
+                    className="text-sm font-semibold text-gray-800"
+                  >
                     Description
                   </label>
-                  <a href="#" className="text-xs text-muted-foreground underline">
-                    Auto-generate from my website
-                  </a>
+                  {/* <a href="#" className="text-xs text-muted-foreground underline">
+      Auto-generate from my website
+    </a> */}
                 </div>
                 <Textarea
                   id="description"
@@ -155,7 +162,7 @@ export default function OnboardingPage() {
                   disabled={
                     !workspaceName || !workspaceAddress || loading || !!error
                   }
-                  className="bg-black text-white rounded-full hover:bg-gray-800 flex items-center w-fit px-8"
+                  className="bg-black text-white rounded-xl hover:bg-gray-800 flex items-center w-fit px-8"
                 >
                   {loading ? (
                     "Creating..."
