@@ -114,19 +114,16 @@ function SortableTableRow({
       className={isDragging ? 'z-50' : ''}
     >
       <TableCell className="w-8">
-        <div
+        {/* <div
           {...attributes}
           {...listeners}
           className="cursor-grab hover:cursor-grabbing p-1 hover:bg-gray-100 rounded"
         >
           <GripVertical className="h-4 w-4 text-gray-400" />
-        </div>
+        </div> */}
       </TableCell>
       <TableCell className="font-medium">
-        <div className="flex items-center gap-2">
-          <Tag className="h-4 w-4 text-blue-500" />
-          {tag.name}
-        </div>
+        <div className="flex items-center gap-2">{tag.name}</div>
       </TableCell>
       <TableCell className="text-center">
         <div className="flex items-center justify-center gap-2">

@@ -1,35 +1,32 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, MoreVertical, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 import { BlogEditorSidebar, BlogPost, Author } from './blog-editor-sidebar';
-import Link from 'next/link';
-import { TiptapEditor } from '@/components/ui/tiptap-editor';
+import { PlateEditor } from '../platejs/components/editor/plate-editor';
 
 interface BlogEditorProps {
   workspaceSlug: string;
-  blogId: string;
+  blogId?: string; // This is actually pageId (the blog publication)
   initialPost?: BlogPost;
   categories: string[];
   authors: Author[];
   allPosts: BlogPost[];
-  tags: string[]; // Add this line
+  tags: string[];
   isNewPost?: boolean;
+  workspaceId: string;
 }
 
 export function BlogEditor({
   workspaceSlug,
-  blogId,
+  blogId, // This is the pageId of the blog publication
   initialPost,
   categories,
   authors,
   allPosts,
-  tags, // Add this line
+  tags,
   isNewPost = true,
+  workspaceId,
 }: BlogEditorProps) {
   const [post, setPost] = useState<BlogPost>({
     title: '',
@@ -46,137 +43,213 @@ export function BlogEditor({
     ...initialPost,
   });
 
-  const [wordCount, setWordCount] = useState(100);
   const [isSaving, setIsSaving] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [currentBlogPostId, setCurrentBlogPostId] = useState<
+    string | undefined
+  >(initialPost?.id);
 
   const handlePostChange = (updatedPost: BlogPost) => {
     setPost(updatedPost);
+  };
 
-    // Calculate word count
-    if (updatedPost.content !== post.content) {
-      const words = (updatedPost.content || '')
-        .split(/\s+/)
-        .filter((word) => word.length > 0).length;
-      setWordCount(words);
-    }
+  const handleContentChange = (content: any[]) => {
+    console.log('BlogEditor handleContentChange called!'); // Debug log
+    console.log('BlogEditor received content:', content); // Debug log
+    console.log('Content length:', content?.length); // Debug log
+    console.log('Content structure:', JSON.stringify(content, null, 2)); // Debug log
+
+    handlePostChange({ ...post, content: JSON.stringify(content) });
+  };
+
+  const handleTitleChange = (title: string) => {
+    const slug = generateSlug(title);
+    handlePostChange({ ...post, title, slug });
+  };
+
+  const handleDescriptionChange = (description: string) => {
+    handlePostChange({ ...post, description });
   };
 
   const handleSave = async () => {
+    if (!post.title.trim()) {
+      toast.error('Please enter a title');
+      return;
+    }
+
+    if (!blogId) {
+      toast.error('Blog ID is required');
+      return;
+    }
+
+    if (!workspaceId) {
+      toast.error('Workspace ID is required');
+      return;
+    }
+
     setIsSaving(true);
-    // Simulate saving
-    setTimeout(() => setIsSaving(false), 1000);
+
+    try {
+      console.log(post);
+      const content = post.content ? JSON.parse(post.content) : [];
+
+      const requestData = {
+        title: post.title,
+        slug: post.slug,
+        content,
+        excerpt: post.description,
+        featuredImage: post.featuredImage,
+        tags: post.tags,
+        category: post.category,
+        metaTitle: post.title,
+        metaDescription: post.description,
+        featured: false,
+        pinned: false,
+        scheduledFor: post.publishDate,
+        authorIds: post.authorIds, // Add this line
+        workspaceId,
+        pageId: blogId, // This is the blog publication ID
+        blogPostId: currentBlogPostId,
+      };
+      console.log(content);
+      const response = await fetch('/api/blog-posts/draft', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success(result.message);
+
+        // Set the blog post ID if it's a new post
+        if (!currentBlogPostId && result.blogPostId) {
+          setCurrentBlogPostId(result.blogPostId);
+        }
+      } else {
+        toast.error(result.error);
+      }
+    } catch (error) {
+      toast.error('Failed to save draft');
+      console.error('Save error:', error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handlePublish = async () => {
-    // Handle publish
+    if (!post.title.trim()) {
+      toast.error('Please enter a title');
+      return;
+    }
+
+    if (!post.content || post.content.trim() === '') {
+      toast.error('Please add some content');
+      return;
+    }
+
+    if (!blogId) {
+      toast.error('Blog ID is required');
+      return;
+    }
+
+    setIsPublishing(true);
+
+    try {
+      const content = JSON.parse(post.content);
+
+      const requestData = {
+        title: post.title,
+        slug: post.slug,
+        content,
+        excerpt: post.description,
+        featuredImage: post.featuredImage,
+        tags: post.tags,
+        category: post.category,
+        metaTitle: post.title,
+        metaDescription: post.description,
+        featured: false,
+        pinned: false,
+        publishedAt: post.publishDate || new Date(),
+        workspaceId,
+        pageId: blogId,
+        blogPostId: currentBlogPostId,
+      };
+
+      const response = await fetch('/api/blog-posts/publish', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success(result.message);
+        // Redirect to the blog posts list
+        window.location.href = `/${workspaceSlug}/blogs/${blogId}`;
+      } else {
+        toast.error(result.error);
+      }
+    } catch (error) {
+      toast.error('Failed to publish blog');
+      console.error('Publish error:', error);
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
   return (
-    <div className=" bg-white flex flex-col">
-      {/* Top Navbar */}
-
-      {/* Main Content Area */}
-      <div className="flex flex-1">
-        {/* Content Area */}
-        <div className="flex-1 bg-gray-50">
-          <div className="max-w-4xl mx-auto px-8 py-8">
-            <div className="space-y-6">
-              {/* Title */}
-              <div>
-                <Input
-                  value={post.title}
-                  onChange={(e) =>
-                    handlePostChange({ ...post, title: e.target.value })
-                  }
-                  placeholder="Post Title"
-                  className="text-4xl font-bold border-none bg-transparent p-0 focus-visible:ring-0 placeholder:text-gray-400 shadow-none"
-                />
-              </div>
-
-              {/* Meta Description */}
-              <div>
-                <Input
-                  value={post.description}
-                  onChange={(e) =>
-                    handlePostChange({ ...post, description: e.target.value })
-                  }
-                  placeholder="Excerpt / Meta Description"
-                  className="text-lg text-gray-600 border-none bg-transparent p-0 focus-visible:ring-0 placeholder:text-gray-400 shadow-none"
-                />
-              </div>
-
-              {/* Featured Image Upload */}
-              <div className="mt-8">
-                <Card className="border-2 border-dashed border-gray-300 bg-white">
-                  <CardContent className="p-12">
-                    <div className="text-center space-y-4">
-                      <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center">
-                        <svg
-                          className="w-8 h-8 text-gray-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1.5}
-                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                          />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-lg text-gray-500 font-medium">
-                          Upload featured (OG) image
-                        </p>
-                        <p className="text-sm text-gray-400 mt-1">
-                          Recommended: 1200 x 630 px (Facebook, Twitter, etc.)
-                        </p>
-                      </div>
-                      <Button
-                        variant="outline"
-                        className="bg-white border-gray-300"
-                      >
-                        Use Default Image
-                      </Button>
-                      <p className="text-xs text-gray-400">
-                        Uses Logo, Post Title and Description to generate image
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Tiptap Editor */}
-              <div className="mt-8">
-                <TiptapEditor
-                  content={post.content}
-                  onChange={(content) => handlePostChange({ ...post, content })}
-                  placeholder="Press '/' for commands or start typing..."
-                  minHeight="400px"
-                  className="min-h-[400px]"
-                />
-              </div>
-            </div>
-          </div>
+    <div className="flex flex-col h-screen">
+      <div className="flex flex-1 overflow-hidden">
+        <div className="flex-1  overflow-auto">
+          <PlateEditor
+            initialValue={post.content ? JSON.parse(post.content) : undefined}
+            onChange={handleContentChange}
+            title={post.title}
+            description={post.description}
+            onTitleChange={handleTitleChange}
+            onDescriptionChange={handleDescriptionChange}
+            placeholder="Press '/' for commands or start typing..."
+            workspaceSlug={workspaceSlug}
+            blogId={blogId || 'new'}
+            onSave={handleSave}
+            onPublish={handlePublish}
+            isSaving={isSaving}
+            isPublishing={isPublishing}
+          />
         </div>
 
-        {/* Fixed Right Sidebar */}
-        <div className="w-80 bg-white border-l border-gray-200 flex-shrink-0">
+        <div className="w-80  border-l border-gray-200 flex-shrink-0">
           <BlogEditorSidebar
             post={post}
             categories={categories}
             authors={authors}
             allPosts={allPosts}
-            tags={tags} // Add this line
+            tags={tags}
             onPostChange={handlePostChange}
             onSave={handleSave}
             onPublish={handlePublish}
             isSaving={isSaving}
-            isPublishing={false}
+            isPublishing={isPublishing}
           />
         </div>
       </div>
     </div>
   );
+}
+
+// Helper function to generate slug from title
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9 -]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
 }

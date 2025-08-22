@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { BlogTableHeader } from './blog-table-header';
 import { BlogTableFilters } from './blog-table-filters';
 import { BlogTableContent } from './blog-table-content';
-import { blogPostsMock, BlogPost } from '@/lib/mock-data';
+import { BlogPost } from '@/types/blog';
 import { BlogTableProvider, useBlogTable } from '@/contexts/BlogTableContext';
 
 interface BlogTableViewProps {
@@ -14,20 +14,20 @@ interface BlogTableViewProps {
     title: string;
     type: string;
   };
+  blogPosts: BlogPost[];
 }
 
 function BlogTable({
   workspaceSlug,
   currentPage,
-}: Omit<BlogTableViewProps, 'posts'>) {
+  blogPosts,
+}: BlogTableViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const { pinnedIds } = useBlogTable();
 
-  const posts = blogPostsMock;
-
   const filteredAndSortedPosts = useMemo(() => {
-    const filtered = posts.filter((post) => {
+    const filtered = blogPosts.filter((post) => {
       const matchesSearch = post.title
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
@@ -38,29 +38,33 @@ function BlogTable({
     });
 
     return filtered.sort((a, b) => {
-      const aIsPinned = pinnedIds.has(a.id);
-      const bIsPinned = pinnedIds.has(b.id);
+      // Check if post is pinned (either from context or database)
+      const aIsPinned = pinnedIds.has(a.id) || a.pinned;
+      const bIsPinned = pinnedIds.has(b.id) || b.pinned;
+
       if (aIsPinned && !bIsPinned) return -1;
       if (!aIsPinned && bIsPinned) return 1;
-      return 0;
+
+      // Sort by creation date if pin status is the same
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
-  }, [posts, searchTerm, statusFilter, pinnedIds]);
+  }, [blogPosts, searchTerm, statusFilter, pinnedIds]);
 
   return (
-    <div className="flex h-full flex-col bg-background ">
+    <div className="flex h-full flex-col bg-background">
       <BlogTableHeader
         workspaceSlug={workspaceSlug}
         currentPageId={currentPage.id}
       />
 
       <div className="flex-1 overflow-y-auto">
-        <div className=" md:w-[80vw] px-4 py-6 sm:px-6 lg:px-8">
+        <div className="md:w-[80vw] px-4 py-6 sm:px-6 lg:px-8">
           <BlogTableFilters
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
             statusFilter={statusFilter}
             setStatusFilter={setStatusFilter}
-            postsCount={posts.length}
+            postsCount={blogPosts.length}
           />
           <BlogTableContent
             posts={filteredAndSortedPosts}

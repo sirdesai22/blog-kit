@@ -1,5 +1,5 @@
 import React from 'react';
-
+import db from '@/lib/db';
 import {
   getBlogCategories,
   getWorkspaceAuthors,
@@ -7,6 +7,7 @@ import {
   getBlogTags, // Add this import
 } from '@/lib/actions/blog-actions';
 import { BlogEditor } from '@/components/blogs/blog-editor';
+import { auth } from '@/lib/auth';
 
 interface NewPostPageProps {
   params: Promise<{
@@ -16,9 +17,15 @@ interface NewPostPageProps {
 }
 
 export default async function NewPostPage(props: NewPostPageProps) {
+  const session = await auth();
   const params = await props.params;
   const { workspaceSlug, blogId } = params;
-
+  const workspace = await db.workspace.findUnique({
+    where: {
+      slug: workspaceSlug,
+      members: { some: { userId: session?.user.id } },
+    },
+  });
   // Fetch necessary data - now including tags
   const [categories, authors, blogPosts, tags] = await Promise.all([
     getBlogCategories(workspaceSlug),
@@ -31,6 +38,7 @@ export default async function NewPostPage(props: NewPostPageProps) {
     <BlogEditor
       workspaceSlug={workspaceSlug}
       blogId={blogId}
+      workspaceId={workspace?.id}
       categories={categories}
       authors={authors}
       allPosts={blogPosts}

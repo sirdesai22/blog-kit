@@ -17,206 +17,6 @@ export interface BlogPostData {
   relatedArticleIds: string[];
 }
 
-export async function createBlogPost(
-  workspaceSlug: string,
-  data: BlogPostData
-) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    redirect('/auth/signin');
-  }
-
-  // Check workspace access
-  const workspace = await db.workspace.findFirst({
-    where: {
-      slug: workspaceSlug,
-      members: {
-        some: {
-          userId: session.user.id,
-        },
-      },
-    },
-  });
-
-  if (!workspace) {
-    throw new Error('Workspace not found or insufficient permissions');
-  }
-
-  // Generate slug from title
-  const slug = data.title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-
-  // Create the page and blog post
-  const page = await db.page.create({
-    data: {
-      title: data.title,
-      slug,
-      type: PageType.BLOG,
-      description: data.description,
-      content: data.content,
-      status: PageStatus.DRAFT,
-      category: data.category,
-      featuredImage: data.featuredImage,
-      publishedAt: data.publishDate,
-      workspaceId: workspace.id,
-      createdById: session.user.id,
-      blogPost: {
-        create: {
-          tags: data.tags,
-          categories: data.category ? [data.category] : [],
-        },
-      },
-      authors: {
-        createMany: {
-          data: data.authorIds.map((userId) => ({ userId })),
-        },
-      },
-    },
-    include: {
-      blogPost: true,
-      authors: {
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              image: true,
-            },
-          },
-        },
-      },
-    },
-  });
-
-  return page;
-}
-
-export async function updateBlogPost(
-  pageId: string,
-  workspaceSlug: string,
-  data: Partial<BlogPostData>
-) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    redirect('/auth/signin');
-  }
-
-  // Check workspace access and page ownership
-  const page = await db.page.findFirst({
-    where: {
-      id: pageId,
-      workspace: {
-        slug: workspaceSlug,
-        members: {
-          some: {
-            userId: session.user.id,
-          },
-        },
-      },
-    },
-    include: {
-      blogPost: true,
-    },
-  });
-
-  if (!page) {
-    throw new Error('Blog post not found or insufficient permissions');
-  }
-
-  // Update the page and blog post
-  const updatedPage = await db.page.update({
-    where: {
-      id: pageId,
-    },
-    data: {
-      title: data.title,
-      description: data.description,
-      content: data.content,
-      category: data.category,
-      featuredImage: data.featuredImage,
-      publishedAt: data.publishDate,
-      updatedById: session.user.id,
-      ...(data.tags && {
-        blogPost: {
-          update: {
-            tags: data.tags,
-            categories: data.category ? [data.category] : [],
-          },
-        },
-      }),
-      ...(data.authorIds && {
-        authors: {
-          deleteMany: {},
-          createMany: {
-            data: data.authorIds.map((userId) => ({ userId })),
-          },
-        },
-      }),
-    },
-    include: {
-      blogPost: true,
-      authors: {
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              image: true,
-            },
-          },
-        },
-      },
-    },
-  });
-
-  return updatedPage;
-}
-
-export async function publishBlogPost(pageId: string, workspaceSlug: string) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    redirect('/auth/signin');
-  }
-
-  const page = await db.page.findFirst({
-    where: {
-      id: pageId,
-      workspace: {
-        slug: workspaceSlug,
-        members: {
-          some: {
-            userId: session.user.id,
-          },
-        },
-      },
-    },
-  });
-
-  if (!page) {
-    throw new Error('Blog post not found or insufficient permissions');
-  }
-
-  const updatedPage = await db.page.update({
-    where: {
-      id: pageId,
-    },
-    data: {
-      status: PageStatus.PUBLISHED,
-      publishedAt: new Date(),
-      updatedById: session.user.id,
-    },
-  });
-
-  return updatedPage;
-}
-
 export async function getBlogCategories(
   workspaceSlug: string
 ): Promise<string[]> {
@@ -416,4 +216,72 @@ export async function getBlogTags(workspaceSlug: string): Promise<string[]> {
 
   // If the data is not in the expected format, return empty array
   return [];
+}
+
+export async function getWorkspaceInfo(workspaceSlug: string) {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    redirect('/auth/signin');
+  }
+
+  const workspace = await db.workspace.findFirst({
+    where: {
+      slug: workspaceSlug,
+      members: {
+        some: {
+          userId: session.user.id,
+        },
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+    },
+  });
+
+  if (!workspace) {
+    throw new Error('Workspace not found or access denied');
+  }
+
+  return workspace;
+}
+
+export async function getBlogPage(workspaceSlug: string, blogId: string) {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    redirect('/auth/signin');
+  }
+
+  const blogPage = await db.page.findFirst({
+    where: {
+      id: blogId,
+      type: PageType.BLOG,
+      workspace: {
+        slug: workspaceSlug,
+        members: {
+          some: {
+            userId: session.user.id,
+          },
+        },
+      },
+    },
+    include: {
+      workspace: {
+        select: {
+          id: true,
+          slug: true,
+          name: true,
+        },
+      },
+    },
+  });
+
+  if (!blogPage) {
+    throw new Error('Blog not found or access denied');
+  }
+
+  return blogPage;
 }

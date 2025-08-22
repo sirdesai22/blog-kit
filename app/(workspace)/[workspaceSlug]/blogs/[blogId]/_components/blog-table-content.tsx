@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -13,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Heading } from '@/components/ui/heading';
 import { useRouter } from 'next/navigation';
-import { BlogPost } from '@/lib/mock-data';
+import { BlogPost } from '@/types/blog';
 
 interface BlogTableContentProps {
   posts: BlogPost[];
@@ -57,21 +56,21 @@ export function BlogTableContent({
   return (
     <div className="overflow-hidden rounded-lg border border-border">
       <div className="relative w-full overflow-x-auto">
-        <Table className="">
-         <TableHeader>
-  <TableRow className="bg-muted/50 hover:bg-muted/50">
-    <TableHead className="w-14"></TableHead>
-    <TableHead>Posts</TableHead>
-    <TableHead>Status</TableHead>
-    <TableHead>Category</TableHead>
-    <TableHead>Tags</TableHead>
-    <TableHead>Author</TableHead>
-    <TableHead>Published / Modified</TableHead>
-    <TableHead>Traffic</TableHead>
-    <TableHead>Leads</TableHead>
-    <TableHead className="sticky right-0 w-12 bg-muted/50 text-center"></TableHead>
-  </TableRow>
-</TableHeader>
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50 hover:bg-muted/50">
+              <TableHead className="w-14"></TableHead>
+              <TableHead>Posts</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Tags</TableHead>
+              <TableHead>Author</TableHead>
+              <TableHead>Published / Modified</TableHead>
+              <TableHead>Traffic</TableHead>
+              <TableHead>Leads</TableHead>
+              <TableHead className="sticky right-0 w-12 bg-muted/50 text-center"></TableHead>
+            </TableRow>
+          </TableHeader>
           <TableBody>
             {posts.map((post) => (
               <BlogTableRow

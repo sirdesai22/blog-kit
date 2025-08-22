@@ -69,6 +69,7 @@ model Workspace {
   updatedAt DateTime          @updatedAt
   authors   Author[]
   pages     Page[]
+  blogPosts BlogPost[]        // Add this line
   config    WorkspaceConfig?
   domain    WorkspaceDomain?
   members   WorkspaceMember[]
@@ -142,7 +143,7 @@ model Page {
   updatedById     String?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
-  blogPost        BlogPost?
+ blogPosts       BlogPost[] 
   changelogEntry  ChangelogEntry?
   helpdeskArticle HelpdeskArticle?
   createdBy       User             @relation("CreatedPages", fields: [createdById], references: [id])
@@ -167,6 +168,7 @@ model Author {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   pages       Page[]    @relation("AuthorToPage")
+  blogPosts   BlogPost[] // Add this relation
 
   @@unique([name, workspaceId])
 }
@@ -183,12 +185,61 @@ model PageAuthor {
 
 model BlogPost {
   id                String   @id @default(cuid())
-  pageId            String   @unique
+  
+  // Core Content
+  title             String
+  slug              String
+  content           Json     // PlateJS content
+  htmlContent       String?  // Rendered HTML for faster display
+  excerpt           String?  // Short summary
+  mdx               String?
+  // Publishing
+  status            PostStatus @default(DRAFT)
+  publishedAt       DateTime?
+  scheduledFor      DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  // SEO
+  metaTitle         String?
+  metaDescription   String?
+  canonicalUrl      String?
+  
+  // Media
+  featuredImage     String?
+  featuredImageAlt  String?
+  gallery           String[] // Additional images
+  
+  // Organization
   tags              String[]
   categories        String[]
+  featured          Boolean  @default(false)
+  pinned            Boolean  @default(false)
+  
+  // Analytics
+  views             Int      @default(0)
+  readTime          Int?     // Estimated read time in minutes
+  
+  // Author & Workspace Relations
+  authorId          String?  // Primary author
+  coAuthorIds       String[] // Additional authors
+  workspaceId       String
+  
+  // Blog Publication Relation - REMOVE @unique here
+  pageId            String   // Multiple blog posts can belong to same blog publication
+  estimatedReadTime Int?     // Duplicate of readTime for compatibility
   authorBio         String?
-  estimatedReadTime Int?
-  page              Page     @relation(fields: [pageId], references: [id])
+  
+  // Relations
+  page              Page      @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  author            Author?   @relation(fields: [authorId], references: [id])
+  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  
+  @@unique([slug, workspaceId]) // Slug should be unique within workspace
+  @@index([status, publishedAt])
+  @@index([workspaceId, status])
+  @@index([authorId])
+  @@index([pageId]) // Add index for better query performance
 }
 
 model HelpdeskArticle {
@@ -281,4 +332,13 @@ enum ChangeType {
   IMPROVEMENT
   BREAKING
   DEPRECATED
+}
+
+// Add PostStatus enum
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+  ARCHIVED
+  DELETED
 }

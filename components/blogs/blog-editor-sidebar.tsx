@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 export interface BlogPost {
   id?: string;
   title: string;
+  slug?: string;
   content: any;
   description?: string;
   category?: string;
@@ -162,10 +163,10 @@ export function BlogEditorSidebar({
   ] as const;
 
   const renderSettingsTab = () => (
-    <div className="space-y-6 ">
+    <div className="space-y-6">
       {/* Category */}
       <div>
-        <Label className="text-sm font-medium text-gray-700">Category</Label>
+        <Label className="text-sm font-medium text-foreground">Category</Label>
         <Select value={post.category} onValueChange={handleCategoryChange}>
           <SelectTrigger className="w-full mt-2">
             <SelectValue placeholder="Select Categories" />
@@ -182,7 +183,7 @@ export function BlogEditorSidebar({
 
       {/* Tags - Updated to use multiselect */}
       <div>
-        <Label className="text-sm font-medium text-gray-700">Tags</Label>
+        <Label className="text-sm font-medium text-foreground">Tags</Label>
         <div className="mt-2">
           {/* Custom multiselect for tags */}
           <div className="relative" ref={tagSelectRef}>
@@ -202,7 +203,7 @@ export function BlogEditorSidebar({
                           e.stopPropagation();
                           handleRemoveTag(tag);
                         }}
-                        className="ml-1 hover:text-red-500"
+                        className="ml-1 hover:text-destructive transition-colors"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -214,7 +215,7 @@ export function BlogEditorSidebar({
 
             {/* Dropdown */}
             {tagSelectOpen && (
-              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+              <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-auto">
                 <div className="p-2">
                   {/* Search input */}
                   <Input
@@ -236,7 +237,7 @@ export function BlogEditorSidebar({
                       .map((tag) => (
                         <div
                           key={tag}
-                          className="flex items-center justify-between p-2 hover:bg-gray-100 rounded cursor-pointer"
+                          className="flex items-center justify-between p-2 hover:bg-accent hover:text-accent-foreground rounded cursor-pointer transition-colors"
                           onClick={() => {
                             onPostChange({
                               ...post,
@@ -246,7 +247,7 @@ export function BlogEditorSidebar({
                           }}
                         >
                           <span className="text-sm">{tag}</span>
-                          <Plus className="w-4 h-4 text-gray-400" />
+                          <Plus className="w-4 h-4 text-muted-foreground" />
                         </div>
                       ))}
 
@@ -256,7 +257,7 @@ export function BlogEditorSidebar({
                         tag.toLowerCase().includes(tagSearch.toLowerCase()) &&
                         !post.tags.includes(tag)
                     ).length === 0 && (
-                      <div className="text-sm text-gray-500 text-center py-2">
+                      <div className="text-sm text-muted-foreground text-center py-2">
                         {tagSearch ? 'No tags found' : 'No tags available'}
                       </div>
                     )}
@@ -265,7 +266,7 @@ export function BlogEditorSidebar({
                   {/* Add new tag option */}
                   {tagSearch && !tags.includes(tagSearch) && (
                     <div
-                      className="flex items-center justify-between p-2 hover:bg-gray-100 rounded cursor-pointer border-t border-gray-200 mt-2 pt-2"
+                      className="flex items-center justify-between p-2 hover:bg-accent hover:text-accent-foreground rounded cursor-pointer border-t border-border mt-2 pt-2 transition-colors"
                       onClick={() => {
                         onPostChange({
                           ...post,
@@ -274,10 +275,10 @@ export function BlogEditorSidebar({
                         setTagSearch('');
                       }}
                     >
-                      <span className="text-sm text-blue-600">
+                      <span className="text-sm text-primary">
                         Create "{tagSearch}"
                       </span>
-                      <Plus className="w-4 h-4 text-blue-600" />
+                      <Plus className="w-4 h-4 text-primary" />
                     </div>
                   )}
                 </div>
@@ -288,7 +289,7 @@ export function BlogEditorSidebar({
           {/* Selected tags summary */}
           {post.tags.length > 0 && (
             <div className="mt-2">
-              <div className="text-xs text-gray-600 mb-1">
+              <div className="text-xs text-muted-foreground mb-1">
                 Selected tags ({post.tags.length}):
               </div>
               <div className="flex flex-wrap gap-1">
@@ -297,7 +298,7 @@ export function BlogEditorSidebar({
                     {tag}
                     <button
                       onClick={() => handleRemoveTag(tag)}
-                      className="ml-1 hover:text-red-500"
+                      className="ml-1 hover:text-destructive transition-colors"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -311,7 +312,7 @@ export function BlogEditorSidebar({
 
       {/* Authors */}
       <div>
-        <Label className="text-sm font-medium text-gray-700">Authors</Label>
+        <Label className="text-sm font-medium text-foreground">Authors</Label>
         <Select
           onValueChange={(value) => {
             const author = authors.find((a) => a.id === value);
@@ -341,7 +342,7 @@ export function BlogEditorSidebar({
           {selectedAuthors.map((author) => (
             <div
               key={author.id}
-              className="flex items-center justify-between text-sm bg-gray-50 rounded px-2 py-1"
+              className="flex items-center justify-between text-sm bg-muted/50 rounded px-2 py-1"
             >
               <div className="flex items-center space-x-2">
                 <Avatar className="w-5 h-5">
@@ -354,7 +355,7 @@ export function BlogEditorSidebar({
               </div>
               <button
                 onClick={() => handleAuthorToggle(author)}
-                className="text-red-500 hover:text-red-700"
+                className="text-destructive hover:text-destructive/80 transition-colors"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -365,7 +366,7 @@ export function BlogEditorSidebar({
 
       {/* Publish Date */}
       <div>
-        <Label className="text-sm font-medium text-gray-700">
+        <Label className="text-sm font-medium text-foreground">
           Publish Date
         </Label>
         <div className="relative mt-2">
@@ -379,34 +380,37 @@ export function BlogEditorSidebar({
             onChange={handlePublishDateChange}
             className="pl-10"
           />
-          <CalendarDays className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <CalendarDays className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
         </div>
       </div>
 
       {/* Related Articles - Updated */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <Label className="text-sm font-medium text-gray-700">
+          <Label className="text-sm font-medium text-foreground">
             Related Articles
           </Label>
           <div className="flex items-center space-x-1">
             <input
               type="checkbox"
               id="auto-related"
-              className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+              className="w-4 h-4 text-primary rounded border-input focus:ring-primary focus:ring-2 focus:ring-offset-2"
               defaultChecked
             />
-            <label htmlFor="auto-related" className="text-xs text-gray-600">
+            <label
+              htmlFor="auto-related"
+              className="text-xs text-muted-foreground"
+            >
               Auto
             </label>
-            <Settings2 className="w-3 h-3 text-gray-400" />
+            <Settings2 className="w-3 h-3 text-muted-foreground" />
           </div>
         </div>
 
         <div className="space-y-2">
           {/* Show message if no articles available */}
           {allPosts.length === 0 && (
-            <p className="text-sm text-gray-500 text-center py-4">
+            <p className="text-sm text-muted-foreground text-center py-4">
               No other articles in this blog yet
             </p>
           )}
@@ -430,7 +434,7 @@ export function BlogEditorSidebar({
                     <SelectItem key={article.id} value={article.id || ''}>
                       <div className="flex items-center justify-between w-full">
                         <span className="truncate">{article.title}</span>
-                        <span className="text-xs text-gray-500 ml-2">
+                        <span className="text-xs text-muted-foreground ml-2">
                           {article.status}
                         </span>
                       </div>
@@ -444,21 +448,23 @@ export function BlogEditorSidebar({
         {/* Show selected related articles */}
         {selectedRelatedArticles.length > 0 && (
           <div className="mt-3 space-y-2">
-            <Label className="text-xs text-gray-600">Selected Articles:</Label>
+            <Label className="text-xs text-muted-foreground">
+              Selected Articles:
+            </Label>
             {selectedRelatedArticles.map((article, index) => (
               <div
                 key={article.id}
-                className="flex items-center justify-between bg-gray-50 rounded px-2 py-1"
+                className="flex items-center justify-between bg-muted/50 rounded px-2 py-1"
               >
                 <div>
                   <p className="text-sm font-medium">Article {index + 1}</p>
-                  <p className="text-xs text-gray-500 truncate">
+                  <p className="text-xs text-muted-foreground truncate">
                     {article.title}
                   </p>
                 </div>
                 <button
                   onClick={() => handleRelatedArticleToggle(article)}
-                  className="text-red-500 hover:text-red-700"
+                  className="text-destructive hover:text-destructive/80 transition-colors"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -470,8 +476,8 @@ export function BlogEditorSidebar({
 
       {/* Form Section */}
       <div>
-        <Label className="text-sm font-medium text-gray-700">Form</Label>
-        <div className="mt-2 p-3 border border-gray-200 rounded-md text-center text-gray-500 text-sm">
+        <Label className="text-sm font-medium text-foreground">Form</Label>
+        <div className="mt-2 p-3 border border-border rounded-md text-center text-muted-foreground text-sm bg-muted/30">
           No form selected
         </div>
       </div>
@@ -481,7 +487,7 @@ export function BlogEditorSidebar({
   const renderSeoTab = () => (
     <div className="space-y-6">
       <div>
-        <Label className="text-sm font-medium text-gray-700">SEO Title</Label>
+        <Label className="text-sm font-medium text-foreground">SEO Title</Label>
         <Input
           value={seoTitle}
           onChange={(e) => setSeoTitle(e.target.value)}
@@ -491,7 +497,7 @@ export function BlogEditorSidebar({
       </div>
 
       <div>
-        <Label className="text-sm font-medium text-gray-700">
+        <Label className="text-sm font-medium text-foreground">
           Meta Description
         </Label>
         <Textarea
@@ -503,7 +509,7 @@ export function BlogEditorSidebar({
       </div>
 
       <div>
-        <Label className="text-sm font-medium text-gray-700">Keywords</Label>
+        <Label className="text-sm font-medium text-foreground">Keywords</Label>
         <Input
           value={seoKeywords}
           onChange={(e) => setSeoKeywords(e.target.value)}
@@ -517,7 +523,9 @@ export function BlogEditorSidebar({
   const renderAdvancedTab = () => (
     <div className="space-y-6">
       <div>
-        <Label className="text-sm font-medium text-gray-700">Custom CSS</Label>
+        <Label className="text-sm font-medium text-foreground">
+          Custom CSS
+        </Label>
         <Textarea
           placeholder="Add custom CSS..."
           className="mt-2 min-h-[100px] font-mono text-sm"
@@ -525,7 +533,7 @@ export function BlogEditorSidebar({
       </div>
 
       <div>
-        <Label className="text-sm font-medium text-gray-700">
+        <Label className="text-sm font-medium text-foreground">
           Custom JavaScript
         </Label>
         <Textarea
@@ -535,7 +543,7 @@ export function BlogEditorSidebar({
       </div>
 
       <div>
-        <Label className="text-sm font-medium text-gray-700">
+        <Label className="text-sm font-medium text-foreground">
           Canonical URL
         </Label>
         <Input
@@ -549,7 +557,7 @@ export function BlogEditorSidebar({
   return (
     <div className="h-full flex flex-col">
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200 bg-gray-50">
+      <div className="border-b border-border">
         <div className="flex">
           {tabs.map((tab) => (
             <button
@@ -557,8 +565,8 @@ export function BlogEditorSidebar({
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === tab.id
-                  ? 'border-black text-black bg-white'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-primary text-foreground bg-background'
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/30'
               }`}
             >
               {tab.label}

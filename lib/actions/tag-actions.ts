@@ -36,7 +36,8 @@ export async function getWorkspaceBlogTags(slug: string) {
           type: 'BLOG',
         },
         include: {
-          blogPost: {
+          blogPosts: {
+            // Changed from blogPost to blogPosts (plural)
             select: {
               tags: true,
             },
@@ -60,9 +61,14 @@ export async function getWorkspaceBlogTags(slug: string) {
   // Count tag usage from blog posts
   const tagUsage = new Map<string, number>();
   workspace.pages.forEach((page) => {
-    if (page.blogPost?.tags) {
-      page.blogPost.tags.forEach((tag) => {
-        tagUsage.set(tag, (tagUsage.get(tag) || 0) + 1);
+    // Changed from blogPost to blogPosts and iterate through the array
+    if (page.blogPosts && page.blogPosts.length > 0) {
+      page.blogPosts.forEach((blogPost) => {
+        if (blogPost.tags) {
+          blogPost.tags.forEach((tag) => {
+            tagUsage.set(tag, (tagUsage.get(tag) || 0) + 1);
+          });
+        }
       });
     }
   });
@@ -184,7 +190,7 @@ export async function updateBlogTag(
           type: 'BLOG',
         },
         include: {
-          blogPost: true,
+          blogPosts: true, // Changed from blogPost to blogPosts
         },
       },
     },
@@ -223,23 +229,32 @@ export async function updateBlogTag(
   });
 
   // Update all blog posts that use this tag
-  const blogPostsWithTag = workspace.pages.filter((page) =>
-    page.blogPost?.tags?.includes(oldName)
-  );
+  const blogPostsToUpdate: string[] = [];
+  workspace.pages.forEach((page) => {
+    if (page.blogPosts && page.blogPosts.length > 0) {
+      page.blogPosts.forEach((blogPost) => {
+        if (blogPost.tags?.includes(oldName)) {
+          blogPostsToUpdate.push(blogPost.id);
+        }
+      });
+    }
+  });
 
-  for (const page of blogPostsWithTag) {
-    if (page.blogPost) {
-      const updatedPostTags = page.blogPost.tags.map((tag) =>
+  // Update blog posts in batch
+  for (const blogPostId of blogPostsToUpdate) {
+    const blogPost = await db.blogPost.findUnique({
+      where: { id: blogPostId },
+      select: { tags: true },
+    });
+
+    if (blogPost) {
+      const updatedPostTags = blogPost.tags.map((tag) =>
         tag === oldName ? newName : tag
       );
 
       await db.blogPost.update({
-        where: {
-          id: page.blogPost.id,
-        },
-        data: {
-          tags: updatedPostTags,
-        },
+        where: { id: blogPostId },
+        data: { tags: updatedPostTags },
       });
     }
   }
@@ -274,7 +289,7 @@ export async function deleteBlogTag(slug: string, tagName: string) {
           type: 'BLOG',
         },
         include: {
-          blogPost: true,
+          blogPosts: true, // Changed from blogPost to blogPosts
         },
       },
     },
@@ -307,23 +322,30 @@ export async function deleteBlogTag(slug: string, tagName: string) {
   });
 
   // Remove tag from all blog posts
-  const blogPostsWithTag = workspace.pages.filter((page) =>
-    page.blogPost?.tags?.includes(tagName)
-  );
+  const blogPostsToUpdate: string[] = [];
+  workspace.pages.forEach((page) => {
+    if (page.blogPosts && page.blogPosts.length > 0) {
+      page.blogPosts.forEach((blogPost) => {
+        if (blogPost.tags?.includes(tagName)) {
+          blogPostsToUpdate.push(blogPost.id);
+        }
+      });
+    }
+  });
 
-  for (const page of blogPostsWithTag) {
-    if (page.blogPost) {
-      const updatedPostTags = page.blogPost.tags.filter(
-        (tag) => tag !== tagName
-      );
+  // Update blog posts in batch
+  for (const blogPostId of blogPostsToUpdate) {
+    const blogPost = await db.blogPost.findUnique({
+      where: { id: blogPostId },
+      select: { tags: true },
+    });
+
+    if (blogPost) {
+      const updatedPostTags = blogPost.tags.filter((tag) => tag !== tagName);
 
       await db.blogPost.update({
-        where: {
-          id: page.blogPost.id,
-        },
-        data: {
-          tags: updatedPostTags,
-        },
+        where: { id: blogPostId },
+        data: { tags: updatedPostTags },
       });
     }
   }
