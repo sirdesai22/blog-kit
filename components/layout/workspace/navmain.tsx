@@ -51,7 +51,7 @@ export function NavMain({
           <SidebarMenuButton asChild isActive={item.isActive}>
             <Link href={getHref(item.url)}>
               <item.icon />
-              <span>{item.title}</span>
+              <span className='text-primary'>{item.title}</span>
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>

@@ -13,7 +13,7 @@ function Input({ className, type, suffix, ...props }: InputProps) {
   return (
     <div
       className={cn(
-        "flex w-full rounded-xl border border-input focus-within:ring-[0.2px] focus-within:ring-ring focus-within:ring-offset-[0.2px]"
+        "flex w-full rounded-xl border border-input focus-within:ring-[0.5px] focus-within:ring-ring focus-within:ring-offset-[0.2px]"
       )}
     >
       <input
@@ -28,7 +28,7 @@ function Input({ className, type, suffix, ...props }: InputProps) {
         {...props}
       />
       {suffix && (
-        <div className="h-12 px-3 flex items-center border-l border-input rounded-r-xl bg-muted text-sm text-muted-foreground">
+        <div className="h-12 px-3 flex items-center border-l border-input rounded-r-xl bg-muted text-md text-muted-foreground">
           {suffix}
         </div>
       )}

@@ -1,10 +1,26 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -13,61 +29,43 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  MoreHorizontal,
-  Plus,
-  Edit2,
-  Trash2,
-  GripVertical,
-  Eye,
-  Tag,
-} from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Heading } from '@/components/ui/heading';
+import { Textarea } from '@/components/ui/textarea';
 import {
   addBlogTag,
-  updateBlogTag,
   deleteBlogTag,
   reorderBlogTags,
+  updateBlogTag,
 } from '@/lib/actions/tag-actions';
-import { useRouter } from 'next/navigation';
 
-// Import drag and drop components
+// Icons
+import {
+  ExternalLink,
+  GripVertical,
+  MoreVertical,
+  Tag,
+  Trash2,
+} from 'lucide-react';
+
+// Drag and Drop
 import {
   DndContext,
   closestCenter,
+  DragEndEvent,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
-  DragEndEvent,
 } from '@dnd-kit/core';
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
+  useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-interface Tag {
+interface TagType {
   name: string;
   posts: number;
   traffic: number;
@@ -77,20 +75,18 @@ interface Tag {
 interface BlogTagsViewProps {
   workspaceSlug: string;
   blogId: string;
-  tags: Tag[];
+  tags: TagType[];
 }
 
-// Sortable row component
+// Redesigned Sortable Row Component for Tags
 function SortableTableRow({
   tag,
-  workspaceSlug,
   onEdit,
   onDelete,
 }: {
-  tag: Tag;
-  workspaceSlug: string;
-  onEdit: (tag: Tag) => void;
-  onDelete: (tag: Tag) => void;
+  tag: TagType;
+  onEdit: (tag: TagType) => void;
+  onDelete: (tag: TagType) => void;
 }) {
   const {
     attributes,
@@ -105,68 +101,88 @@ function SortableTableRow({
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 10 : 'auto',
   };
 
   return (
-    <TableRow
-      ref={setNodeRef}
-      style={style}
-      className={isDragging ? 'z-50' : ''}
-    >
-      <TableCell className="w-8">
-        {/* <div
-          {...attributes}
-          {...listeners}
-          className="cursor-grab hover:cursor-grabbing p-1 hover:bg-gray-100 rounded"
-        >
-          <GripVertical className="h-4 w-4 text-gray-400" />
-        </div> */}
-      </TableCell>
-      <TableCell className="font-medium">
-        <div className="flex items-center gap-2">{tag.name}</div>
-      </TableCell>
-      <TableCell className="text-center">
-        <div className="flex items-center justify-center gap-2">
-          <span className="font-medium">{tag.posts}</span>
-        </div>
-      </TableCell>
-      <TableCell className="text-center font-medium">
-        <span className="">{tag.traffic.toLocaleString()}</span>
-      </TableCell>
-      <TableCell className="text-center">
-        <span className=" font-medium">{tag.leads}</span>
-      </TableCell>
-      <TableCell className="text-center">
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            className="rounded-xl text-gray-600 hover:text-gray-800"
-          >
-            View Posts
-          </Button>
-          <Button
-            variant="outline"
-            className="rounded-xl text-gray-600 hover:text-gray-800"
-            onClick={() => onEdit(tag)}
-          >
-            Edit
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                className="text-destructive"
-                onClick={() => onDelete(tag)}
+    <TableRow ref={setNodeRef} style={style} className="group">
+      <TableCell colSpan={4} className="p-2">
+        <div className="flex w-full items-center justify-between">
+          {/* Left Side: Handle, Name, and External Link */}
+          <div className="flex items-center gap-3">
+            <div
+              {...attributes}
+              {...listeners}
+              className="cursor-grab rounded p-1 hover:bg-accent"
+            >
+              <GripVertical className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <Link
+              href={`/blog/tags/${tag.name}`}
+              passHref
+              className="flex items-center gap-2"
+            >
+              <Tag className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium text-foreground">{tag.name}</span>
+              <ExternalLink className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+            </Link>
+          </div>
+
+          {/* Right Side: Stats and Action Buttons */}
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-x-8 text-sm text-muted-foreground">
+              <div className="flex w-16 items-center justify-end">
+                <span className="font-semibold text-foreground">
+                  {tag.posts}
+                </span>
+              </div>
+              <div className="flex w-20 items-center justify-end">
+                <span className="font-semibold text-foreground">
+                  {tag.traffic.toLocaleString()}
+                </span>
+              </div>
+              <div className="flex w-16 items-center justify-end">
+                <span className="font-semibold text-foreground">
+                  {tag.leads}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex w-56 items-center justify-end gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-muted-foreground"
               >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                Manage Posts
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-muted-foreground"
+                onClick={() => onEdit(tag)}
+              >
+                Edit
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="h-8 w-8 p-0">
+                    <span className="sr-only">Open menu</span>
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    className="text-destructive"
+                    onClick={() => onDelete(tag)}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    <span>Delete</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
         </div>
       </TableCell>
     </TableRow>
@@ -175,17 +191,13 @@ function SortableTableRow({
 
 export function BlogTagsView({
   workspaceSlug,
-  blogId,
   tags: initialTags,
 }: BlogTagsViewProps) {
   const router = useRouter();
   const [tags, setTags] = useState(initialTags);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedTag, setSelectedTag] = useState<Tag | null>(null);
-  const [newTagName, setNewTagName] = useState('');
-  const [newTagDescription, setNewTagDescription] = useState('');
+  const [selectedTag, setSelectedTag] = useState<TagType | null>(null);
   const [editTagName, setEditTagName] = useState('');
   const [editTagDescription, setEditTagDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -199,15 +211,12 @@ export function BlogTagsView({
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
-
     if (over && active.id !== over.id) {
-      const oldIndex = tags.findIndex((item) => item.name === active.id);
-      const newIndex = tags.findIndex((item) => item.name === over.id);
-
+      const oldIndex = tags.findIndex((t) => t.name === active.id);
+      const newIndex = tags.findIndex((t) => t.name === over.id);
       const newTags = arrayMove(tags, oldIndex, newIndex);
       setTags(newTags);
 
-      // Update the order on the server
       try {
         await reorderBlogTags(
           workspaceSlug,
@@ -215,39 +224,17 @@ export function BlogTagsView({
         );
       } catch (error) {
         console.error('Failed to update tag order:', error);
-        // Revert the order if the update fails
-        setTags(tags);
+        setTags(tags); // Revert on failure
       }
-    }
-  };
-
-  const handleAddTag = async () => {
-    if (!newTagName.trim()) return;
-
-    setIsLoading(true);
-    try {
-      await addBlogTag(workspaceSlug, newTagName.trim());
-      setIsAddDialogOpen(false);
-      setNewTagName('');
-      setNewTagDescription('');
-      router.refresh();
-    } catch (error) {
-      console.error('Failed to add tag:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleEditTag = async () => {
     if (!selectedTag || !editTagName.trim()) return;
-
     setIsLoading(true);
     try {
       await updateBlogTag(workspaceSlug, selectedTag.name, editTagName.trim());
       setIsEditDialogOpen(false);
-      setSelectedTag(null);
-      setEditTagName('');
-      setEditTagDescription('');
       router.refresh();
     } catch (error) {
       console.error('Failed to update tag:', error);
@@ -258,12 +245,10 @@ export function BlogTagsView({
 
   const handleDeleteTag = async () => {
     if (!selectedTag) return;
-
     setIsLoading(true);
     try {
       await deleteBlogTag(workspaceSlug, selectedTag.name);
       setIsDeleteDialogOpen(false);
-      setSelectedTag(null);
       router.refresh();
     } catch (error) {
       console.error('Failed to delete tag:', error);
@@ -273,90 +258,12 @@ export function BlogTagsView({
   };
 
   return (
-    <div className="px-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="w-full">
-          <div className="max-w-7xl mx-auto py-6">
-            <div className="flex items-center w-full justify-between">
-              <div>
-                <Heading
-                  level="h1"
-                  variant="default"
-                  subtitleVariant="muted"
-                  subtitleSize="xs"
-                  subtitle={
-                    <>
-                      Organize your blog content with tags to help readers find
-                      related articles and improve discoverability.
-                    </>
-                  }
-                >
-                  Tags
-                </Heading>
-              </div>
-              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    New Tag
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[400px]">
-                  <DialogHeader>
-                    <DialogTitle>Create New Tag</DialogTitle>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="tag-name">Tag Name</Label>
-                      <Input
-                        id="tag-name"
-                        value={newTagName}
-                        onChange={(e) => setNewTagName(e.target.value)}
-                        placeholder=""
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="tag-description">Description</Label>
-                      <Textarea
-                        id="tag-description"
-                        value={newTagDescription}
-                        onChange={(e) => setNewTagDescription(e.target.value)}
-                        placeholder=""
-                        rows={4}
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setIsAddDialogOpen(false);
-                        setNewTagName('');
-                        setNewTagDescription('');
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button onClick={handleAddTag} disabled={isLoading}>
-                      {isLoading ? 'Creating...' : 'Create'}
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Tags Table with Drag and Drop */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>{tags.length} Tags</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+    <>
+      <CardTitle className="text-base font-semibold mb-2 ml-8">
+        {tags.length} <span className="text-muted-foreground">Tags</span>
+      </CardTitle>
+      <Card className="p-0 border-none shadow-none">
+        <CardContent className="p-0">
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -364,21 +271,36 @@ export function BlogTagsView({
           >
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="w-8"></TableHead>
-                  <TableHead>Tag</TableHead>
-                  <TableHead className="text-center">Posts</TableHead>
-                  <TableHead className="text-center">Traffic</TableHead>
-                  <TableHead className="text-center">Leads</TableHead>
-                  <TableHead className="text-center"></TableHead>
+                <TableRow className="bg-muted hover:bg-muted">
+                  <TableHead colSpan={4} className="p-2">
+                    <div className="flex w-full items-center justify-between">
+                      <span className="pl-2 text-sm font-medium text-muted-foreground">
+                        Tag
+                      </span>
+                      <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-x-8 text-sm text-muted-foreground">
+                          <span className="w-16 text-right font-medium">
+                            Posts
+                          </span>
+                          <span className="w-20 text-right font-medium">
+                            Traffic
+                          </span>
+                          <span className="w-16 text-right font-medium">
+                            Leads
+                          </span>
+                        </div>
+                        <div className="w-[210px]" />
+                      </div>
+                    </div>
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {tags.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={6}
-                      className="text-center py-8 text-gray-500"
+                      colSpan={4}
+                      className="py-12 text-center text-muted-foreground"
                     >
                       No tags yet. Create your first tag to organize your blog
                       posts.
@@ -393,15 +315,14 @@ export function BlogTagsView({
                       <SortableTableRow
                         key={tag.name}
                         tag={tag}
-                        workspaceSlug={workspaceSlug}
-                        onEdit={(selectedTag) => {
-                          setSelectedTag(selectedTag);
-                          setEditTagName(selectedTag.name);
-                          setEditTagDescription(''); // You might want to load existing description if stored
+                        onEdit={(t) => {
+                          setSelectedTag(t);
+                          setEditTagName(t.name);
+                          setEditTagDescription('');
                           setIsEditDialogOpen(true);
                         }}
-                        onDelete={(selectedTag) => {
-                          setSelectedTag(selectedTag);
+                        onDelete={(t) => {
+                          setSelectedTag(t);
                           setIsDeleteDialogOpen(true);
                         }}
                       />
@@ -427,7 +348,6 @@ export function BlogTagsView({
                 id="edit-tag-name"
                 value={editTagName}
                 onChange={(e) => setEditTagName(e.target.value)}
-                placeholder=""
               />
             </div>
             <div className="space-y-2">
@@ -436,7 +356,6 @@ export function BlogTagsView({
                 id="edit-tag-description"
                 value={editTagDescription}
                 onChange={(e) => setEditTagDescription(e.target.value)}
-                placeholder=""
                 rows={4}
               />
             </div>
@@ -444,17 +363,12 @@ export function BlogTagsView({
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => {
-                setIsEditDialogOpen(false);
-                setSelectedTag(null);
-                setEditTagName('');
-                setEditTagDescription('');
-              }}
+              onClick={() => setIsEditDialogOpen(false)}
             >
               Cancel
             </Button>
             <Button onClick={handleEditTag} disabled={isLoading}>
-              {isLoading ? 'Updating...' : 'Edit'}
+              {isLoading ? 'Updating...' : 'Save Changes'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -466,18 +380,14 @@ export function BlogTagsView({
           <DialogHeader>
             <DialogTitle>Delete Tag</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{selectedTag?.name}"? This action
-              cannot be undone. All blog posts using this tag will have it
-              removed.
+              Are you sure you want to delete &quot;{selectedTag?.name}&quot;?
+              This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => {
-                setIsDeleteDialogOpen(false);
-                setSelectedTag(null);
-              }}
+              onClick={() => setIsDeleteDialogOpen(false)}
             >
               Cancel
             </Button>
@@ -491,6 +401,6 @@ export function BlogTagsView({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

@@ -1,4 +1,5 @@
 'use client';
+'use client';
 
 import {
   Table,
@@ -56,7 +57,7 @@ export function BlogTableContent({
   return (
     <div className="overflow-hidden rounded-lg border border-border">
       <div className="relative w-full overflow-x-auto">
-        <Table>
+        <Table className="">
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
               <TableHead className="w-14"></TableHead>

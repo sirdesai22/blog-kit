@@ -14,28 +14,26 @@ interface WorkspaceLayoutProps {
 export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
   const pathname = usePathname();
 
-  // Check if we're on a page ID route (contains /pages/)
   const isPageRoute =
     pathname.includes('/pages/') || pathname.includes('/blogs/');
 
-  // Use different sidebar data based on the route
   const sidebarData = isPageRoute
     ? pageManagementSidebarData
     : workspaceSidebarData;
 
   return (
-    <div className="[--header-height:calc(--spacing(12))]">
-      <SidebarProvider className="flex flex-col max-w-screen overflow-x-hidden">
-        <SiteHeader />
-        <div className="flex flex-1 ">
-          <MainSidebar
-            navMainItems={sidebarData.navMain}
-            navSecondaryItems={sidebarData.navSecondary}
-            navSupportItems={sidebarData.navSupport}
-            showSupport={!isPageRoute} // Hide support section on page routes
-          />
-          <SidebarInset>{children}</SidebarInset>
-        </div>
+    <div className="flex h-screen flex-col">
+      <SiteHeader />
+      <SidebarProvider className="flex flex-1 overflow-hidden">
+        <MainSidebar
+          navMainItems={sidebarData.navMain}
+          navSecondaryItems={sidebarData.navSecondary}
+          navSupportItems={sidebarData.navSupport}
+          showSupport={!isPageRoute}
+        />
+        <SidebarInset className="flex-1">
+          {children}
+        </SidebarInset>
       </SidebarProvider>
     </div>
   );

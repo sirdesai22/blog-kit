@@ -6,10 +6,10 @@ import { Button } from "@/components/custom/Button";
 import { Input } from "@/components/custom/Input";
 import { Textarea } from "@/components/custom/TextArea";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { ArrowRight } from "lucide-react"
+import { ArrowRight } from "lucide-react";
 
 import { useRouter } from "next/navigation";
-import Navbar from "./_components/navbar";
+import { SiteHeader } from "@/components/layout/header";
 
 export default function OnboardingPage() {
   const [workspaceName, setWorkspaceName] = useState("");
@@ -63,9 +63,7 @@ export default function OnboardingPage() {
       const data = await response.json();
 
       if (!data.available) {
-        setError(
-          "This name is already taken. Only letters and numbers allowed"
-        );
+        setError("The name is already taken.");
       } else {
         setError("");
       }
@@ -91,64 +89,91 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-screen">
       {/* Navigation Bar */}
-      <Navbar />
+      <SiteHeader />
       {/* Main Content */}
-      <div className="flex items-center  justify-center px-4 py-8">
+      <div className="flex items-center justify-center px-4 py-8">
         <div className="max-w-lg w-full">
           <Card className="border-none shadow-none">
-            <CardHeader className="pb-4 pt-6">
-              <div className="text-center">
-                <h1 className="text-2xl font-semibold text-primary">
-                  Create Workspace
-                </h1>
-              </div>
+            <CardHeader className="">
+              <h1 className="text-3xl font-bold text-primary">
+                Create Workspace
+              </h1>
             </CardHeader>
 
-            <CardContent className="space-y-4 px-6 pb-6">
+            <CardContent className="space-y-3">
               {/* Workspace Name */}
-              <div className="space-y-1">
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor="workspaceName"
+                  className="text-sm font-semibold text-gray-800"
+                >
+                  Workspace Name*
+                </label>
                 <Input
+                  id="workspaceName"
                   type="text"
-                  placeholder="Workspace Name"
                   value={workspaceName}
                   onChange={(e) => setWorkspaceName(e.target.value)}
                 />
               </div>
 
               {/* Workspace Address */}
-              <div className="space-y-1">
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor="workspaceAddress"
+                  className="text-sm font-semibold text-gray-800"
+                >
+                  Workspace Address*
+                </label>
                 <Input
+                  id="workspaceAddress"
                   type="text"
                   value={workspaceAddress}
-                  placeholder="Workspace Address"
                   onChange={(e) => handleWorkspaceAddressChange(e.target.value)}
-                  suffix=".blogkit.com"
+                  suffix=".blogkit.test"
                 />
-                {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+                {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
               </div>
 
               {/* Description */}
-              <Textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                label="Description"
-                helperText="Auto-generate from my website"
-              />
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2 items-baseline">
+                  <label
+                    htmlFor="description"
+                    className="text-sm font-semibold text-gray-800"
+                  >
+                    Description
+                  </label>
+                  {/* <a href="#" className="text-xs text-muted-foreground underline">
+      Auto-generate from my website
+    </a> */}
+                </div>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
 
               {/* Create Button */}
-            <Button
-  onClick={handleCreateWorkspace}
-  disabled={!workspaceName || !workspaceAddress || loading || !!error}
->
-  {loading ? (
-    "Creating..."
-  ) : (
-    <>
-      Create Workspace
-      <ArrowRight className="ml-2 h-4 w-4" />
-    </>
-  )}
-</Button>
+              <div className="flex justify-end pt-4">
+                <Button
+                  onClick={handleCreateWorkspace}
+                  disabled={
+                    !workspaceName || !workspaceAddress || loading || !!error
+                  }
+                  className="bg-black text-white rounded-xl hover:bg-gray-800 flex items-center w-fit px-8"
+                >
+                  {loading ? (
+                    "Creating..."
+                  ) : (
+                    <>
+                      Create Workspace
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
