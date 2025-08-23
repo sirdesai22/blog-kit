@@ -53,7 +53,12 @@ export function SiteHeader() {
         </div>
 
         <div className="hidden items-center  md:flex">
-          <Button variant="ghost" size="sm" asChild className='rounded-full mx-1 hover:border-primary/20 hover:border-1'>
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className="rounded-full mx-1 hover:border-primary/20 hover:border-1"
+          >
             <Link href="#">
               View Blog
               <ArrowUpRight className=" h-4 w-4 text-muted-foreground hover:text-primary" />
@@ -70,8 +75,12 @@ export function SiteHeader() {
             <div className="flex items-center gap-[--gap-xs]  mx-2 rounded-full  ">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8  hover:text-primary bg-transparent rounded-full">
-                    <LifeBuoy className="h-4 w-4 " /> 
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8  hover:text-primary bg-transparent rounded-full"
+                  >
+                    <LifeBuoy className="h-4 w-4 " />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -80,7 +89,11 @@ export function SiteHeader() {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8  hover:text-primary bg-transparent rounded-full">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8  hover:text-primary bg-transparent rounded-full"
+                  >
                     <Inbox className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
@@ -88,7 +101,7 @@ export function SiteHeader() {
                   <p>Inbox</p>
                 </TooltipContent>
               </Tooltip>
-              {/* <ThemeToggle /> */}
+              <ThemeToggle />
             </div>
           </TooltipProvider>
           <Popover>
@@ -137,7 +150,7 @@ export function SiteHeader() {
         <div className="md:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className=''>
+              <Button variant="ghost" size="icon" className="">
                 <Menu className="h-5 w-5 text-muted-foreground hover:text-primary bg-transparent rounded-full" />
                 <span className="sr-only">Open menu</span>
               </Button>
@@ -146,10 +159,7 @@ export function SiteHeader() {
               <div className="flex h-full flex-col">
                 <div className="flex items-center gap-3 pb-4">
                   <Avatar>
-                    <AvatarImage
-                      src={user.image || ''}
-                      alt={user.name || ''}
-                    />
+                    <AvatarImage src={user.image || ''} alt={user.name || ''} />
                     <AvatarFallback className="bg-muted font-medium text-muted-foreground ">
                       {initial}
                     </AvatarFallback>
@@ -176,19 +186,28 @@ export function SiteHeader() {
                     </Button>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Button variant="ghost" className="w-full justify-start  hover:text-primary bg-transparent rounded-full">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start  hover:text-primary bg-transparent rounded-full"
+                    >
                       <MessageSquare className="mr-2 h-4 w-4" />
                       Feedback
                     </Button>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Button variant="ghost" className="w-full justify-start  hover:text-primary bg-transparent rounded-full">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start  hover:text-primary bg-transparent rounded-full"
+                    >
                       <LifeBuoy className="mr-2 h-4 w-4" />
                       Support
                     </Button>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Button variant="ghost" className="w-full justify-start  hover:text-primary bg-transparent rounded-full">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start  hover:text-primary bg-transparent rounded-full"
+                    >
                       <Inbox className="mr-2 h-4 w-4" />
                       Inbox
                     </Button>
