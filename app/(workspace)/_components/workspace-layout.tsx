@@ -31,9 +31,7 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
           navSupportItems={sidebarData.navSupport}
           showSupport={!isPageRoute}
         />
-        <SidebarInset className="flex-1">
-          {children}
-        </SidebarInset>
+        <SidebarInset className="flex-1">{children}</SidebarInset>
       </SidebarProvider>
     </div>
   );
