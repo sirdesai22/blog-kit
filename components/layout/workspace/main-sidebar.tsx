@@ -10,43 +10,50 @@ import {
 } from '@/components/ui/sidebar';
 import { NavMain } from '@/components/layout/workspace/navmain';
 import { NavSecondary } from '@/components/layout/workspace/navsecondary';
+import { LucideIcon } from 'lucide-react';
 
-import { workspaceSidebarData } from '@/lib/data';
+// Define a type for a single navigation item
+type NavItem = {
+  title: string;
+  url: string;
+  icon: LucideIcon;
+  items?: NavItem[];
+};
 
-interface MainSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  navMainItems?: typeof workspaceSidebarData.navMain;
-  navSecondaryItems?: typeof workspaceSidebarData.navSecondary;
-  navSupportItems?: typeof workspaceSidebarData.navSupport;
-  showSettings?: boolean;
-  showSupport?: boolean;
-  settingsLabel?: string;
-  supportLabel?: string;
+// Define a type for a sidebar section
+interface SidebarSection {
+  id: string;
+  label?: string;
+  items: NavItem[];
 }
 
-export function MainSidebar({
-  navMainItems = workspaceSidebarData.navMain,
-  navSecondaryItems = workspaceSidebarData.navSecondary,
-  navSupportItems = workspaceSidebarData.navSupport,
-  showSettings = true,
-  showSupport = true,
-  settingsLabel = 'Settings',
-  supportLabel = 'Support',
-  ...props
-}: MainSidebarProps) {
+interface MainSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  sections?: SidebarSection[];
+}
+
+export function MainSidebar({ sections = [], ...props }: MainSidebarProps) {
+  // The first section is always treated as the main navigation
+  const mainSection = sections[0];
+  // All other sections are treated as secondary groups with labels
+  const contentSections = sections.slice(1);
+
   return (
     <Sidebar
       className="top-[calc(var(--header-height)-7px)] h-[calc(100svh-var(--header-height)+7px)]!"
       {...props}
     >
       <SidebarHeader>
-        <NavMain items={navMainItems} />
+        {mainSection && <NavMain items={mainSection.items} />}
       </SidebarHeader>
       <SidebarContent>
-        {showSettings && (
-          <NavSecondary label={settingsLabel} items={navSecondaryItems} />
-        )}
-        {showSupport && (
-          <NavSecondary label={supportLabel} items={navSupportItems} />
+        {contentSections.map((section) =>
+          section.label ? (
+            <NavSecondary
+              key={section.id}
+              label={section.label}
+              items={section.items}
+            />
+          ) : null
         )}
       </SidebarContent>
       <SidebarRail />

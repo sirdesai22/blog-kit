@@ -17,7 +17,8 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
   const isPageRoute =
     pathname.includes('/pages/') || pathname.includes('/blogs/');
 
-  const sidebarData = isPageRoute
+  // Select the appropriate data structure based on the current route
+  const sidebarSections = isPageRoute
     ? pageManagementSidebarData
     : workspaceSidebarData;
 
@@ -25,15 +26,8 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
     <div className="flex h-screen flex-col">
       <SiteHeader />
       <SidebarProvider className="flex flex-1 overflow-hidden">
-        <MainSidebar
-          navMainItems={sidebarData.navMain}
-          navSecondaryItems={sidebarData.navSecondary}
-          navSupportItems={sidebarData.navSupport}
-          showSupport={!isPageRoute}
-        />
-        <SidebarInset className="flex-1">
-          {children}
-        </SidebarInset>
+        <MainSidebar sections={sidebarSections} />
+        <SidebarInset className="flex-1">{children}</SidebarInset>
       </SidebarProvider>
     </div>
   );

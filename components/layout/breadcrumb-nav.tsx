@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { WorkSpaceSwitcher } from '../workspace/workspace-switcher';
 import Link from 'next/link';
+import { BlogSwitcher } from '../workspace/blogs-switcher';
 
 // Interface for a breadcrumb item
 interface BreadcrumbItem {
@@ -89,35 +90,12 @@ export function BreadcrumbNav() {
           <Slash className="w-3 h-3 text-muted-foreground/80 rotate-[170deg]" />
 
           {item.isDropdown ? (
-            item.label === 'Blog' && item.dropdownItems ? (
-              // Blog context dropdown
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-auto p-1 text-sm  hover:cursor-pointer focus-visible:ring-0 hover:bg-transparent"
-                  >
-                    <span>{item.label}</span>
-                    <ChevronsUpDown className="ml-1 h-4 w-4 text-muted-foreground" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48">
-                  {item.dropdownItems.map((dropdownItem) => (
-                    <DropdownMenuItem
-                      key={dropdownItem.href}
-                      onSelect={() => router.push(dropdownItem.href)}
-                    >
-                      {dropdownItem.label}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              // Workspace Switcher (the first item)
-              <WorkSpaceSwitcher />
-            )
-          ) : (
+  item.label === 'Blog' ? (
+    <BlogSwitcher /> 
+  ) : (
+    <WorkSpaceSwitcher />
+  )
+) : (
             // Standard breadcrumb link or text
             <Button
               variant={item.href ? 'ghost' : 'link'}

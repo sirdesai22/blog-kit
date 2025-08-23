@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useSession, signOut } from 'next-auth/react';
+import { usePathname } from "next/navigation";
 import {
   LogOut,
   LifeBuoy,
@@ -37,6 +38,8 @@ import { ThemeToggle } from './theme-toggle';
 
 export function SiteHeader() {
   const { data: session } = useSession();
+  const pathname = usePathname();
+  const showViewBlog = pathname.includes("/blogs/");
 
   if (!session?.user) {
     return null;
@@ -44,6 +47,8 @@ export function SiteHeader() {
 
   const { user } = session;
   const initial = user.name?.charAt(0).toUpperCase() || '?';
+
+
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background px-3 py-2">
@@ -53,6 +58,7 @@ export function SiteHeader() {
         </div>
 
         <div className="hidden items-center  md:flex">
+          {showViewBlog && (
           <Button
             variant="ghost"
             size="sm"
@@ -64,6 +70,7 @@ export function SiteHeader() {
               <ArrowUpRight className=" h-4 w-4 text-muted-foreground hover:text-primary" />
             </Link>
           </Button>
+          )}
           <Button
             variant="secondary"
             size="sm"
@@ -101,7 +108,7 @@ export function SiteHeader() {
                   <p>Inbox</p>
                 </TooltipContent>
               </Tooltip>
-              <ThemeToggle />
+              {/* <ThemeToggle /> */}
             </div>
           </TooltipProvider>
           <Popover>
