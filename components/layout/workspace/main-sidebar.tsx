@@ -35,7 +35,7 @@ export function MainSidebar({
 }: MainSidebarProps) {
   return (
     <Sidebar
-      className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
+      className="top-[calc(var(--header-height)-7px)] h-[calc(100svh-var(--header-height)+7px)]!"
       {...props}
     >
       <SidebarHeader>

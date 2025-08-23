@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, use } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -203,135 +203,133 @@ export default function AuthorsPage(props: AuthorsPageProps) {
   }
 
   return (
-    <div className="px-4">
+    <div className="bg-background">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="w-full">
-          <div className="max-w-7xl mx-auto py-6">
-            <div className="flex items-start w-full justify-between">
-              <div>
-                <Heading
-                  level="h1"
-                  variant="default"
-                  subtitleVariant="muted"
-                  subtitleSize="xs"
-                  subtitle={
-                    <div className=" ml-1">
-                      <p className="text-xs">
-                        Manage authors who can write and be attributed
-                      </p>
-                      <p className="text-xs">
-                        to blog posts in your workspace.
-                      </p>
-                    </div>
-                  }
-                >
-                  Authors
-                </Heading>
-              </div>
-              <Button onClick={() => setIsAddDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                New Author
-              </Button>
-            </div>
+      <div className="px-4 py-6 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-start">
+          <div>
+            <Heading
+              level="h1"
+              variant="default"
+              subtitleVariant="muted"
+              subtitleSize="xs"
+              className="text-primary"
+              subtitle={
+                <p className="max-w-md text-sm text-muted-foreground">
+                  Manage authors who can write and be attributed to posts.{' '} <br />
+                  <span className="cursor-pointer hover:underline">
+                    Learn more
+                  </span>
+                </p>
+              }
+            >
+              <p className="text-2xl">Authors</p>
+            </Heading>
           </div>
+          <Button onClick={() => setIsAddDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Author
+          </Button>
         </div>
       </div>
 
       {/* Authors Table */}
-      <CardTitle className="flex items-center justify-between mb-2 ml-1">
-        <span>{authors.length} Authors</span>
-      </CardTitle>
-      <Card className="p-0">
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted">
-                <TableHead>Author</TableHead>
-                <TableHead>Posts</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {authors.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={2}
-                    className="text-center py-8 text-gray-500"
-                  >
-                    No authors yet. Create your first author to start
-                    attributing blog posts.
-                  </TableCell>
+      <div>
+        <CardTitle className="flex items-center justify-between ml-8 mb-3">
+          <span className="text-sm">{authors.length} <span className='text-muted-foreground font-medium '>Authors</span></span>
+        </CardTitle>
+        <Card className="p-0 shadow-none border-none">
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted">
+                  <TableHead className='pl-8'>Author</TableHead>
+                  <TableHead>Posts</TableHead>
                 </TableRow>
-              ) : (
-                authors.map((author) => (
-                  <TableRow key={author.id}>
-                    <TableCell>
-                      <div className="flex items-center space-x-3">
-                        <Avatar className="w-8 h-8">
-                          <AvatarImage src={author.image || ''} />
-                          <AvatarFallback className="text-sm">
-                            {author.name[0].toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex items-center space-x-2">
-                          <span className="font-medium">{author.name}</span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">
-                          {author.posts} Posts
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="rounded-xl text-gray-600 hover:text-gray-800"
-                          >
-                            View Posts
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="rounded-xl text-gray-600 hover:text-gray-800"
-                            onClick={() => handleEditClick(author)}
-                          >
-                            Edit
-                          </Button>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                className="text-destructive"
-                                onClick={() => handleDeleteClick(author)}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </div>
+              </TableHeader>
+              <TableBody>
+                {authors.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={2}
+                      className="text-center py-8 text-gray-500"
+                    >
+                      No authors yet. Create your first author to start
+                      attributing blog posts.
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                ) : (
+                  authors.map((author) => (
+                    <TableRow key={author.id}>
+                      <TableCell className='pl-8'>
+                        <div className="flex items-center space-x-3">
+                          <Avatar className="w-8 h-8">
+                            <AvatarImage src={author.image || ''} />
+                            <AvatarFallback className="text-sm">
+                              {author.name[0].toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex items-center space-x-2">
+                            <span className="font-medium">{author.name}</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">
+                            {author.posts}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                            >
+                              View Posts
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditClick(author)}
+                            >
+                              Edit
+                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                  className="text-destructive"
+                                  onClick={() => handleDeleteClick(author)}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Add Author Dialog */}
       <AuthorDialog

@@ -32,7 +32,7 @@ async function PagesContent({ workspaceSlug }: { workspaceSlug: string }) {
   }
 
   return (
-    <div className="p-6">
+    <div className="px-4 py-6 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">My Pages</h1>

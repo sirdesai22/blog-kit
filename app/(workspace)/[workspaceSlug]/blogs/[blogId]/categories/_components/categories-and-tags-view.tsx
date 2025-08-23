@@ -136,10 +136,10 @@ export function CategoriesAndTagsView({
                   subtitleSize="xs"
                   subtitle={
                     <div className="">
-                      <p className="text-xs">
+                      <p className="text-sm">
                         Organize your blog content with categories and tags
                       </p>
-                      <p className="text-xs">
+                      <p className="text-sm">
                         to help readers find what they&apos;re looking for.
                       </p>
                     </div>

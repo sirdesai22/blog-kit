@@ -1,89 +1,91 @@
-import { Icons } from './icons';
 import {
-  AudioWaveform,
-  Blocks,
-  Calendar,
-  Command,
+  Layers,
+  LayoutTemplate,
   Home,
-  Inbox,
-  MessageCircleQuestion,
-  Search,
+  Calendar,
   Settings2,
-  Sparkles,
-  Trash2,
+  Box,
+  Users,
+  CreditCard,
+  HelpCircle,
+  RefreshCw,
+  MessageSquare,
   Gauge,
   FileText,
   FolderOpen,
-  Users,
   ClipboardList,
   Target,
-  Box,
   Palette,
   Globe,
   Puzzle,
-  Settings,
+  Command,
 } from 'lucide-react';
 
 export const workspaceSidebarData = {
   navMain: [
     {
-      title: 'My Pages',
+      title: 'Pages',
       url: '#',
-      icon: Icons.layers,
-    },
-    {
-      title: 'Templates',
-      url: '#',
-      icon: Icons.layoutTemplate,
+      icon: Layers,
     },
     {
       title: 'Widgets',
       url: '#',
       icon: Home,
     },
+    {
+      title: 'Templates',
+      url: '#',
+      icon: LayoutTemplate,
+    },
   ],
   navSecondary: [
     {
-      title: 'Calendar',
+      title: 'Domain',
       url: '#',
-      icon: Calendar,
+      icon: Globe,
     },
     {
-      title: 'Settings',
+      title: 'Brand Settings',
       url: '#',
       icon: Settings2,
     },
     {
-      title: 'Templates',
+      title: 'Global Header',
       url: '#',
-      icon: Blocks,
+      icon: Box,
     },
     {
-      title: 'Trash',
+      title: 'Global Footer',
       url: '#',
-      icon: Trash2,
+      icon: Box,
     },
     {
-      title: 'Help',
+      title: 'Team',
       url: '#',
-      icon: MessageCircleQuestion,
+      icon: Users,
+    },
+    {
+      title: 'Billing',
+      url: '#',
+      icon: CreditCard,
     },
   ],
   navSupport: [
     {
-      title: 'User Guide',
+      title: 'Help Center',
       url: '#',
-      icon: Calendar,
+      icon: HelpCircle,
     },
     {
-      title: "What's New",
+      title: 'Changelog',
       url: '#',
-      icon: Calendar,
+      icon: RefreshCw,
     },
     {
       title: 'Feedback',
       url: '#',
-      icon: Calendar,
+      icon: MessageSquare,
     },
   ],
 };
@@ -100,37 +102,25 @@ export const pageManagementSidebarData = {
       url: '#',
       icon: FileText,
       items: [
-        {
-          title: 'All Posts',
-          url: '#',
-        },
-        {
-          title: 'Published',
-          url: 'published',
-        },
-        {
-          title: 'Drafts',
-          url: 'drafts',
-        },
-        {
-          title: 'Scheduled',
-          url: 'scheduled',
-        },
+        { title: 'All Posts', url: '#' },
+        { title: 'Published', url: 'published' },
+        { title: 'Drafts', url: 'drafts' },
+        { title: 'Scheduled', url: 'scheduled' },
       ],
     },
     {
       title: 'Posts',
-      url: '#', // Will resolve to /{workspaceSlug}/blogs/{blogId}
+      url: '#',
       icon: FileText,
     },
     {
       title: 'Categories',
-      url: 'categories', // Will resolve to /{workspaceSlug}/blogs/{blogId}/categories
+      url: 'categories',
       icon: FolderOpen,
     },
     {
       title: 'Authors',
-      url: 'authors', // Will resolve to /{workspaceSlug}/blogs/{blogId}/authors
+      url: 'authors',
       icon: Users,
     },
     {
@@ -156,36 +146,14 @@ export const pageManagementSidebarData = {
       icon: Palette,
     },
     {
-      title: 'Domain',
+      title: 'Integrations',
       url: '#',
       icon: Globe,
     },
     {
-      title: 'Integrations',
-      url: '#',
-      icon: Puzzle,
-    },
-    {
       title: 'Settings',
       url: '#',
-      icon: Settings,
-    },
-  ],
-  navSupport: [
-    {
-      title: 'User Guide',
-      url: '#',
-      icon: Calendar,
-    },
-    {
-      title: "What's New",
-      url: '#',
-      icon: Calendar,
-    },
-    {
-      title: 'Feedback',
-      url: '#',
-      icon: Calendar,
+      icon: Puzzle,
     },
   ],
 };
