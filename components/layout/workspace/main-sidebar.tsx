@@ -39,7 +39,7 @@ export function MainSidebar({ sections = [], ...props }: MainSidebarProps) {
 
   return (
     <Sidebar
-      className="top-[calc(var(--header-height)-7px)] h-[calc(100svh-var(--header-height)+7px)]!"
+      className="top-[calc(var(--header-height)-15px)] h-[calc(100svh-var(--header-height)+15px)]!"
       {...props}
     >
       <SidebarHeader>

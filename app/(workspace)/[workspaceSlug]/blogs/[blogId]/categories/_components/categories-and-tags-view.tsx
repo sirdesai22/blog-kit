@@ -108,13 +108,13 @@ export function CategoriesAndTagsView({
                     variant={activeTab === 'categories' ? 'default' : 'ghost'}
                     size="sm"
                     onClick={() => setActiveTab('categories')}
-                    className={`w-28 flex items-center justify-center gap-2 text-normal transition-all duration-200 rounded-md ${
+                    className={`w-28 flex items-center justify-center gap-2 text-normal transition-all duration-200 rounded-md  ${
                       activeTab === 'categories'
                         ? 'bg-card shadow-sm hover:bg-card/80'
                         : 'bg-transparent hover:bg-accent cursor-pointer'
                     }`}
                   >
-                    Categories
+                    <p className="text-main">Categories</p>
                   </Button>
                   <Button
                     variant={activeTab === 'tags' ? 'default' : 'ghost'}
@@ -126,7 +126,7 @@ export function CategoriesAndTagsView({
                         : ' bg-transparent hover:bg-accent cursor-pointer'
                     }`}
                   >
-                    Tags
+                    <p className="text-main">Tags</p>
                   </Button>
                 </div>
                 <Heading

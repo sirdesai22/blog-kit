@@ -51,7 +51,7 @@ export function SiteHeader() {
 
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background px-3 py-2">
+    <header className="sticky top-0 z-50 w-full border-b bg-background px-3 py-1">
       <div className="flex h-[--header-height] items-center justify-between px-[--header-horizontal-padding]">
         <div className="flex flex-1 items-center">
           <BreadcrumbNav />
