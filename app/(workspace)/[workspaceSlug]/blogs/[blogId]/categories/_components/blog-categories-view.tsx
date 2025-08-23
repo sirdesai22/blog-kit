@@ -244,7 +244,7 @@ export function BlogCategoriesView({
 
   return (
     <>
-      <CardTitle className="text-sm ml-8 mb-4">
+      <CardTitle className="text-sm ml-lg mb-md">
         {categories.length}{" "}
         <span className="text-muted-foreground font-medium">Categories</span>
       </CardTitle>

@@ -105,7 +105,7 @@ function SortableTableRow({
       {...attributes}
       {...listeners}
     >
-      <TableCell className="font-medium pl-8">
+      <TableCell className="font-medium pl-lg">
         <Link
           href={`/blog/tags/${tag.name}`}
           passHref
@@ -236,7 +236,7 @@ export function BlogTagsView({
 
   return (
     <>
-      <CardTitle className="text-sm ml-8 mb-3">
+      <CardTitle className="text-sm ml-lg mb-md">
         {tags.length} <span className="text-muted-foreground font-medium">Tags</span>
       </CardTitle>
       <div className="overflow-hidden">
@@ -249,7 +249,7 @@ export function BlogTagsView({
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50 hover:bg-muted/50">
-                 <TableHead className="pl-8">Tag</TableHead>
+                 <TableHead className="pl-lg">Tag</TableHead>
                   <TableHead>Posts</TableHead>
                   <TableHead>Traffic</TableHead>
                   <TableHead>Leads</TableHead>

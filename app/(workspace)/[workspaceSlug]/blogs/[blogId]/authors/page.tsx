@@ -205,7 +205,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
   return (
     <div className="bg-background">
       {/* Header */}
-      <div className="px-4 py-6 sm:px-6 lg:px-8">
+      <div className="px-4 py-6 sm:px-md lg:px-lg">
           <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-start">
           <div>
             <Heading
@@ -235,7 +235,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
 
       {/* Authors Table */}
       <div>
-        <CardTitle className="flex items-center justify-between ml-8 mb-3">
+        <CardTitle className="flex items-center justify-between ml-lg mb-md">
           <span className="text-sm">{authors.length} <span className='text-muted-foreground font-medium '>Authors</span></span>
         </CardTitle>
         <Card className="p-0 shadow-none border-none">
@@ -243,7 +243,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted">
-                  <TableHead className='pl-8'>Author</TableHead>
+                  <TableHead className='pl-lg'>Author</TableHead>
                   <TableHead>Posts</TableHead>
                 </TableRow>
               </TableHeader>
@@ -261,7 +261,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
                 ) : (
                   authors.map((author) => (
                     <TableRow key={author.id}>
-                      <TableCell className='pl-8'>
+                      <TableCell className='pl-lg'>
                         <div className="flex items-center space-x-3">
                           <Avatar className="w-8 h-8">
                             <AvatarImage src={author.image || ''} />

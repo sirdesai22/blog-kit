@@ -35,7 +35,7 @@ export function BlogTableContent({
   if (posts.length === 0) {
     return (
       <div className="py-12 text-center">
-        <div className="mx-auto max-w-md">
+        <div className="mx-auto">
           <Heading
             level="h3"
             variant="default"

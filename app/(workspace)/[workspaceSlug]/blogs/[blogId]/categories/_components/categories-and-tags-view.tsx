@@ -100,7 +100,7 @@ export function CategoriesAndTagsView({
       <div className="flex items-center justify-between">
         <div className="w-full">
           <div className=" mx-auto">
-            <div className="flex items-start w-full justify-between flex-col md:flex-row px-4 py-6 sm:px-6 lg:px-8">
+            <div className="flex items-start w-full justify-between flex-col md:flex-row px-4 py-6 sm:px-md lg:px-lg">
               <div className="space-y-4 ">
                 {/* Tab Navigation */}
                 <div className="flex items-center bg-muted p-1 rounded-lg w-fit">

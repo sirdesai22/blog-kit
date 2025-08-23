@@ -33,10 +33,10 @@ export function BlogTableFilters({
   postsCount,
 }: BlogTableFiltersProps) {
   return (
-    <div className="px-4 py-6 sm:px-6 lg:px-8 pt-0 flex flex-wrap items-center gap-2">
+    <div className="px-4 py-6 sm:px-md lg:px-lg pt-0 flex flex-wrap items-center gap-2">
       <div className="flex items-center gap-4">
         <div className="text-sm font-medium">
-          {postsCount} Posts
+          {postsCount} <span className='text-muted-foreground font-medium'>Posts</span>
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />

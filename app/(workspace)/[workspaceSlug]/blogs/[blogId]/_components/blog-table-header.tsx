@@ -22,7 +22,7 @@ export function BlogTableHeader({
 
   return (
     <div className="bg-background">
-      <div className="px-4 py-6 sm:px-6 lg:px-8">
+      <div className="px-4 py-6 sm:px-md lg:px-lg">
         <div className="flex flex-col items-start justify-between gap-4 md:flex-row ">
           <div>
             <Heading
@@ -32,7 +32,7 @@ export function BlogTableHeader({
               subtitleSize="xs"
               className='text-primary'
               subtitle={
-                <p className="max-w-md text-sm text-muted-foreground">
+                <p className=" text-sm text-muted-foreground">
                   Create, edit, and pin posts.{' '} <br />
                   <span className="cursor-pointer hover:underline">
                     Watch tutorial (2 mins)

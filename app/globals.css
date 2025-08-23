@@ -45,6 +45,11 @@
   --color-muted-dark: var(--muted-dark);
   --height-header: var(--header-height);
   --padding-header-horizontal: var(--header-horizontal-padding);
+
+  --spacing-xs: var(--gap-xs);
+  --spacing-sm: var(--gap-sm);
+  --spacing-md: var(--gap-md);
+  --spacing-lg: var(--gap-lg);
 }
 
 :root {

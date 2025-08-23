@@ -298,13 +298,13 @@ export function AuthorDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-hidden p-0">
-        <DialogHeader className="px-6 pt-6 pb-2">
+        <DialogHeader className="px-lg pt-6 pb-2">
           <DialogTitle className="text-lg font-semibold">
             {isEdit ? 'Edit Author' : 'Create Author'}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="px-6 pb-6 overflow-y-auto max-h-[calc(90vh-210px)]">
+        <div className="px-lg pb-6 overflow-y-auto max-h-[calc(90vh-210px)]">
           {/* Profile Image */}
           <div className="flex flex-col items-center space-y-4 mb-6">
             <Avatar className="w-20 h-20">
@@ -453,7 +453,7 @@ export function AuthorDialog({
           </div>
         </div>
 
-        <div className="px-6 py-4 flex items-center justify-between border-t">
+        <div className="px-lg py-4 flex items-center justify-between border-t">
           <Button
             variant="outline"
             onClick={() => handleOpenChange(false)}

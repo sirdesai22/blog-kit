@@ -79,7 +79,7 @@ export function SiteHeader() {
             Feedback
           </Button>
           <TooltipProvider>
-            <div className="flex items-center gap-[--gap-xs]  mx-2 rounded-full  ">
+            <div className="flex items-center gap-[--gap-xs] mx-2 rounded-full  ">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
