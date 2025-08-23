@@ -10,7 +10,7 @@ import { Editor, EditorContainer } from '../../ui/editor';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BlogEditorToolbar } from '@/components/blogs/blog-editor-toolbar';
+import { BlogEditorToolbar } from '@/modules/blogs/components/blog-editor-toolbar';
 
 interface PlateEditorProps {
   initialValue?: any[];

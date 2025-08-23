@@ -5,7 +5,7 @@ import { BlogTableHeader } from './blog-table-header';
 import { BlogTableFilters } from './blog-table-filters';
 import { BlogTableContent } from './blog-table-content';
 import { BlogPost } from '@/types/blog';
-import { BlogTableProvider, useBlogTable } from '@/contexts/BlogTableContext';
+import { BlogTableProvider, useBlogTable } from '@/modules/blogs/contexts/BlogTableContext';
 
 interface BlogTableViewProps {
   workspaceSlug: string;

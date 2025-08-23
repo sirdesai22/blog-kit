@@ -33,7 +33,7 @@ import {
   addAuthor,
   updateAuthor,
   deleteAuthor,
-} from '@/lib/actions/workspace-actions';
+} from '@/modules/workspace/actions/workspace-actions';
 import { AuthorDialog } from './_components/author-dialog';
 
 interface Author {

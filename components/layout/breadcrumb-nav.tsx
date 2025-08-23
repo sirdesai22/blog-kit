@@ -11,9 +11,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { WorkSpaceSwitcher } from "../workspace/workspace-switcher";
+import { WorkSpaceSwitcher } from "../../modules/workspace/components/workspace-switcher";
 import Link from "next/link";
-import { BlogSwitcher } from "../workspace/blogs-switcher";
+import { BlogSwitcher } from "../../modules/workspace/components/blogs-switcher";
 
 // Interface for a breadcrumb item
 interface BreadcrumbItem {

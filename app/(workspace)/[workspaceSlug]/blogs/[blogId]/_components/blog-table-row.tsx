@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { BlogPost } from '@/types/blog';
-import { useBlogTable } from '@/contexts/BlogTableContext';
+import { useBlogTable } from '@/modules/blogs/contexts/BlogTableContext';
 import { cn } from '@/lib/utils';
 
 interface BlogTableRowProps {

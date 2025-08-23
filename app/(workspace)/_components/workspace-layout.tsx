@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
 import { SiteHeader } from '@/components/layout/header';
-import { MainSidebar } from '@/components/layout/workspace/main-sidebar';
+import { MainSidebar } from '@/modules/workspace/layouts/main-sidebar';
 import { workspaceSidebarData, pageManagementSidebarData } from '@/lib/data';
 
 interface WorkspaceLayoutProps {

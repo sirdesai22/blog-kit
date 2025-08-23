@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
-import { getWorkspaceWithPages } from '@/lib/actions/workspace-actions';
+import { getWorkspaceWithPages } from '@/modules/workspace/actions/workspace-actions';
 import { PageCard } from '../_components/page-card';
 import { NewPageButton } from '../_components/new-page-button';
 

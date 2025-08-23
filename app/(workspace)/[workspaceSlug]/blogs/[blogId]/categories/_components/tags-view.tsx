@@ -34,7 +34,7 @@ import {
   deleteBlogTag,
   reorderBlogTags,
   updateBlogTag,
-} from '@/lib/actions/tag-actions';
+} from '@/modules/blogs/actions/tag-actions';
 
 // Icons
 import { ExternalLink, MoreVertical, Trash2 } from 'lucide-react';

@@ -34,7 +34,7 @@ import {
   deleteBlogCategory,
   reorderBlogCategories,
   updateBlogCategory,
-} from "@/lib/actions/workspace-actions";
+} from "@/modules/workspace/actions/workspace-actions";
 
 // Icons
 import { ExternalLink, GripVertical, MoreVertical, Trash2 } from "lucide-react";

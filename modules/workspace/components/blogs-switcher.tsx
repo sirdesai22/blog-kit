@@ -13,8 +13,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 // Replace these with your real hooks later
-import { useUserBlogs, useCurrentBlog } from '@/lib/hooks/use-blogs';
-import { useBlogStore } from '@/lib/stores/blogs-store';
+import { useUserBlogs, useCurrentBlog } from '@/modules/blogs/hooks/use-blogs';
+import { useBlogStore } from '@/modules/blogs/stores/blogs-store';
 
 export function BlogSwitcher() {
   const params = useParams();

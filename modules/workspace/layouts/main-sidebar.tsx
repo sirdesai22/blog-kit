@@ -8,8 +8,8 @@ import {
   SidebarHeader,
   SidebarRail,
 } from '@/components/ui/sidebar';
-import { NavMain } from '@/components/layout/workspace/navmain';
-import { NavSecondary } from '@/components/layout/workspace/navsecondary';
+import { NavMain } from '@/modules/workspace/layouts/navmain';
+import { NavSecondary } from '@/modules/workspace/layouts/navsecondary';
 import { LucideIcon } from 'lucide-react';
 
 // Define a type for a single navigation item

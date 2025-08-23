@@ -15,8 +15,8 @@ import {
 import {
   useUserWorkspaces,
   useCurrentWorkspace,
-} from '@/lib/hooks/use-workspaces';
-import { useWorkspaceStore } from '@/lib/stores/workspace-store';
+} from '@/modules/workspace/hooks/use-workspaces';
+import { useWorkspaceStore } from '@/modules/workspace/stores/workspace-store';
 
 export function WorkSpaceSwitcher() {
   const params = useParams();

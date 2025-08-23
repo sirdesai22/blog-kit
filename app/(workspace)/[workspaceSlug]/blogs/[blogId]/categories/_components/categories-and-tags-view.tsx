@@ -17,8 +17,8 @@ import {
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { addBlogCategory } from '@/lib/actions/workspace-actions';
-import { addBlogTag } from '@/lib/actions/tag-actions';
+import { addBlogCategory } from '@/modules/workspace/actions/workspace-actions';
+import { addBlogTag } from '@/modules/blogs/actions/tag-actions';
 import { useRouter } from 'next/navigation';
 
 interface Category {
