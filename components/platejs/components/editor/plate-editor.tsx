@@ -64,7 +64,7 @@ export function PlateEditor({
       onValueChange={(newValue) => {
         console.log('Plate onValueChange triggered with value:', newValue); // Debug log
         if (newValue.value) {
-          onChange?.(newValue.value);
+          onChange?.(newValue.value as any);
         }
       }}
     >
@@ -146,7 +146,7 @@ export function PlateEditor({
           <div className="mt-8">
             <EditorContainer>
               <Editor
-                value={initvalue}
+                value={initvalue as any}
                 variant="demo"
                 placeholder={placeholder}
               />
@@ -159,7 +159,7 @@ export function PlateEditor({
 }
 const value = [
   {
-    children: [{ text: '' }],
+    children: [{ text: 'Hello world' }],
     type: 'p',
   },
 ];

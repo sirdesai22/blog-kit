@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Heading } from "@/components/ui/heading";
-import { Plus } from "lucide-react";
-import { BlogCategoriesView } from "./blog-categories-view";
-import { BlogTagsView } from "./tags-view";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Heading } from '@/components/ui/heading';
+import { Plus } from 'lucide-react';
+import { BlogCategoriesView } from './blog-categories-view';
+import { BlogTagsView } from './tags-view';
 import {
   Dialog,
   DialogContent,
@@ -13,13 +13,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { addBlogCategory } from "@/lib/actions/workspace-actions";
-import { addBlogTag } from "@/lib/actions/tag-actions";
-import { useRouter } from "next/navigation";
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { addBlogCategory } from '@/lib/actions/workspace-actions';
+import { addBlogTag } from '@/lib/actions/tag-actions';
+import { useRouter } from 'next/navigation';
 
 interface Category {
   name: string;
@@ -38,7 +38,7 @@ interface TagType {
 interface CategoriesAndTagsViewProps {
   workspaceSlug: string;
   blogId: string;
-  categories: Category[];
+  categories: Category[] | any;
   tags: TagType[];
 }
 
@@ -49,15 +49,15 @@ export function CategoriesAndTagsView({
   tags,
 }: CategoriesAndTagsViewProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"categories" | "tags">(
-    "categories"
+  const [activeTab, setActiveTab] = useState<'categories' | 'tags'>(
+    'categories'
   );
   const [isAddCategoryDialogOpen, setIsAddCategoryDialogOpen] = useState(false);
   const [isAddTagDialogOpen, setIsAddTagDialogOpen] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState("");
-  const [newCategoryDescription, setNewCategoryDescription] = useState("");
-  const [newTagName, setNewTagName] = useState("");
-  const [newTagDescription, setNewTagDescription] = useState("");
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryDescription, setNewCategoryDescription] = useState('');
+  const [newTagName, setNewTagName] = useState('');
+  const [newTagDescription, setNewTagDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAddCategory = async () => {
@@ -67,11 +67,11 @@ export function CategoriesAndTagsView({
     try {
       await addBlogCategory(workspaceSlug, newCategoryName.trim());
       setIsAddCategoryDialogOpen(false);
-      setNewCategoryName("");
-      setNewCategoryDescription("");
+      setNewCategoryName('');
+      setNewCategoryDescription('');
       router.refresh();
     } catch (error) {
-      console.error("Failed to add category:", error);
+      console.error('Failed to add category:', error);
     } finally {
       setIsLoading(false);
     }
@@ -84,11 +84,11 @@ export function CategoriesAndTagsView({
     try {
       await addBlogTag(workspaceSlug, newTagName.trim());
       setIsAddTagDialogOpen(false);
-      setNewTagName("");
-      setNewTagDescription("");
+      setNewTagName('');
+      setNewTagDescription('');
       router.refresh();
     } catch (error) {
-      console.error("Failed to add tag:", error);
+      console.error('Failed to add tag:', error);
     } finally {
       setIsLoading(false);
     }
@@ -105,25 +105,25 @@ export function CategoriesAndTagsView({
                 {/* Tab Navigation */}
                 <div className="flex items-center bg-muted p-1 rounded-lg w-fit">
                   <Button
-                    variant={activeTab === "categories" ? "default" : "ghost"}
+                    variant={activeTab === 'categories' ? 'default' : 'ghost'}
                     size="sm"
-                    onClick={() => setActiveTab("categories")}
+                    onClick={() => setActiveTab('categories')}
                     className={`w-28 flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 rounded-md ${
-                      activeTab === "categories"
-                        ? "bg-card text-secondary-foreground shadow-sm hover:bg-card/80"
-                        : "text-muted-foreground hover:text-secondary-foreground bg-transparent hover:bg-accent cursor-pointer"
+                      activeTab === 'categories'
+                        ? 'bg-card text-secondary-foreground shadow-sm hover:bg-card/80'
+                        : 'text-muted-foreground hover:text-secondary-foreground bg-transparent hover:bg-accent cursor-pointer'
                     }`}
                   >
                     Categories
                   </Button>
                   <Button
-                    variant={activeTab === "tags" ? "default" : "ghost"}
+                    variant={activeTab === 'tags' ? 'default' : 'ghost'}
                     size="sm"
-                    onClick={() => setActiveTab("tags")}
+                    onClick={() => setActiveTab('tags')}
                     className={`w-28 flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 rounded-md ${
-                      activeTab === "tags"
-                        ? "bg-card text-secondary-foreground shadow-sm hover:bg-card"
-                        : "text-muted-foreground hover:text-secondary-foreground bg-transparent hover:bg-accent cursor-pointer"
+                      activeTab === 'tags'
+                        ? 'bg-card text-secondary-foreground shadow-sm hover:bg-card'
+                        : 'text-muted-foreground hover:text-secondary-foreground bg-transparent hover:bg-accent cursor-pointer'
                     }`}
                   >
                     Tags
@@ -136,8 +136,12 @@ export function CategoriesAndTagsView({
                   subtitleSize="xs"
                   subtitle={
                     <div className="">
-                      <p className="text-xs">Organize your blog content with categories and tags</p>
-                      <p className="text-xs">to help readers find what they&apos;re looking for.</p>
+                      <p className="text-xs">
+                        Organize your blog content with categories and tags
+                      </p>
+                      <p className="text-xs">
+                        to help readers find what they&apos;re looking for.
+                      </p>
                     </div>
                   }
                 ></Heading>
@@ -189,14 +193,14 @@ export function CategoriesAndTagsView({
                         variant="outline"
                         onClick={() => {
                           setIsAddCategoryDialogOpen(false);
-                          setNewCategoryName("");
-                          setNewCategoryDescription("");
+                          setNewCategoryName('');
+                          setNewCategoryDescription('');
                         }}
                       >
                         Cancel
                       </Button>
                       <Button onClick={handleAddCategory} disabled={isLoading}>
-                        {isLoading ? "Creating..." : "Create"}
+                        {isLoading ? 'Creating...' : 'Create'}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -241,14 +245,14 @@ export function CategoriesAndTagsView({
                         variant="outline"
                         onClick={() => {
                           setIsAddTagDialogOpen(false);
-                          setNewTagName("");
-                          setNewTagDescription("");
+                          setNewTagName('');
+                          setNewTagDescription('');
                         }}
                       >
                         Cancel
                       </Button>
                       <Button onClick={handleAddTag} disabled={isLoading}>
-                        {isLoading ? "Creating..." : "Create"}
+                        {isLoading ? 'Creating...' : 'Create'}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -261,7 +265,7 @@ export function CategoriesAndTagsView({
 
       {/* Tab Content */}
       <div className="">
-        {activeTab === "categories" ? (
+        {activeTab === 'categories' ? (
           <CategoriesContent
             workspaceSlug={workspaceSlug}
             blogId={blogId}

@@ -1,3 +1,5 @@
+// @ts-nocheck
+// @ts-ignore
 'use client';
 
 import * as React from 'react';

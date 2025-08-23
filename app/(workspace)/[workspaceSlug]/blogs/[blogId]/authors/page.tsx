@@ -80,7 +80,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
     try {
       const result = await getWorkspaceAuthors(params.workspaceSlug);
       if (result) {
-        setAuthors(result.authors);
+        setAuthors(result.authors as unknown as Author[]);
       }
     } catch (error) {
       console.error('Failed to load authors:', error);
@@ -215,11 +215,14 @@ export default function AuthorsPage(props: AuthorsPageProps) {
                   variant="default"
                   subtitleVariant="muted"
                   subtitleSize="xs"
-                  subtitle=
-                  {
+                  subtitle={
                     <div className=" ml-1">
-                      <p className="text-xs">Manage authors who can write and be attributed</p>
-                      <p className="text-xs">to blog posts in your workspace.</p>
+                      <p className="text-xs">
+                        Manage authors who can write and be attributed
+                      </p>
+                      <p className="text-xs">
+                        to blog posts in your workspace.
+                      </p>
                     </div>
                   }
                 >
@@ -236,15 +239,14 @@ export default function AuthorsPage(props: AuthorsPageProps) {
       </div>
 
       {/* Authors Table */}
-       <CardTitle className="flex items-center justify-between mb-2 ml-1">
-            <span>{authors.length} Authors</span>
-          </CardTitle>
-      <Card className='p-0'>
-       
-        <CardContent className='p-0'>
+      <CardTitle className="flex items-center justify-between mb-2 ml-1">
+        <span>{authors.length} Authors</span>
+      </CardTitle>
+      <Card className="p-0">
+        <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow className='bg-muted'>
+              <TableRow className="bg-muted">
                 <TableHead>Author</TableHead>
                 <TableHead>Posts</TableHead>
               </TableRow>

@@ -201,7 +201,9 @@ export async function getWorkspaceBlogCategories(slug: string) {
   }
 
   // Get categories and their usage stats
-  const categories = workspace.config?.blogCategories || [];
+  const categories = Array.isArray(workspace.config?.blogCategories)
+    ? workspace.config.blogCategories
+    : [];
   const categoryStats = categories.map((category) => {
     const posts = workspace.pages.filter(
       (page) => page.category === category
@@ -256,7 +258,14 @@ export async function addBlogCategory(slug: string, categoryName: string) {
   const currentCategories = workspace.config?.blogCategories || [];
 
   // Check if category already exists
-  if (currentCategories.includes(categoryName)) {
+  if (
+    Array.isArray(currentCategories) &&
+    currentCategories.some(
+      (cat) =>
+        typeof cat === 'string' &&
+        cat.trim().toLowerCase() === categoryName.trim().toLowerCase()
+    )
+  ) {
     throw new Error('Category already exists');
   }
 
@@ -267,7 +276,9 @@ export async function addBlogCategory(slug: string, categoryName: string) {
         id: workspace.config.id,
       },
       data: {
-        blogCategories: [...currentCategories, categoryName],
+        blogCategories: Array.isArray(currentCategories)
+          ? [...currentCategories, categoryName]
+          : [categoryName],
       },
     });
   } else {
@@ -318,7 +329,10 @@ export async function updateBlogCategory(
 
   const currentCategories = workspace.config.blogCategories || [];
 
-  if (!currentCategories.includes(oldName)) {
+  if (
+    !Array.isArray(currentCategories) ||
+    !currentCategories.includes(oldName)
+  ) {
     throw new Error('Category not found');
   }
 
@@ -386,7 +400,10 @@ export async function deleteBlogCategory(slug: string, categoryName: string) {
 
   const currentCategories = workspace.config.blogCategories || [];
 
-  if (!currentCategories.includes(categoryName)) {
+  if (
+    !Array.isArray(currentCategories) ||
+    !currentCategories.includes(categoryName)
+  ) {
     throw new Error('Category not found');
   }
 

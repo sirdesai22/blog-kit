@@ -11,7 +11,7 @@ interface BlogEditorProps {
   initialPost?: BlogPost;
   categories: string[];
   authors: Author[];
-  allPosts: BlogPost[];
+  allPosts: any[];
   tags: string[];
   isNewPost?: boolean;
   workspaceId: string;

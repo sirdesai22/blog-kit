@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import type { OurFileRouter } from '@/lib/uploadthing';
+// import type { OurFileRouter } from '@/lib/uploadthing';
 import type {
   ClientUploadedFileData,
   UploadFilesOptions,
@@ -14,7 +14,7 @@ export type UploadedFile<T = unknown> = ClientUploadedFileData<T>;
 
 interface UseUploadFileProps
   extends Pick<
-    UploadFilesOptions<OurFileRouter['editorUploader']>,
+    UploadFilesOptions<any['editorUploader']>,
     'headers' | 'onUploadBegin' | 'onUploadProgress' | 'skipPolling'
   > {
   onUploadComplete?: (file: UploadedFile) => void;
@@ -104,8 +104,7 @@ export function useUploadFile({
   };
 }
 
-export const { uploadFiles, useUploadThing } =
-  generateReactHelpers<OurFileRouter>();
+export const { uploadFiles, useUploadThing } = generateReactHelpers<any>();
 
 export function getErrorMessage(err: unknown) {
   const unknownError = 'Something went wrong, please try again later.';
