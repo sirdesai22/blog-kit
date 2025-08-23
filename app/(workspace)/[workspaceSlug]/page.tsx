@@ -35,7 +35,7 @@ async function PagesContent({ workspaceSlug }: { workspaceSlug: string }) {
     <div className="px-4 py-6 sm:px-md lg:px-lg">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">My Pages</h1>
+        <p className="text-header">My Pages</p>
         <NewPageButton workspaceSlug={workspaceSlug} />
       </div>
 

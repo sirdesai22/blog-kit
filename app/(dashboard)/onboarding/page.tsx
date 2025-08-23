@@ -92,7 +92,7 @@ export default function OnboardingPage() {
       <SiteHeader />
       {/* Main Content */}
       <div className="flex items-center justify-center px-4 py-8">
-        <div className="max-w-lg w-full">
+        <div className="max-w-xl w-full">
           <Card className="border-none shadow-none">
             <CardHeader className="">
               <h1 className="text-3xl font-bold text-primary">

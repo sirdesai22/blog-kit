@@ -52,7 +52,7 @@ export function BlogSwitcher() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto p-1 text-sm font-medium hover:bg-transparent hover:cursor-pointer focus-visible:ring-0"
+          className="h-auto text-normal hover:bg-transparent hover:cursor-pointer focus-visible:ring-0"
         >
           <span>{displayBlog?.title || 'Select Blog'}</span>
           <ChevronsUpDown className="ml-2 h-4 w-4 text-muted-foreground" />
@@ -73,8 +73,8 @@ export function BlogSwitcher() {
                 {blog.title.charAt(0).toUpperCase()}
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-medium">{blog.title}</span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-normal ">{blog.title}</span>
+                <span className="text-small ">
                   {blog.status || 'draft'}
                 </span>
               </div>
@@ -85,7 +85,7 @@ export function BlogSwitcher() {
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={handleCreateBlog} className="cursor-pointer">
           <Plus className="mr-2 h-4 w-4" />
-          <span>Create new blog</span>
+          <span className='text-normal'>Create new blog</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

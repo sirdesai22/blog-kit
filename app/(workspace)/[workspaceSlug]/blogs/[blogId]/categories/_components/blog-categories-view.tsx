@@ -105,7 +105,7 @@ function SortableTableRow({
           {...listeners}
           className="cursor-grab rounded p-1 hover:bg-accent flex items-center justify-center"
         >
-          <GripVertical className="h-5 w-5 text-muted-foreground" />
+          <GripVertical className="h-4 w-4 text-normal-muted" />
         </div>
       </TableCell>
       <TableCell className="font-medium">
@@ -114,8 +114,8 @@ function SortableTableRow({
           passHref
           className="flex items-center gap-1.5 hover:underline"
         >
-          <span className="text-foreground">{category.name}</span>
-          <ExternalLink className="h-4 w-4 text-muted-foreground" />
+          <span className="text-normal">{category.name}</span>
+          <ExternalLink className="h-4 w-4 text-normal" />
         </Link>
       </TableCell>
       <TableCell>{category.posts}</TableCell>
@@ -131,17 +131,16 @@ function SortableTableRow({
         </span></TableCell>
       <TableCell className="sticky right-0 bg-background group-hover:bg-accent/50">
         <div className="flex items-center justify-end gap-2">
-          <Button variant="outline" size="sm" className="text-muted-foreground">
+          <Button variant="outline" size="sm"  className="text-normal-muted">
             Manage featured posts
           </Button>{" "}
-          <Button variant="outline" size="sm" className="text-muted-foreground">
+          <Button variant="outline" size="sm" className="text-normal-muted">
             View Posts
           </Button>
           <Button
             variant="outline"
             size="sm"
-            className="text-muted-foreground"
-            onClick={() => onEdit(category)}
+            onClick={() => onEdit(category)} className="text-normal-muted"
           >
             Edit
           </Button>
@@ -149,7 +148,7 @@ function SortableTableRow({
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">
                 <span className="sr-only">Open menu</span>
-                <MoreVertical className="h-4 w-4" />
+                <MoreVertical className="h-4 w-4 text-normal-muted" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -244,9 +243,9 @@ export function BlogCategoriesView({
 
   return (
     <>
-      <CardTitle className="text-sm ml-lg mb-md">
+      <CardTitle className="text-normal ml-lg mb-md">
         {categories.length}{" "}
-        <span className="text-muted-foreground font-medium">Categories</span>
+        <span className="text-small">Categories</span>
       </CardTitle>
       <div className="overflow-hidden">
         <div className="relative w-full overflow-x-auto">

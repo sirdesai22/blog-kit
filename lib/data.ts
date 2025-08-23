@@ -64,29 +64,21 @@ export const pageManagementSidebarData = [
     id: 'post-management',
     label: 'Post Management',
     items: [
-      { title: 'All Posts', url: '#', icon: FileText },
-      { title: 'Published', url: 'published', icon: FileText },
-      { title: 'Drafts', url: 'drafts', icon: FileText },
-      { title: 'Scheduled', url: 'scheduled', icon: FileText },
+      { title: 'Posts', url: '#', icon: FileText },
       { title: 'Categories', url: 'categories', icon: FolderOpen },
       { title: 'Authors', url: 'authors', icon: Users },
+      { title: 'Forms', url: 'forms', icon: ClipboardList },
+      { title: 'Leads', url: 'leads', icon: Target },
+      { title: 'Widgets', url: 'widgets', icon: Box },
     ],
   },
   {
-    id: 'other',
-    items: [
-      { title: 'Forms', url: '#', icon: ClipboardList },
-      { title: 'Leads', url: '#', icon: Target },
-      { title: 'Widgets', url: '#', icon: Box },
-    ],
-  },
-  {
-    id: 'configuration',
-    label: 'Configuration',
+    id: 'settings',
+    label: 'Settings',
     items: [
       { title: 'Customization', url: '#', icon: Palette },
       { title: 'Integrations', url: '#', icon: Globe },
-      { title: 'Settings', url: '#', icon: Puzzle },
+      { title: 'Settings', url: '#', icon: Settings2 },
     ],
   },
 ];

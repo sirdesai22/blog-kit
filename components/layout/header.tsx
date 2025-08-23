@@ -63,18 +63,18 @@ export function SiteHeader() {
             variant="ghost"
             size="sm"
             asChild
-            className="rounded-full mx-1 hover:border-primary/20 hover:border-1"
+            className="rounded-full mx-1 hover:border-primary/20 hover:border-1 text-nomal"
           >
-            <Link href="#">
+            <Link href="#" className='text-normal'>
               View Blog
-              <ArrowUpRight className=" h-4 w-4 text-muted-foreground hover:text-primary" />
+              <ArrowUpRight className=" h-4 w-4 text-muted-foreground " />
             </Link>
           </Button>
           )}
           <Button
             variant="secondary"
             size="sm"
-            className="h-8 rounded-full px-3 bg-transparent border-primary/20 border-1"
+            className="h-8 rounded-full px-3 bg-transparent border-primary/20 border-1 text-normal"
           >
             Feedback
           </Button>
@@ -87,7 +87,7 @@ export function SiteHeader() {
                     size="icon"
                     className="h-8 w-8  hover:text-primary bg-transparent rounded-full"
                   >
-                    <LifeBuoy className="h-4 w-4 " />
+                    <LifeBuoy className="h-4 w-4 text-normal" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -101,7 +101,7 @@ export function SiteHeader() {
                     size="icon"
                     className="h-8 w-8  hover:text-primary bg-transparent rounded-full"
                   >
-                    <Inbox className="h-4 w-4" />
+                    <Inbox className="h-4 w-4 text-normal" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -134,8 +134,8 @@ export function SiteHeader() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col truncate">
-                  <p className="truncate text-sm font-medium">{user.name}</p>
-                  <p className="truncate text-xs text-muted-foreground">
+                  <p className="truncate text-normal">{user.name}</p>
+                  <p className="truncate text-small">
                     {user.email}
                   </p>
                 </div>
@@ -148,7 +148,7 @@ export function SiteHeader() {
                 onClick={() => signOut()}
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+                <span className='text-normal'>Log out</span>
               </Button>
             </PopoverContent>
           </Popover>
@@ -186,9 +186,9 @@ export function SiteHeader() {
                       className="w-full justify-start hover:text-primary bg-transparent rounded-full"
                       asChild
                     >
-                      <Link href="#">
+                      <Link href="#" >
                         <ArrowUpRight className="mr-2 h-4 w-4  hover:text-primary" />
-                        View Blog
+                        <p className='text-normal'>View Blog</p>
                       </Link>
                     </Button>
                   </SheetClose>

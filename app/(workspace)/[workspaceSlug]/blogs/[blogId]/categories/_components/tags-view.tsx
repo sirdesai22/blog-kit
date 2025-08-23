@@ -103,16 +103,15 @@ function SortableTableRow({
       style={style}
       className="group cursor-grab"
       {...attributes}
-      {...listeners}
     >
-      <TableCell className="font-medium pl-lg">
+      <TableCell className="font-medium pl-lg" {...listeners}>
         <Link
           href={`/blog/tags/${tag.name}`}
           passHref
           className="flex items-center gap-1.5 hover:underline"
           onClick={(e) => e.stopPropagation()}
         >
-          <span className="text-foreground">{tag.name}</span>
+          <span className="text-normal">{tag.name}</span>
           <ExternalLink className="h-4 w-4 text-muted-foreground" />
         </Link>
       </TableCell>
@@ -131,15 +130,15 @@ function SortableTableRow({
           <Button
             variant="outline"
             size="sm"
-            className="text-muted-foreground"
+            className='text-normal-muted'
           >
             View Posts
           </Button>
           <Button
             variant="outline"
             size="sm"
-            className="text-muted-foreground"
-            onClick={() => onEdit(tag)}
+            className='text-normal-muted'
+            onClick={() => onEdit(tag) }
           >
             Edit
           </Button>
@@ -147,7 +146,7 @@ function SortableTableRow({
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">
                 <span className="sr-only">Open menu</span>
-                <MoreVertical className="h-4 w-4" />
+                <MoreVertical className="h-4 w-4 text-normal-muted" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -236,8 +235,8 @@ export function BlogTagsView({
 
   return (
     <>
-      <CardTitle className="text-sm ml-lg mb-md">
-        {tags.length} <span className="text-muted-foreground font-medium">Tags</span>
+      <CardTitle className="text-sm ml-lg mb-md text-normal">
+        {tags.length} <span className="text-small">Tags</span>
       </CardTitle>
       <div className="overflow-hidden">
         <div className="relative w-full overflow-x-auto">

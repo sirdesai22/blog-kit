@@ -26,21 +26,17 @@ export function BlogTableHeader({
         <div className="flex flex-col items-start justify-between gap-4 md:flex-row ">
           <div>
             <Heading
-              level="h1"
               variant="default"
-              subtitleVariant="muted"
-              subtitleSize="xs"
-              className='text-primary'
               subtitle={
-                <p className=" text-sm text-muted-foreground">
+                <p className=" text-small">
                   Create, edit, and pin posts.{' '} <br />
-                  <span className="cursor-pointer hover:underline">
+                  <span className="cursor-pointer text-small hover:underline">
                     Watch tutorial (2 mins)
                   </span>
                 </p>
               }
             >
-              <p className='text-2xl'>Posts</p>
+              <p className='text-header'>Posts</p>
             </Heading>
           </div>
           <Button onClick={newPage}>

@@ -215,15 +215,15 @@ export default function AuthorsPage(props: AuthorsPageProps) {
               subtitleSize="xs"
               className="text-primary"
               subtitle={
-                <p className="max-w-md text-sm text-muted-foreground">
+                <p className="max-w-xl text-small">
                   Manage authors who can write and be attributed to posts.{' '} <br />
-                  <span className="cursor-pointer hover:underline">
+                  <span className="cursor-pointer text-small hover:underline">
                     Learn more
                   </span>
                 </p>
               }
             >
-              <p className="text-2xl">Authors</p>
+              <p className="text-header">Authors</p>
             </Heading>
           </div>
           <Button onClick={() => setIsAddDialogOpen(true)}>
@@ -236,7 +236,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
       {/* Authors Table */}
       <div>
         <CardTitle className="flex items-center justify-between ml-lg mb-md">
-          <span className="text-sm">{authors.length} <span className='text-muted-foreground font-medium '>Authors</span></span>
+          <span className="text-normal">{authors.length} <span className='text-small'>Authors</span></span>
         </CardTitle>
         <Card className="p-0 shadow-none border-none">
           <CardContent className="p-0">
@@ -276,7 +276,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
                               size="sm"
                               className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
                             >
-                              <ExternalLink className="h-3 w-3" />
+                              <ExternalLink className="h-3 w-3 text-normal" />
                             </Button>
                           </div>
                         </div>
@@ -290,6 +290,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
                             <Button
                               variant="outline"
                               size="sm"
+                              className='text-normal-muted'
                             >
                               View Posts
                             </Button>
@@ -297,6 +298,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
                               variant="outline"
                               size="sm"
                               onClick={() => handleEditClick(author)}
+                              className='text-normal-muted'
                             >
                               Edit
                             </Button>
@@ -306,7 +308,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
                                   variant="ghost"
                                   className="h-8 w-8 p-0"
                                 >
-                                  <MoreHorizontal className="h-4 w-4" />
+                                  <MoreHorizontal className="h-4 w-4 text-normal-muted" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">

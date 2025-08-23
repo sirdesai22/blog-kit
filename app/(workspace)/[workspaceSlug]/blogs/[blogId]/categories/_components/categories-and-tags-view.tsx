@@ -108,10 +108,10 @@ export function CategoriesAndTagsView({
                     variant={activeTab === 'categories' ? 'default' : 'ghost'}
                     size="sm"
                     onClick={() => setActiveTab('categories')}
-                    className={`w-28 flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 rounded-md ${
+                    className={`w-28 flex items-center justify-center gap-2 text-normal transition-all duration-200 rounded-md ${
                       activeTab === 'categories'
-                        ? 'bg-card text-secondary-foreground shadow-sm hover:bg-card/80'
-                        : 'text-muted-foreground hover:text-secondary-foreground bg-transparent hover:bg-accent cursor-pointer'
+                        ? 'bg-card shadow-sm hover:bg-card/80'
+                        : 'bg-transparent hover:bg-accent cursor-pointer'
                     }`}
                   >
                     Categories
@@ -120,10 +120,10 @@ export function CategoriesAndTagsView({
                     variant={activeTab === 'tags' ? 'default' : 'ghost'}
                     size="sm"
                     onClick={() => setActiveTab('tags')}
-                    className={`w-28 flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 rounded-md ${
+                    className={`w-28 flex items-center justify-center gap-2 text-normal transition-all duration-200 rounded-md ${
                       activeTab === 'tags'
-                        ? 'bg-card text-secondary-foreground shadow-sm hover:bg-card'
-                        : 'text-muted-foreground hover:text-secondary-foreground bg-transparent hover:bg-accent cursor-pointer'
+                        ? 'bg-card  shadow-sm hover:bg-card'
+                        : ' bg-transparent hover:bg-accent cursor-pointer'
                     }`}
                   >
                     Tags
@@ -136,10 +136,10 @@ export function CategoriesAndTagsView({
                   subtitleSize="xs"
                   subtitle={
                     <div className="">
-                      <p className="text-sm">
+                      <p className="text-small">
                         Organize your blog content with categories and tags
                       </p>
-                      <p className="text-sm">
+                      <p className="text-small">
                         to help readers find what they&apos;re looking for.
                       </p>
                     </div>

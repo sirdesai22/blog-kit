@@ -45,13 +45,13 @@ export function NavMain({
   };
 
   return (
-    <SidebarMenu className='pt-2'>
+    <SidebarMenu>
       {items.map((item) => (
         <SidebarMenuItem key={item.title}>
           <SidebarMenuButton asChild isActive={item.isActive}>
             <Link href={getHref(item.url)}>
               <item.icon />
-              <span className='text-primary'>{item.title}</span>
+              <span>{item.title}</span>
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
