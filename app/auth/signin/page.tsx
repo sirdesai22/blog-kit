@@ -168,7 +168,7 @@ export default function SignInPage() {
         </h2>
       </div>
 
-      <div className="w-full max-w-sm px-4">
+      <div className="w-full max-w-[385px] px-4">
         <p className="text-center text-muted-foreground text-md mt-4 mb-2">
           Get started - Sign-in or create an account
         </p>

@@ -33,10 +33,10 @@ export function BlogTableFilters({
   postsCount,
 }: BlogTableFiltersProps) {
   return (
-    <div className="px-4 py-6 sm:px-6 lg:px-8 pt-0 flex flex-wrap items-center gap-2">
+    <div className="px-4 py-6 sm:px-md lg:px-lg pt-0 flex flex-wrap items-center gap-2">
       <div className="flex items-center gap-4">
-        <div className="text-sm font-medium">
-          {postsCount} Posts
+        <div className="text-normal font-medium">
+          {postsCount} <span className='text-small'>Posts</span>
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -44,7 +44,7 @@ export function BlogTableFilters({
             placeholder="Search Posts..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-8 w-64 pl-10 text-sm"
+            className="h-8 w-64 pl-10 text-small"
           />
         </div>
       </div>
@@ -52,7 +52,7 @@ export function BlogTableFilters({
       <div className="flex flex-wrap items-center gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8 text-xs">
+            <Button variant="outline" size="sm" className="h-8 text-normal">
               <Hash className="mr-1 h-3 w-3" />
               Category
               <ChevronDown className="ml-1 h-3 w-3" />
@@ -67,7 +67,7 @@ export function BlogTableFilters({
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8 text-xs">
+            <Button variant="outline" size="sm" className="h-8 text-normal">
               <Hash className="mr-1 h-3 w-3" />
               Tags
               <ChevronDown className="ml-1 h-3 w-3" />
@@ -81,7 +81,7 @@ export function BlogTableFilters({
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8 text-xs">
+            <Button variant="outline" size="sm" className="h-8 text-normal">
               <Circle className="mr-1 h-3 w-3" />
               Status
               <ChevronDown className="ml-1 h-3 w-3" />
@@ -105,7 +105,7 @@ export function BlogTableFilters({
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8 text-xs">
+            <Button variant="outline" size="sm" className="h-8 text-normal">
               <User className="mr-1 h-3 w-3" />
               Authors
               <ChevronDown className="ml-1 h-3 w-3" />
@@ -119,7 +119,7 @@ export function BlogTableFilters({
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8 text-xs">
+            <Button variant="outline" size="sm" className="h-8 text-normal">
               <ArrowUpDown className="mr-1 h-3 w-3" />
               Recent on top
               <ChevronDown className="ml-1 h-3 w-3" />

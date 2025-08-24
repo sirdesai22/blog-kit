@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useWorkspaceStore } from '@/lib/stores/workspace-store';
+import { useWorkspaceStore } from '@/modules/workspace/stores/workspace-store';
 
 export function useUserWorkspaces() {
   const setUserWorkspaces = useWorkspaceStore(

@@ -2,8 +2,8 @@ import { notFound } from 'next/navigation';
 import {
   getPageById,
   getWorkspaceWithPages,
-} from '@/lib/actions/workspace-actions';
-import { getBlogPostsForTable } from '@/lib/actions/blog-table-actions';
+} from '@/modules/workspace/actions/workspace-actions';
+import { getBlogPostsForTable } from '@/modules/blogs/actions/blog-table-actions';
 import { BlogTableView } from './_components/blog-table-view';
 
 interface PageProps {

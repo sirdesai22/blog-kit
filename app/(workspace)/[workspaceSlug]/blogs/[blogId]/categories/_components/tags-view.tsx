@@ -31,20 +31,13 @@ import {
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  addBlogTag,
   deleteBlogTag,
   reorderBlogTags,
   updateBlogTag,
-} from '@/lib/actions/tag-actions';
+} from '@/modules/blogs/actions/tag-actions';
 
 // Icons
-import {
-  ExternalLink,
-  GripVertical,
-  MoreVertical,
-  Tag,
-  Trash2,
-} from 'lucide-react';
+import { ExternalLink, MoreVertical, Trash2 } from 'lucide-react';
 
 // Drag and Drop
 import {
@@ -105,84 +98,67 @@ function SortableTableRow({
   };
 
   return (
-    <TableRow ref={setNodeRef} style={style} className="group">
-      <TableCell colSpan={4} className="p-2">
-        <div className="flex w-full items-center justify-between">
-          {/* Left Side: Handle, Name, and External Link */}
-          <div className="flex items-center gap-3">
-            <div
-              {...attributes}
-              {...listeners}
-              className="cursor-grab rounded p-1 hover:bg-accent"
-            >
-              <GripVertical className="h-5 w-5 text-muted-foreground" />
-            </div>
-            <Link
-              href={`/blog/tags/${tag.name}`}
-              passHref
-              className="flex items-center gap-2"
-            >
-              <Tag className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium text-foreground">{tag.name}</span>
-              <ExternalLink className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-            </Link>
-          </div>
-
-          {/* Right Side: Stats and Action Buttons */}
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-x-8 text-sm text-muted-foreground">
-              <div className="flex w-16 items-center justify-end">
-                <span className="font-semibold text-foreground">
-                  {tag.posts}
-                </span>
-              </div>
-              <div className="flex w-20 items-center justify-end">
-                <span className="font-semibold text-foreground">
-                  {tag.traffic.toLocaleString()}
-                </span>
-              </div>
-              <div className="flex w-16 items-center justify-end">
-                <span className="font-semibold text-foreground">
-                  {tag.leads}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex w-56 items-center justify-end gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-muted-foreground"
-              >
-                Manage Posts
+    <TableRow
+      ref={setNodeRef}
+      style={style}
+      className="group cursor-grab"
+      {...attributes}
+    >
+      <TableCell className="font-medium pl-lg" {...listeners}>
+        <Link
+          href={`/blog/tags/${tag.name}`}
+          passHref
+          className="flex items-center gap-1.5 hover:underline"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <span className="text-normal">{tag.name}</span>
+          <ExternalLink className="h-4 w-4 text-muted-foreground" />
+        </Link>
+      </TableCell>
+      <TableCell>{tag.posts}</TableCell>
+      <TableCell>{tag.traffic.toLocaleString()} <span className="rounded bg-red-50 px-1 text-xs font-medium text-red-600">
+          {Math.floor(Math.random() * 60)}%
+        </span></TableCell>
+      <TableCell>{tag.leads} <span className="rounded bg-green-50 px-1 text-xs font-medium text-green-600">
+          {Math.floor(Math.random() * 60)}%
+        </span></TableCell>
+      <TableCell
+        className="sticky right-0 bg-background group-hover:bg-accent/50"
+        onClick={(e) => e.stopPropagation()} // Prevents drag from firing on button clicks
+      >
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className='text-normal-muted'
+          >
+            View Posts
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className='text-normal-muted'
+            onClick={() => onEdit(tag) }
+          >
+            Edit
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreVertical className="h-4 w-4 text-normal-muted" />
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-muted-foreground"
-                onClick={() => onEdit(tag)}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => onDelete(tag)}
               >
-                Edit
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-8 w-8 p-0">
-                    <span className="sr-only">Open menu</span>
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    className="text-destructive"
-                    onClick={() => onDelete(tag)}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    <span>Delete</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
+                <Trash2 className="mr-2 h-4 w-4" />
+                <span>Delete</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </TableCell>
     </TableRow>
@@ -259,11 +235,11 @@ export function BlogTagsView({
 
   return (
     <>
-      <CardTitle className="text-base font-semibold mb-2 ml-8">
-        {tags.length} <span className="text-muted-foreground">Tags</span>
+      <CardTitle className="text-sm ml-lg mb-md text-normal">
+        {tags.length} <span className="text-small">Tags</span>
       </CardTitle>
-      <Card className="p-0 border-none shadow-none">
-        <CardContent className="p-0">
+      <div className="overflow-hidden">
+        <div className="relative w-full overflow-x-auto">
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -271,35 +247,19 @@ export function BlogTagsView({
           >
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted hover:bg-muted">
-                  <TableHead colSpan={4} className="p-2">
-                    <div className="flex w-full items-center justify-between">
-                      <span className="pl-2 text-sm font-medium text-muted-foreground">
-                        Tag
-                      </span>
-                      <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-x-8 text-sm text-muted-foreground">
-                          <span className="w-16 text-right font-medium">
-                            Posts
-                          </span>
-                          <span className="w-20 text-right font-medium">
-                            Traffic
-                          </span>
-                          <span className="w-16 text-right font-medium">
-                            Leads
-                          </span>
-                        </div>
-                        <div className="w-[210px]" />
-                      </div>
-                    </div>
-                  </TableHead>
+                <TableRow className="bg-muted/50 hover:bg-muted/50">
+                 <TableHead className="pl-lg">Tag</TableHead>
+                  <TableHead>Posts</TableHead>
+                  <TableHead>Traffic</TableHead>
+                  <TableHead>Leads</TableHead>
+                  <TableHead className="sticky right-0 w-12  text-center"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {tags.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={4}
+                      colSpan={5}
                       className="py-12 text-center text-muted-foreground"
                     >
                       No tags yet. Create your first tag to organize your blog
@@ -332,8 +292,8 @@ export function BlogTagsView({
               </TableBody>
             </Table>
           </DndContext>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>

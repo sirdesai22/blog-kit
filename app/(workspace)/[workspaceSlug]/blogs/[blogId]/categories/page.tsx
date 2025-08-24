@@ -2,9 +2,9 @@ import { notFound } from 'next/navigation';
 import {
   getPageById,
   getWorkspaceBlogCategories,
-} from '@/lib/actions/workspace-actions';
+} from '@/modules/workspace/actions/workspace-actions';
 import { CategoriesAndTagsView } from './_components/categories-and-tags-view';
-import { getWorkspaceBlogTags } from '@/lib/actions/tag-actions';
+import { getWorkspaceBlogTags } from '@/modules/blogs/actions/tag-actions';
 import { Suspense } from 'react';
 
 interface PageProps {

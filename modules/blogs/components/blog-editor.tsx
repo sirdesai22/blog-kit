@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { BlogEditorSidebar, BlogPost, Author } from './blog-editor-sidebar';
-import { PlateEditor } from '../platejs/components/editor/plate-editor';
+import { PlateEditor } from '../../../components/platejs/components/editor/plate-editor';
 
 interface BlogEditorProps {
   workspaceSlug: string;

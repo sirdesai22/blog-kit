@@ -5,7 +5,7 @@ import { BlogTableHeader } from './blog-table-header';
 import { BlogTableFilters } from './blog-table-filters';
 import { BlogTableContent } from './blog-table-content';
 import { BlogPost } from '@/types/blog';
-import { BlogTableProvider, useBlogTable } from '@/contexts/BlogTableContext';
+import { BlogTableProvider, useBlogTable } from '@/modules/blogs/contexts/BlogTableContext';
 
 interface BlogTableViewProps {
   workspaceSlug: string;
@@ -58,7 +58,7 @@ function BlogTable({
       />
 
       <div className="flex-1 overflow-y-auto">
-        <div className="md:w-[80vw] px-4 py-6 sm:px-6 lg:px-8">
+        <div className="">
           <BlogTableFilters
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}

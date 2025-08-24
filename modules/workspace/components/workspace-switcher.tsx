@@ -15,8 +15,8 @@ import {
 import {
   useUserWorkspaces,
   useCurrentWorkspace,
-} from '@/lib/hooks/use-workspaces';
-import { useWorkspaceStore } from '@/lib/stores/workspace-store';
+} from '@/modules/workspace/hooks/use-workspaces';
+import { useWorkspaceStore } from '@/modules/workspace/stores/workspace-store';
 
 export function WorkSpaceSwitcher() {
   const params = useParams();
@@ -65,7 +65,7 @@ export function WorkSpaceSwitcher() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto p-1 text-sm font-medium hover:bg-transparent hover:cursor-pointer focus-visible:ring-0"
+          className="h-auto p-1 text-normal hover:bg-transparent hover:cursor-pointer focus-visible:ring-0"
         >
           <span>{displayWorkspace?.name || 'Select Workspace'}</span>
           <ChevronsUpDown className="ml-2 h-4 w-4 text-muted-foreground " />
@@ -86,8 +86,8 @@ export function WorkSpaceSwitcher() {
                 {workspace.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-medium">{workspace.name}</span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-normal ">{workspace.name}</span>
+                <span className="text-small">
                   {workspace.role.toLowerCase()}
                 </span>
               </div>
@@ -100,7 +100,7 @@ export function WorkSpaceSwitcher() {
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={handleCreateWorkspace} className="cursor-pointer">
           <Plus className="mr-2 h-4 w-4" />
-          <span>Create workspace</span>
+          <span className='text-normal'>Create workspace</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -5,8 +5,8 @@ import {
   getWorkspaceAuthors,
   getBlogPostsByBlogId,
   getBlogTags, // Add this import
-} from '@/lib/actions/blog-actions';
-import { BlogEditor } from '@/components/blogs/blog-editor';
+} from '@/modules/blogs/actions/blog-actions';
+import { BlogEditor } from '@/modules/blogs/components/blog-editor';
 import { auth } from '@/lib/auth';
 
 interface NewPostPageProps {

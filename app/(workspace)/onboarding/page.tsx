@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useSession } from "next-auth/react";
-import { Button } from "@/components/custom/Button";
-import { Input } from "@/components/custom/Input";
-import { Textarea } from "@/components/custom/TextArea";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { ArrowRight } from "lucide-react";
+import { useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { Button } from '@/components/custom/Button';
+import { Input } from '@/components/custom/Input';
+import { Textarea } from '@/components/custom/TextArea';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ArrowRight } from 'lucide-react';
 
-import { useRouter } from "next/navigation";
-import { SiteHeader } from "@/components/layout/header";
+import { useRouter } from 'next/navigation';
+import { SiteHeader } from '@/components/layout/header';
 
 export default function OnboardingPage() {
-  const [workspaceName, setWorkspaceName] = useState("");
-  const [workspaceAddress, setWorkspaceAddress] = useState("");
-  const [description, setDescription] = useState("");
+  const [workspaceName, setWorkspaceName] = useState('');
+  const [workspaceAddress, setWorkspaceAddress] = useState('');
+  const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -24,13 +24,13 @@ export default function OnboardingPage() {
     if (!workspaceName || !workspaceAddress) return;
 
     setLoading(true);
-    setError("");
+    setError('');
 
     try {
-      const response = await fetch("/api/workspace", {
-        method: "POST",
+      const response = await fetch('/api/workspaces/create', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           name: workspaceName,
@@ -41,7 +41,7 @@ export default function OnboardingPage() {
 
       if (!response.ok) {
         const data = await response.json();
-        setError(data.error || "Something went wrong");
+        setError(data.error || 'Something went wrong');
         return;
       }
 
@@ -49,7 +49,7 @@ export default function OnboardingPage() {
       // Redirect to the specific workspace that was created
       router.push(`/${data.workspace.slug}`);
     } catch (error) {
-      setError("Something went wrong");
+      setError('Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -59,22 +59,22 @@ export default function OnboardingPage() {
     if (!slug) return;
 
     try {
-      const response = await fetch(`/api/workspace/check-slug?slug=${slug}`);
+      const response = await fetch(`/api/workspaces/check-slug?slug=${slug}`);
       const data = await response.json();
 
       if (!data.available) {
-        setError("The name is already taken.");
+        setError('The name is already taken.');
       } else {
-        setError("");
+        setError('');
       }
     } catch (error) {
-      console.error("Error checking slug:", error);
+      console.error('Error checking slug:', error);
     }
   };
 
   const handleWorkspaceAddressChange = (value: string) => {
     // Only allow letters and numbers
-    const cleanValue = value.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+    const cleanValue = value.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
     setWorkspaceAddress(cleanValue);
 
     if (cleanValue) {
@@ -92,7 +92,7 @@ export default function OnboardingPage() {
       <SiteHeader />
       {/* Main Content */}
       <div className="flex items-center justify-center px-4 py-8">
-        <div className="max-w-lg w-full">
+        <div className="max-w-xl w-full">
           <Card className="border-none shadow-none">
             <CardHeader className="">
               <h1 className="text-3xl font-bold text-primary">
@@ -165,7 +165,7 @@ export default function OnboardingPage() {
                   className="bg-black text-white rounded-xl hover:bg-gray-800 flex items-center w-fit px-8"
                 >
                   {loading ? (
-                    "Creating..."
+                    'Creating...'
                   ) : (
                     <>
                       Create Workspace

@@ -35,17 +35,17 @@ export function BlogTableContent({
   if (posts.length === 0) {
     return (
       <div className="py-12 text-center">
-        <div className="mx-auto max-w-md">
+        <div className="mx-auto">
           <Heading
             level="h3"
             variant="default"
             subtitle="Get started by creating your first blog post."
             subtitleVariant="muted"
-            className="mb-6"
           >
             No blog posts found
           </Heading>
-          <Button onClick={newPage}>
+           
+          <Button onClick={newPage}  className="mt-3" >
             <Plus className="mr-2 h-4 w-4" />
             New Post
           </Button>

@@ -45,6 +45,19 @@
   --color-muted-dark: var(--muted-dark);
   --height-header: var(--header-height);
   --padding-header-horizontal: var(--header-horizontal-padding);
+
+  --spacing-xs: var(--gap-xs);
+  --spacing-sm: var(--gap-sm);
+  --spacing-md: var(--gap-md);
+  --spacing-lg: var(--gap-lg);
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+
+  --sidebar-label-gap: 0.4rem;
 }
 
 :root {
@@ -136,20 +149,38 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }
+
+  .text-header {
+    @apply text-2xl font-semibold text-foreground;
+  }
+
+  .text-main {
+    @apply text-md font-medium text-foreground;
+  }
+
+  .text-normal {
+    @apply text-sm text-foreground font-normal;
+  }
+
+  .text-small {
+    @apply text-xs text-muted-foreground font-normal;
+  }
+  
+  .text-normal-muted {
+    @apply text-sm text-muted-foreground font-normal;
+  }
 }
 
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
   background: var(--muted-dark);
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: rgb(199, 199, 199);
   border-radius: 4px;

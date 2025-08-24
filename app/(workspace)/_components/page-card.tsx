@@ -122,7 +122,7 @@ export function PageCard({ page, workspaceSlug }: PageCardProps) {
         <div className="bg-gray-50 rounded-t-lg p-4 h-32 flex items-center justify-center border-b">
           <div className="w-full h-full bg-white rounded border-2 border-dashed border-gray-300 flex items-center justify-center">
             <div className="text-center">
-              <p className="text-sm text-gray-500">No preview available</p>
+              <p className="text-small">No preview available</p>
             </div>
           </div>
         </div>
@@ -132,14 +132,14 @@ export function PageCard({ page, workspaceSlug }: PageCardProps) {
           {/* Title and URL */}
           <div className="mb-4 flex justify-between">
             <div>
-              <h3 className="font-medium text-gray-900 mb-1 line-clamp-1">
+              <h3 className="text-main mb-1 line-clamp-1">
                 {page.title}
               </h3>
               <Link
                 href={page.slug}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 text-sm text-muted-foreground hover:underline"
+                className="flex items-center gap-1 text-small hover:underline"
               >
                 {page.slug}
                 <ExternalLink className="w-3 h-3" />
@@ -150,7 +150,7 @@ export function PageCard({ page, workspaceSlug }: PageCardProps) {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 text-xs rounded-full px-8"
+                className="flex-1 text-normal rounded-full px-8"
                 asChild
               >
                 <Link href={`/${workspaceSlug}/blogs/${page.id}`}>Edit</Link>
@@ -165,7 +165,7 @@ export function PageCard({ page, workspaceSlug }: PageCardProps) {
           </div>
 
           {/* Meta info */}
-          <div className="flex items-center justify-between text-sm text-gray-500">
+          <div className="flex items-center justify-between text-small text-gray-500">
             <div className="flex items-center gap-2 ">
               {/* <span
               className={`px-2 py-1 rounded-full text-xs font-medium ${typeConfig.color}`}
@@ -173,17 +173,17 @@ export function PageCard({ page, workspaceSlug }: PageCardProps) {
               {typeConfig.label}
             </span> */}
               <span
-                className={`px-2 py-1 rounded-full text-xs font-medium ${statusConfig.color}`}
+                className={`px-2 py-1 rounded-full text-small ${statusConfig.color}`}
               >
                 {statusConfig.dot} {statusConfig.label}
               </span>
             </div>
-            <span className="flex items-center gap-1 text-muted-foreground">
-              <Clock className="w-4 h-4" />
+            <span className="flex items-center gap-1 text-small">
+              <Clock className="w-3 h-3" />
               {timeAgo}
             </span>
-            <span className="flex items-center gap-1 text-muted-foreground">
-              <User className="w-4 h-4" />
+            <span className="flex items-center gap-1 text-small">
+              <User className="w-3 h-3" />
               {page.author}
             </span>
           </div>
