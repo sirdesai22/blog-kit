@@ -106,13 +106,13 @@ export function BlogEditor({
         featured: false,
         pinned: false,
         scheduledFor: post.publishDate,
-        authorIds: post.authorIds, // Add this line
+        authorIds: post.authorIds,
         workspaceId,
-        pageId: blogId, // This is the blog publication ID
+        pageId: blogId,
         blogPostId: currentBlogPostId,
       };
       console.log(content);
-      const response = await fetch('/api/blog-posts/draft', {
+      const response = await fetch('/api/blogs/posts/draft', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -125,7 +125,6 @@ export function BlogEditor({
       if (result.success) {
         toast.success(result.message);
 
-        // Set the blog post ID if it's a new post
         if (!currentBlogPostId && result.blogPostId) {
           setCurrentBlogPostId(result.blogPostId);
         }

@@ -31,7 +31,7 @@ export default async function NewPostPage(props: NewPostPageProps) {
     getBlogCategories(workspaceSlug),
     getWorkspaceAuthors(workspaceSlug),
     getBlogPostsByBlogId(workspaceSlug, blogId),
-    getBlogTags(workspaceSlug), // Add this line
+    getBlogTags(workspaceSlug),
   ]);
 
   return (
@@ -42,7 +42,7 @@ export default async function NewPostPage(props: NewPostPageProps) {
       categories={categories}
       authors={authors}
       allPosts={blogPosts}
-      tags={tags} // Add this line
+      tags={tags}
       isNewPost={true}
     />
   );

@@ -44,8 +44,8 @@ export function BlogTableContent({
           >
             No blog posts found
           </Heading>
-           
-          <Button onClick={newPage}  className="mt-3" >
+
+          <Button onClick={newPage} className="mt-3">
             <Plus className="mr-2 h-4 w-4" />
             New Post
           </Button>
@@ -56,7 +56,7 @@ export function BlogTableContent({
 
   return (
     <div className="overflow-hidden rounded-lg border border-border">
-      <div className="relative w-full overflow-x-auto">
+      <div className="relative  max-w-[80vw] overflow-x-auto">
         <Table className="">
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
