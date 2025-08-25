@@ -76,6 +76,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return session;
     },
+    async redirect({ url, baseUrl, token }) {
+      // Handle OAuth redirects with smart logic
+      if (token?.id) {
+        const redirectPath = await getUserRedirectPath(token.id as string);
+        return `${baseUrl}${redirectPath}`;
+      }
+
+      // Fallback for other cases
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
+      if (new URL(url).origin === baseUrl) return url;
+      return `${baseUrl}/onboarding`;
+    },
   },
   pages: {
     signIn: '/auth/signin',

@@ -41,8 +41,8 @@ async function PagesContent({ workspaceSlug }: { workspaceSlug: string }) {
 
       {/* Pages Grid */}
       {workspace.pages.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="max-w-md mx-auto">
+        <div className="text-center  py-12">
+          <div className=" mx-auto">
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               No pages yet
             </h3>
@@ -64,11 +64,9 @@ async function PagesContent({ workspaceSlug }: { workspaceSlug: string }) {
 }
 
 // Main page component
-export default async function WorkspacePage(
-  props: {
-    params: Promise<{ workspaceSlug: string }>;
-  }
-) {
+export default async function WorkspacePage(props: {
+  params: Promise<{ workspaceSlug: string }>;
+}) {
   const params = await props.params;
   return (
     <Suspense fallback={<PagesLoading />}>
