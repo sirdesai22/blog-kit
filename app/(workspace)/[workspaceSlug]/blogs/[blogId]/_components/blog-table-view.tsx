@@ -1,11 +1,22 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { BlogTableHeader } from './blog-table-header';
 import { BlogTableFilters } from './blog-table-filters';
 import { BlogTableContent } from './blog-table-content';
+import { BlogTablePagination } from './blog-table-pagination';
 import { BlogPost } from '@/types/blog';
-import { BlogTableProvider, useBlogTable } from '@/modules/blogs/contexts/BlogTableContext';
+import {
+  BlogTableProvider,
+  useBlogTable,
+} from '@/modules/blogs/contexts/BlogTableContext';
+import { useBlogPostsTable } from '@/modules/blogs/hooks/use-blog-posts-table';
+import {
+  BlogPostFilters,
+  BlogPostSort,
+  BlogPostPagination,
+} from '@/modules/blogs/actions/blog-table-actions';
+import { useDebounce } from '@/hooks/use-debounce';
 
 interface BlogTableViewProps {
   workspaceSlug: string;
@@ -14,41 +25,153 @@ interface BlogTableViewProps {
     title: string;
     type: string;
   };
-  blogPosts: BlogPost[];
+  initialPosts?: BlogPost[]; // For SSR fallback
 }
 
 function BlogTable({
   workspaceSlug,
   currentPage,
-  blogPosts,
+  initialPosts = [],
 }: BlogTableViewProps) {
+  // Local state for filters and pagination
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [statusFilters, setStatusFilters] = useState<string[]>([]); // Changed to array
+  const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
+  const [tagFilters, setTagFilters] = useState<string[]>([]);
+  const [authorFilters, setAuthorFilters] = useState<string[]>([]);
+  const [currentPageNum, setCurrentPageNum] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [sortConfig, setSortConfig] = useState<BlogPostSort>({
+    field: 'createdAt',
+    direction: 'desc',
+  });
+
+  // Debounce search to avoid too many API calls
+  const debouncedSearch = useDebounce(searchTerm, 500);
+
   const { pinnedIds } = useBlogTable();
 
-  const filteredAndSortedPosts = useMemo(() => {
-    const filtered = blogPosts.filter((post) => {
-      const matchesSearch = post.title
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-      const matchesStatus =
-        statusFilter === 'all' ||
-        post.status.toLowerCase() === statusFilter.toLowerCase();
-      return matchesSearch && matchesStatus;
-    });
+  // Build filters object
+  const filters: BlogPostFilters = useMemo(() => {
+    const filterObj: BlogPostFilters = {};
 
-    return filtered.sort((a, b) => {
-      // Check if post is pinned (either from context or database)
-      const aIsPinned = pinnedIds.has(a.id) || a.pinned;
-      const bIsPinned = pinnedIds.has(b.id) || b.pinned;
+    if (debouncedSearch) {
+      filterObj.search = debouncedSearch;
+    }
 
-      if (aIsPinned && !bIsPinned) return -1;
-      if (!aIsPinned && bIsPinned) return 1;
+    if (statusFilters.length > 0) {
+      filterObj.statuses = statusFilters as PostStatus[]; // Pass array of statuses
+    }
 
-      // Sort by creation date if pin status is the same
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
-  }, [blogPosts, searchTerm, statusFilter, pinnedIds]);
+    if (categoryFilters.length > 0) {
+      filterObj.categories = categoryFilters;
+    }
+
+    if (tagFilters.length > 0) {
+      filterObj.tags = tagFilters;
+    }
+
+    if (authorFilters.length > 0) {
+      filterObj.authorIds = authorFilters;
+    }
+
+    return filterObj;
+  }, [
+    debouncedSearch,
+    statusFilters,
+    categoryFilters,
+    tagFilters,
+    authorFilters,
+  ]);
+
+  // Build pagination object
+  const pagination: BlogPostPagination = useMemo(
+    () => ({
+      page: currentPageNum,
+      pageSize: pageSize,
+    }),
+    [currentPageNum, pageSize]
+  );
+
+  // Fetch data with TanStack Query
+  const {
+    data: queryResult,
+    isLoading,
+    isFetching,
+    error,
+  } = useBlogPostsTable({
+    workspaceSlug,
+    blogId: currentPage.id,
+    filters,
+    sort: sortConfig,
+    pagination,
+  });
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPageNum(1);
+  }, [
+    debouncedSearch,
+    statusFilters,
+    categoryFilters,
+    tagFilters,
+    authorFilters,
+  ]);
+
+  // Memoize blogPosts to prevent unnecessary re-renders
+  const blogPosts = useMemo(() => {
+    return queryResult?.success ? queryResult.blogPosts || [] : initialPosts;
+  }, [queryResult?.success, queryResult?.blogPosts, initialPosts]);
+
+  const paginationInfo = queryResult?.pagination;
+
+  // Apply local pinning logic (from context) to the server data
+  const processedPosts = useMemo(() => {
+    return blogPosts
+      .map((post) => ({
+        ...post,
+        pinned: pinnedIds.has(post.id) || post.pinned,
+      }))
+      .sort((a, b) => {
+        // Ensure pinned posts are always at the top
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return 0;
+      });
+  }, [blogPosts, pinnedIds]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPageNum(page);
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setCurrentPageNum(1); // Reset to first page when changing page size
+  };
+
+  const handleSort = (field: BlogPostSort['field']) => {
+    setSortConfig((current) => ({
+      field,
+      direction:
+        current.field === field && current.direction === 'asc' ? 'desc' : 'asc',
+    }));
+    setCurrentPageNum(1); // Reset to first page when sorting changes
+  };
+
+  if (error) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-destructive">
+            Error loading blog posts
+          </h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            {error instanceof Error ? error.message : 'Something went wrong'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full flex-col bg-background">
@@ -57,21 +180,42 @@ function BlogTable({
         currentPageId={currentPage.id}
       />
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="">
-          <BlogTableFilters
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            postsCount={blogPosts.length}
-          />
+      <div className="flex-1 overflow-hidden flex flex-col">
+        <BlogTableFilters
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          statusFilters={statusFilters}
+          setStatusFilters={setStatusFilters}
+          categoryFilters={categoryFilters}
+          setCategoryFilters={setCategoryFilters}
+          tagFilters={tagFilters}
+          setTagFilters={setTagFilters}
+          authorFilters={authorFilters}
+          setAuthorFilters={setAuthorFilters}
+          postsCount={paginationInfo?.totalCount || blogPosts.length}
+          loading={isLoading || isFetching}
+          workspaceSlug={workspaceSlug}
+        />
+
+        <div className="flex-1 overflow-y-auto">
           <BlogTableContent
-            posts={filteredAndSortedPosts}
+            posts={processedPosts}
             workspaceSlug={workspaceSlug}
             currentPageId={currentPage.id}
+            loading={isLoading}
+            onSort={handleSort}
+            sortConfig={sortConfig}
           />
         </div>
+
+        {paginationInfo && (
+          <BlogTablePagination
+            pagination={paginationInfo}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+            loading={isLoading || isFetching}
+          />
+        )}
       </div>
     </div>
   );

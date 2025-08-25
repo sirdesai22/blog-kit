@@ -9,17 +9,42 @@ import { BlogPost } from '@/types/blog';
 
 export interface BlogPostFilters {
   search?: string;
-  status?: PostStatus | 'all';
-  category?: string;
-  tag?: string;
-  authorId?: string;
+  statuses?: PostStatus[]; // Changed from status?: PostStatus | 'all'
+  categories?: string[];
+  tags?: string[];
+  authorIds?: string[];
   featured?: boolean;
   pinned?: boolean;
 }
 
 export interface BlogPostSort {
-  field: 'title' | 'status' | 'publishedAt' | 'createdAt' | 'updatedAt' | 'views';
+  field:
+    | 'title'
+    | 'status'
+    | 'publishedAt'
+    | 'createdAt'
+    | 'updatedAt'
+    | 'views';
   direction: 'asc' | 'desc';
+}
+
+export interface BlogPostPagination {
+  page: number;
+  pageSize: number;
+}
+
+export interface BlogPostTableResult {
+  success: boolean;
+  blogPosts?: BlogPost[];
+  error?: string;
+  pagination?: {
+    totalCount: number;
+    totalPages: number;
+    currentPage: number;
+    pageSize: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
 }
 
 /**
@@ -28,15 +53,11 @@ export interface BlogPostSort {
  */
 export async function getBlogPostsForTable(
   workspaceSlug: string,
-  blogId: string, // This is the pageId of the blog publication
+  blogId: string,
   filters?: BlogPostFilters,
-  sort?: BlogPostSort
-): Promise<{
-  success: boolean;
-  blogPosts?: BlogPost[];
-  error?: string;
-  totalCount?: number;
-}> {
+  sort?: BlogPostSort,
+  pagination?: BlogPostPagination
+): Promise<BlogPostTableResult> {
   try {
     const session = await auth();
 
@@ -91,8 +112,10 @@ export async function getBlogPostsForTable(
     };
 
     if (filters) {
-      if (filters.status && filters.status !== 'all') {
-        whereClause.status = filters.status;
+      if (filters.statuses && filters.statuses.length > 0) {
+        whereClause.status = {
+          in: filters.statuses, // Use 'in' operator for multiple statuses
+        };
       }
 
       if (filters.search) {
@@ -112,24 +135,24 @@ export async function getBlogPostsForTable(
         ];
       }
 
-      if (filters.category) {
+      if (filters.categories && filters.categories.length > 0) {
         whereClause.categories = {
-          has: filters.category,
+          hasSome: filters.categories, // Use hasSome for multiple categories
         };
       }
 
-      if (filters.tag) {
+      if (filters.tags && filters.tags.length > 0) {
         whereClause.tags = {
-          has: filters.tag,
+          hasSome: filters.tags, // Use hasSome for multiple tags
         };
       }
 
-      if (filters.authorId) {
+      if (filters.authorIds && filters.authorIds.length > 0) {
         whereClause.OR = [
-          { authorId: filters.authorId },
+          { authorId: { in: filters.authorIds } }, // Author is one of the selected
           {
             coAuthorIds: {
-              has: filters.authorId,
+              hasSome: filters.authorIds, // Or co-author includes any of selected
             },
           },
         ];
@@ -172,7 +195,13 @@ export async function getBlogPostsForTable(
       where: whereClause,
     });
 
-    // Fetch blog posts with all necessary data
+    // Calculate pagination parameters
+    const pageSize = pagination?.pageSize || 10;
+    const currentPage = Math.max(1, pagination?.page || 1);
+    const skip = (currentPage - 1) * pageSize;
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    // Fetch blog posts with pagination
     const dbBlogPosts = await db.blogPost.findMany({
       where: whereClause,
       include: {
@@ -193,6 +222,8 @@ export async function getBlogPostsForTable(
         },
       },
       orderBy,
+      take: pageSize,
+      skip: skip,
     });
 
     // Transform the data to match our BlogPost interface
@@ -200,7 +231,7 @@ export async function getBlogPostsForTable(
       dbBlogPosts.map(async (post) => {
         // Get co-authors information if they exist
         let coAuthors: Array<{ id: string; name: string; image?: string }> = [];
-        
+
         if (post.coAuthorIds && post.coAuthorIds.length > 0) {
           coAuthors = await db.author.findMany({
             where: {
@@ -224,7 +255,12 @@ export async function getBlogPostsForTable(
           content: post.content,
           htmlContent: post.htmlContent || undefined,
           excerpt: post.excerpt || undefined,
-          status: post.status as 'DRAFT' | 'PUBLISHED' | 'SCHEDULED' | 'ARCHIVED' | 'DELETED',
+          status: post.status as
+            | 'DRAFT'
+            | 'PUBLISHED'
+            | 'SCHEDULED'
+            | 'ARCHIVED'
+            | 'DELETED',
           publishedAt: post.publishedAt || undefined,
           createdAt: post.createdAt,
           updatedAt: post.updatedAt,
@@ -237,28 +273,40 @@ export async function getBlogPostsForTable(
           featuredImage: post.featuredImage || undefined,
           authorId: post.authorId || undefined,
           coAuthorIds: post.coAuthorIds,
-          author: post.author ? {
-            id: post.author.id,
-            name: post.author.name,
-            image: post.author.image || undefined,
-          } : undefined,
+          author: post.author
+            ? {
+                id: post.author.id,
+                name: post.author.name,
+                image: post.author.image || undefined,
+              }
+            : undefined,
           coAuthors: coAuthors,
           workspaceId: post.workspaceId,
           pageId: post.pageId,
-        } as BlogPost & { coAuthors: Array<{ id: string; name: string; image?: string }> };
+        } as BlogPost & {
+          coAuthors: Array<{ id: string; name: string; image?: string }>;
+        };
       })
     );
 
     return {
       success: true,
       blogPosts,
-      totalCount,
+      pagination: {
+        totalCount,
+        totalPages,
+        currentPage,
+        pageSize,
+        hasNextPage: currentPage < totalPages,
+        hasPreviousPage: currentPage > 1,
+      },
     };
   } catch (error) {
     console.error('Error fetching blog posts:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to fetch blog posts',
+      error:
+        error instanceof Error ? error.message : 'Failed to fetch blog posts',
     };
   }
 }
@@ -308,54 +356,49 @@ export async function getBlogPostStats(
     }
 
     // Get statistics
-    const [
-      total,
-      published,
-      draft,
-      scheduled,
-      viewsAndReadTime,
-    ] = await Promise.all([
-      db.blogPost.count({
-        where: {
-          pageId: blogId,
-          workspaceId: workspace.id,
-        },
-      }),
-      db.blogPost.count({
-        where: {
-          pageId: blogId,
-          workspaceId: workspace.id,
-          status: PostStatus.PUBLISHED,
-        },
-      }),
-      db.blogPost.count({
-        where: {
-          pageId: blogId,
-          workspaceId: workspace.id,
-          status: PostStatus.DRAFT,
-        },
-      }),
-      db.blogPost.count({
-        where: {
-          pageId: blogId,
-          workspaceId: workspace.id,
-          status: PostStatus.SCHEDULED,
-        },
-      }),
-      db.blogPost.aggregate({
-        where: {
-          pageId: blogId,
-          workspaceId: workspace.id,
-        },
-        _sum: {
-          views: true,
-          readTime: true,
-        },
-        _avg: {
-          readTime: true,
-        },
-      }),
-    ]);
+    const [total, published, draft, scheduled, viewsAndReadTime] =
+      await Promise.all([
+        db.blogPost.count({
+          where: {
+            pageId: blogId,
+            workspaceId: workspace.id,
+          },
+        }),
+        db.blogPost.count({
+          where: {
+            pageId: blogId,
+            workspaceId: workspace.id,
+            status: PostStatus.PUBLISHED,
+          },
+        }),
+        db.blogPost.count({
+          where: {
+            pageId: blogId,
+            workspaceId: workspace.id,
+            status: PostStatus.DRAFT,
+          },
+        }),
+        db.blogPost.count({
+          where: {
+            pageId: blogId,
+            workspaceId: workspace.id,
+            status: PostStatus.SCHEDULED,
+          },
+        }),
+        db.blogPost.aggregate({
+          where: {
+            pageId: blogId,
+            workspaceId: workspace.id,
+          },
+          _sum: {
+            views: true,
+            readTime: true,
+          },
+          _avg: {
+            readTime: true,
+          },
+        }),
+      ]);
 
     return {
       success: true,
@@ -433,7 +476,8 @@ export async function toggleBlogPostPin(
     console.error('Error toggling pin status:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to toggle pin status',
+      error:
+        error instanceof Error ? error.message : 'Failed to toggle pin status',
     };
   }
 }
@@ -490,7 +534,8 @@ export async function deleteBlogPost(
     console.error('Error deleting blog post:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to delete blog post',
+      error:
+        error instanceof Error ? error.message : 'Failed to delete blog post',
     };
   }
 }
@@ -535,8 +580,8 @@ export async function getBlogPostCategories(
     });
 
     const categoriesSet = new Set<string>();
-    posts.forEach(post => {
-      post.categories.forEach(category => categoriesSet.add(category));
+    posts.forEach((post) => {
+      post.categories.forEach((category) => categoriesSet.add(category));
     });
 
     return Array.from(categoriesSet).sort();
@@ -586,8 +631,8 @@ export async function getBlogPostTags(
     });
 
     const tagsSet = new Set<string>();
-    posts.forEach(post => {
-      post.tags.forEach(tag => tagsSet.add(tag));
+    posts.forEach((post) => {
+      post.tags.forEach((tag) => tagsSet.add(tag));
     });
 
     return Array.from(tagsSet).sort();

@@ -16,24 +16,29 @@ interface PageProps {
 export default async function Page({ params }: PageProps) {
   const { workspaceSlug, blogId } = await params;
 
-  const [page, workspace, blogPostsResult] = await Promise.all([
+  const [page, workspace, initialDataResult] = await Promise.all([
     getPageById(workspaceSlug, blogId),
     getWorkspaceWithPages(workspaceSlug),
-    getBlogPostsForTable(workspaceSlug, blogId),
+    getBlogPostsForTable(workspaceSlug, blogId, undefined, undefined, {
+      page: 1,
+      pageSize: 10,
+    }),
   ]);
 
   if (!page || !workspace || !workspaceSlug) {
     notFound();
   }
 
-  const blogPosts = blogPostsResult.success ? blogPostsResult.blogPosts : [];
+  const initialPosts = initialDataResult.success
+    ? initialDataResult.blogPosts
+    : [];
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
       <BlogTableView
         workspaceSlug={workspaceSlug}
         currentPage={page}
-        blogPosts={blogPosts}
+        initialPosts={initialPosts}
       />
     </div>
   );

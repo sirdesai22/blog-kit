@@ -124,6 +124,8 @@ model WorkspaceConfig {
   workspace          Workspace  @relation(fields: [workspaceId], references: [id])
 }
 
+// BLOG PAGE
+
 model Page {
   id              String           @id @default(cuid())
   title           String
