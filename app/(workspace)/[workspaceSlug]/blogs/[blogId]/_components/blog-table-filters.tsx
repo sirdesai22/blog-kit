@@ -73,7 +73,7 @@ export function BlogTableFilters({
     image: author.image,
   }));
 
-  // Build active filters array
+  // Build active filters array - CREATE INDIVIDUAL CHIPS FOR EACH SELECTION
   const activeFilters: ActiveFilter[] = [];
 
   if (searchTerm) {
@@ -85,92 +85,69 @@ export function BlogTableFilters({
     });
   }
 
-  if (statusFilters.length > 0) {
+  // Create individual chips for each selected status
+  statusFilters.forEach((statusId) => {
+    const statusOption = statusOptions.find((s) => s.id === statusId);
     activeFilters.push({
-      id: 'statuses',
+      id: `status-${statusId}`,
       type: 'statuses',
-      label:
-        statusFilters.length === 1
-          ? statusOptions.find((s) => s.id === statusFilters[0])?.label ||
-            statusFilters[0]
-          : 'Statuses',
-      value: statusFilters,
-      count: statusFilters.length,
+      label: statusOption?.label || statusId,
+      value: statusId,
     });
-  }
+  });
 
-  if (categoryFilters.length > 0) {
+  // Create individual chips for each selected category
+  categoryFilters.forEach((category) => {
     activeFilters.push({
-      id: 'categories',
+      id: `category-${category}`,
       type: 'categories',
-      label: categoryFilters.length === 1 ? categoryFilters[0] : 'Categories',
-      value: categoryFilters,
-      count: categoryFilters.length,
+      label: category,
+      value: category,
     });
-  }
+  });
 
-  if (tagFilters.length > 0) {
+  // Create individual chips for each selected tag
+  tagFilters.forEach((tag) => {
     activeFilters.push({
-      id: 'tags',
+      id: `tag-${tag}`,
       type: 'tags',
-      label: tagFilters.length === 1 ? tagFilters[0] : 'Tags',
-      value: tagFilters,
-      count: tagFilters.length,
+      label: tag,
+      value: tag,
     });
-  }
+  });
 
-  if (authorFilters.length > 0) {
-    const authorNames = authorFilters
-      .map((id) => authors.find((a) => a.id === id)?.name)
-      .filter(Boolean);
+  // Create individual chips for each selected author
+  authorFilters.forEach((authorId) => {
+    const author = authors.find((a) => a.id === authorId);
     activeFilters.push({
-      id: 'authors',
+      id: `author-${authorId}`,
       type: 'authors',
-      label: authorNames.length === 1 ? authorNames[0]! : 'Authors',
-      value: authorFilters,
-      count: authorFilters.length,
+      label: author?.name || authorId,
+      value: authorId,
     });
-  }
+  });
 
   const handleRemoveFilter = (filterId: string) => {
-    switch (filterId) {
-      case 'search':
-        setSearchTerm('');
-        break;
-      case 'statuses':
-        setStatusFilters([]);
-        break;
-      case 'categories':
-        setCategoryFilters([]);
-        break;
-      case 'tags':
-        setTagFilters([]);
-        break;
-      case 'authors':
-        setAuthorFilters([]);
-        break;
+    // Extract type and value from filterId
+    if (filterId === 'search') {
+      setSearchTerm('');
+    } else if (filterId.startsWith('status-')) {
+      const statusId = filterId.replace('status-', '');
+      setStatusFilters((prev) => prev.filter((id) => id !== statusId));
+    } else if (filterId.startsWith('category-')) {
+      const category = filterId.replace('category-', '');
+      setCategoryFilters((prev) => prev.filter((cat) => cat !== category));
+    } else if (filterId.startsWith('tag-')) {
+      const tag = filterId.replace('tag-', '');
+      setTagFilters((prev) => prev.filter((t) => t !== tag));
+    } else if (filterId.startsWith('author-')) {
+      const authorId = filterId.replace('author-', '');
+      setAuthorFilters((prev) => prev.filter((id) => id !== authorId));
     }
   };
 
-  const handleUpdateFilter = (
-    filterId: string,
-    newValue: string | string[]
-  ) => {
-    switch (filterId) {
-      case 'statuses':
-        setStatusFilters(newValue as string[]);
-        break;
-      case 'categories':
-        setCategoryFilters(newValue as string[]);
-        break;
-      case 'tags':
-        setTagFilters(newValue as string[]);
-        break;
-      case 'authors':
-        setAuthorFilters(newValue as string[]);
-        break;
-    }
-  };
+  // Remove the handleUpdateFilter since we're not using grouped filters anymore
+  const handleUpdateFilter = undefined;
 
   const handleClearAll = () => {
     setSearchTerm('');
@@ -267,7 +244,7 @@ export function BlogTableFilters({
       <ActiveFiltersBar
         activeFilters={activeFilters}
         onRemoveFilter={handleRemoveFilter}
-        onUpdateFilter={handleUpdateFilter}
+        // Remove onUpdateFilter since we're showing individual chips
         onClearAll={handleClearAll}
         categories={categories}
         tags={tags}

@@ -9,12 +9,22 @@ import {
 } from '@/components/ui/table';
 import { BlogTableRow } from './blog-table-row';
 import { Button } from '@/components/ui/button';
-import { Plus, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import {
+  Plus,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Trash2,
+  Archive,
+} from 'lucide-react';
 import { Heading } from '@/components/ui/heading';
 import { useRouter } from 'next/navigation';
 import { BlogPost } from '@/types/blog';
 import { BlogPostSort } from '@/modules/blogs/actions/blog-table-actions';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useBlogTable } from '@/modules/blogs/contexts/BlogTableContext';
+import { cn } from '@/lib/utils';
 
 interface BlogTableContentProps {
   posts: BlogPost[];
@@ -67,7 +77,7 @@ function SortableHeader({
 function LoadingRow() {
   return (
     <TableRow>
-      <TableHead className="w-14">
+      <TableHead className="w-12">
         <Skeleton className="h-4 w-4 rounded" />
       </TableHead>
       <TableHead>
@@ -88,16 +98,49 @@ function LoadingRow() {
       <TableHead>
         <Skeleton className="h-4 w-28" />
       </TableHead>
-      <TableHead>
-        <Skeleton className="h-4 w-12" />
-      </TableHead>
-      <TableHead>
-        <Skeleton className="h-4 w-12" />
-      </TableHead>
       <TableHead className="sticky right-0 w-12 bg-muted/50">
         <Skeleton className="h-4 w-4" />
       </TableHead>
     </TableRow>
+  );
+}
+
+// Bulk Actions Component
+function BulkActions({
+  selectedCount,
+  onClearSelection,
+}: {
+  selectedCount: number;
+  onClearSelection: () => void;
+}) {
+  return (
+    <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border-b border-blue-200">
+      <span className="text-sm font-medium text-blue-900">
+        {selectedCount} post{selectedCount > 1 ? 's' : ''} selected
+      </span>
+      <div className="flex items-center gap-1 ml-4">
+        <Button size="sm" variant="outline" className="h-7">
+          <Archive className="mr-1 h-3 w-3" />
+          Archive
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-7 text-red-600 hover:text-red-700"
+        >
+          <Trash2 className="mr-1 h-3 w-3" />
+          Delete
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={onClearSelection}
+          className="h-7"
+        >
+          Cancel
+        </Button>
+      </div>
+    </div>
   );
 }
 
@@ -110,10 +153,21 @@ export function BlogTableContent({
   sortConfig,
 }: BlogTableContentProps) {
   const router = useRouter();
+  const {
+    selectedIds,
+    selectAll,
+    clearSelection,
+    isAllSelected,
+    isIndeterminate,
+  } = useBlogTable();
 
   const newPage = () => {
     router.push(`/${workspaceSlug}/blogs/${currentPageId}/new`);
   };
+
+  const allPostIds = posts.map((post) => post.id);
+  const selectedCount = selectedIds.size;
+  const showBulkActions = selectedCount > 0;
 
   if (!loading && posts.length === 0) {
     return (
@@ -139,11 +193,28 @@ export function BlogTableContent({
 
   return (
     <div className="overflow-hidden rounded-lg border border-border">
+      {showBulkActions && (
+        <BulkActions
+          selectedCount={selectedCount}
+          onClearSelection={clearSelection}
+        />
+      )}
+
       <div className="relative max-w-[80vw] overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
-              <TableHead className="w-14"></TableHead>
+              <TableHead className="w-12">
+                <Checkbox
+                  checked={isAllSelected(allPostIds)}
+                  ref={(el) => {
+                    if (el) el.indeterminate = isIndeterminate(allPostIds);
+                  }}
+                  onCheckedChange={() => selectAll(allPostIds)}
+                  aria-label="Select all posts"
+                  disabled={loading}
+                />
+              </TableHead>
               <SortableHeader
                 field="title"
                 onSort={onSort}
@@ -168,14 +239,6 @@ export function BlogTableContent({
               >
                 Published / Modified
               </SortableHeader>
-              <SortableHeader
-                field="views"
-                onSort={onSort}
-                sortConfig={sortConfig}
-              >
-                Traffic
-              </SortableHeader>
-              <TableHead>Leads</TableHead>
               <TableHead className="sticky right-0 w-12 bg-muted/50 text-center"></TableHead>
             </TableRow>
           </TableHeader>
