@@ -34,9 +34,11 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
   return (
     <div className="flex h-screen flex-col">
       <SiteHeader />
-      <SidebarProvider className="flex flex-1 overflow-hidden">
+      <SidebarProvider className="flex flex-1 min-h-0">
         <MainSidebar sections={sidebarSections} />
-        <SidebarInset className="flex-1">{children}</SidebarInset>
+        <SidebarInset className="flex-1 overflow-y-auto">
+          {children}
+        </SidebarInset>
       </SidebarProvider>
     </div>
   );

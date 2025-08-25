@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import * as React from "react";
+import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import {
   LogOut,
@@ -10,31 +10,31 @@ import {
   ArrowUpRight,
   MessageSquare,
   Menu,
-} from 'lucide-react';
-import Link from 'next/link';
+} from "lucide-react";
+import Link from "next/link";
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
+} from "@/components/ui/popover";
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
   SheetClose,
-} from '@/components/ui/sheet';
-import { Separator } from '@/components/ui/separator';
+} from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { BreadcrumbNav } from './breadcrumb-nav';
-import { ThemeToggle } from './theme-toggle';
+} from "@/components/ui/tooltip";
+import { BreadcrumbNav } from "./breadcrumb-nav";
+import { ThemeToggle } from "./theme-toggle";
 
 export function SiteHeader() {
   const { data: session } = useSession();
@@ -46,9 +46,7 @@ export function SiteHeader() {
   }
 
   const { user } = session;
-  const initial = user.name?.charAt(0).toUpperCase() || '?';
-
-
+  const initial = user.name?.charAt(0).toUpperCase() || "?";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background px-3 py-1">
@@ -59,17 +57,17 @@ export function SiteHeader() {
 
         <div className="hidden items-center  md:flex">
           {showViewBlog && (
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="rounded-full mx-1 hover:border-primary/20 hover:border-1 text-nomal"
-          >
-            <Link href="#" className='text-normal'>
-              View Blog
-              <ArrowUpRight className=" h-4 w-4 text-muted-foreground " />
-            </Link>
-          </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="rounded-full mx-1 hover:border-primary/20 hover:border-1 text-nomal"
+            >
+              <Link href="#" className="text-normal">
+                View Blog
+                <ArrowUpRight className=" h-4 w-4 text-muted-foreground " />
+              </Link>
+            </Button>
           )}
           <Button
             variant="secondary"
@@ -118,7 +116,7 @@ export function SiteHeader() {
                 className="flex items-center justify-center rounded-full border-primary/20 border-1"
               >
                 <Avatar className="h-8 w-8 cursor-pointer ">
-                  <AvatarImage src={user.image || ''} alt={user.name || ''} />
+                  <AvatarImage src={user.image || ""} alt={user.name || ""} />
                   <AvatarFallback className="bg-muted text-xs font-medium text-muted-foreground">
                     {initial}
                   </AvatarFallback>
@@ -128,16 +126,14 @@ export function SiteHeader() {
             <PopoverContent className="w-64 p-2" align="end">
               <div className="flex items-center gap-3 p-2">
                 <Avatar>
-                  <AvatarImage src={user.image || ''} alt={user.name || ''} />
+                  <AvatarImage src={user.image || ""} alt={user.name || ""} />
                   <AvatarFallback className="bg-muted font-medium text-muted-foreground">
                     {initial}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col truncate">
                   <p className="truncate text-normal">{user.name}</p>
-                  <p className="truncate text-small">
-                    {user.email}
-                  </p>
+                  <p className="truncate text-small">{user.email}</p>
                 </div>
               </div>
               <Separator />
@@ -148,7 +144,7 @@ export function SiteHeader() {
                 onClick={() => signOut()}
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                <span className='text-normal'>Log out</span>
+                <span className="text-normal">Log out</span>
               </Button>
             </PopoverContent>
           </Popover>
@@ -166,7 +162,7 @@ export function SiteHeader() {
               <div className="flex h-full flex-col">
                 <div className="flex items-center gap-3 pb-4">
                   <Avatar>
-                    <AvatarImage src={user.image || ''} alt={user.name || ''} />
+                    <AvatarImage src={user.image || ""} alt={user.name || ""} />
                     <AvatarFallback className="bg-muted font-medium text-muted-foreground ">
                       {initial}
                     </AvatarFallback>
@@ -186,9 +182,9 @@ export function SiteHeader() {
                       className="w-full justify-start hover:text-primary bg-transparent rounded-full"
                       asChild
                     >
-                      <Link href="#" >
+                      <Link href="#">
                         <ArrowUpRight className="mr-2 h-4 w-4  hover:text-primary" />
-                        <p className='text-normal'>View Blog</p>
+                        <p className="text-normal">View Blog</p>
                       </Link>
                     </Button>
                   </SheetClose>

@@ -171,17 +171,29 @@
   }
 }
 
-.custom-scrollbar::-webkit-scrollbar {
+::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
-.custom-scrollbar::-webkit-scrollbar-track {
+
+::-webkit-scrollbar-track {
   background: transparent;
 }
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--muted-dark);
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
+
+::-webkit-scrollbar-thumb {
   background: rgb(199, 199, 199);
   border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--muted-dark);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(199,199,199) transparent;
+}
+.dark * {
+  scrollbar-color: var(--muted-dark) transparent;
 }
