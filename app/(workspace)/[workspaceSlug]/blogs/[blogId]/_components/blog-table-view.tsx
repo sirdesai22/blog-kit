@@ -60,7 +60,7 @@ function BlogTable({
     }
 
     if (statusFilters.length > 0) {
-      filterObj.statuses = statusFilters as PostStatus[]; // Pass array of statuses
+      filterObj.statuses = statusFilters as any[];
     }
 
     if (categoryFilters.length > 0) {
