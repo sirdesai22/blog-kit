@@ -1,18 +1,22 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
-
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
 const primaryButtonBaseClasses =
-  "w-full h-12 rounded-xl font-medium text-base flex items-center justify-center"
+  "w-full  rounded-xl font-medium text-base flex items-center p-4 justify-center";
 
 const socialButtonClasses =
-  "w-full h-12 flex items-center hover:cursor-pointer justify-center px-4 rounded-xl border border-input text-muted-foreground hover:bg-secondary"
+  "w-full  flex items-center hover:cursor-pointer justify-center p-4 rounded-xl border border-input text-muted-foreground hover:bg-secondary";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "social"
-}
+  variant?: "primary" | "social";
+};
 
-function Button({ className, variant = "primary", disabled, ...props }: ButtonProps) {
+function Button({
+  className,
+  variant = "primary",
+  disabled,
+  ...props
+}: ButtonProps) {
   return (
     <button
       disabled={disabled}
@@ -27,7 +31,7 @@ function Button({ className, variant = "primary", disabled, ...props }: ButtonPr
       )}
       {...props}
     />
-  )
+  );
 }
 
-export { Button }
+export { Button };

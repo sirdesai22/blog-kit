@@ -119,19 +119,19 @@ function SortableTableRow({
         </Link>
       </TableCell>
       <TableCell>{category.posts}</TableCell>
-      <TableCell>
+      {/* <TableCell>
         {category.traffic.toLocaleString()}{" "}
         <span className="rounded bg-red-50 px-1 text-xs font-medium text-red-600">
           {Math.floor(Math.random() * 20)}%
         </span>
-      </TableCell>
-      <TableCell>{category.leads} 
+      </TableCell> */}
+      {/* <TableCell>{category.leads} 
         <span className="rounded bg-green-50 px-1 text-xs font-medium text-green-600">
           {Math.floor(Math.random() * 60)}%
-        </span></TableCell>
+        </span></TableCell> */}
       <TableCell className="sticky right-0 bg-background group-hover:bg-accent/50">
         <div className="flex items-center justify-end gap-2">
-          <Button variant="outline" size="sm"  className="text-normal-muted">
+          <Button variant="outline" size="sm" className="text-normal-muted">
             Manage featured posts
           </Button>{" "}
           <Button variant="outline" size="sm" className="text-normal-muted">
@@ -140,7 +140,8 @@ function SortableTableRow({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onEdit(category)} className="text-normal-muted"
+            onClick={() => onEdit(category)}
+            className="text-normal-muted"
           >
             Edit
           </Button>
@@ -244,8 +245,7 @@ export function BlogCategoriesView({
   return (
     <>
       <CardTitle className="text-normal ml-lg mb-md">
-        {categories.length}{" "}
-        <span className="text-small">Categories</span>
+        {categories.length} <span className="text-small">Categories</span>
       </CardTitle>
       <div className="overflow-hidden">
         <div className="relative w-full overflow-x-auto">
@@ -260,8 +260,8 @@ export function BlogCategoriesView({
                   <TableHead className="w-14"></TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Posts</TableHead>
-                  <TableHead>Traffic</TableHead>
-                  <TableHead>Leads</TableHead>
+                  {/* <TableHead>Traffic</TableHead> */}
+                  {/* <TableHead>Leads</TableHead> */}
                   <TableHead className="sticky right-0 w-12  text-center"></TableHead>
                 </TableRow>
               </TableHeader>

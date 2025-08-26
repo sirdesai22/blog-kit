@@ -27,7 +27,7 @@ function ColorSwatch({
 
   return (
     <div
-      className={`flex flex-col items-start gap-y-2 ${
+      className={`flex flex-col items-start gap-y-1  ${
         disabled ? "opacity-50  cursor-not-allowed " : ""
       }`}
     >
@@ -35,7 +35,7 @@ function ColorSwatch({
         <DialogTrigger asChild>
           <button
             disabled={disabled}
-            className="h-14 w-14 rounded-lg border cursor-pointer disabled:cursor-not-allowed"
+            className="h-18 w-18  border cursor-pointer disabled:cursor-not-allowed"
             style={{ backgroundColor: hex }}
           />
         </DialogTrigger>
@@ -45,7 +45,7 @@ function ColorSwatch({
           </DialogContent>
         )}
       </Dialog>
-      <p className="text-small">{hex}</p>
+      <p className="text-small ml-[12px]">{hex}</p>
     </div>
   );
 }
@@ -58,20 +58,50 @@ const ImageUploadPlaceholder = ({
   label?: string;
   className?: string;
   disabled?: boolean;
-}) => (
-  <div
-    className={`flex flex-col items-center gap-y-2 ${
-      disabled ? "opacity-50 cursor-not-allowed" : ""
-    }`}
-  >
-    {label && <p className="text-normal">{label}</p>}
+}) => {
+  const [preview, setPreview] = useState<string | null>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  return (
     <div
-      className={`flex items-center justify-center rounded-lg bg-secondary ${className}`}
+      className={`flex flex-col items-center gap-y-2 ${
+        disabled ? "opacity-50 cursor-not-allowed" : ""
+      }`}
     >
-      <ImageIcon className="h-8 w-8" />
+      {label && <p className="text-normal">{label}</p>}
+
+      <label
+        className={`relative flex items-center justify-center bg-secondary ${className}  overflow-hidden cursor-pointer ${
+          disabled ? "pointer-events-none" : ""
+        }`}
+      >
+        {preview ? (
+          <img
+            src={preview}
+            alt="Uploaded"
+            className="object-cover w-full h-full"
+          />
+        ) : (
+          <ImageIcon className="h-8 w-8 text-muted-foreground" />
+        )}
+
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          disabled={disabled}
+          onChange={handleChange}
+        />
+      </label>
     </div>
-  </div>
-);
+  );
+};
 
 const SettingsSection = ({
   title,
@@ -82,12 +112,12 @@ const SettingsSection = ({
   description: string;
   children: React.ReactNode;
 }) => (
-  <div className="grid grid-cols-1 gap-8 border-t py-md md:grid-cols-[200px_1fr]">
+  <div className="grid grid-cols-1 gap-8 border-t py-md md:grid-cols-[400px_1fr]">
     <div>
       <h3 className="text-main">{title}</h3>
       <p className="text-small">{description}</p>
     </div>
-    <div className="flex items-start">{children}</div>
+    <div className="flex items-start mt-1">{children}</div>
   </div>
 );
 
@@ -226,12 +256,12 @@ function BrandColors({ darkModeDisabled }: { darkModeDisabled: boolean }) {
       <div className="grid grid-cols-1 border-t py-md md:grid-cols-[200px_1fr]">
         <div className="flex flex-col gap-y-6">
           {/* Header Row */}
-          <div className="grid grid-cols-[220px_100px_100px] items-center gap-x-4">
+          <div className="grid grid-cols-[400px_100px_100px] items-center gap-x-4">
             <h3 className="text-main">Brand Colors</h3>
-            <p className="text-normal ">Light Mode</p>
+            <p className="text-normal text-center  mt-1 ml-2">Light Mode</p>
             <p
-              className={`text-normal ${
-                darkModeDisabled ? "text-muted-foreground" : "text-foreground"
+              className={`text-normal text-center mt-1 ml-2 ${
+                !darkModeDisabled ? "text-muted-foreground" : "text-foreground"
               }`}
             >
               Dark Mode
@@ -242,7 +272,7 @@ function BrandColors({ darkModeDisabled }: { darkModeDisabled: boolean }) {
           {brandColors.map((color) => (
             <div
               key={color.label}
-              className="grid grid-cols-[225px_100px_100px] items-center gap-x-4"
+              className="grid grid-cols-[420px_100px_100px] items-start gap-x-4"
             >
               <div>
                 <p className="text-normal">{color.label}</p>
@@ -259,7 +289,7 @@ function BrandColors({ darkModeDisabled }: { darkModeDisabled: boolean }) {
               <ColorSwatch
                 hex={color.darkHex}
                 onChange={(val) => updateColor(color.label, "darkHex", val)}
-                disabled={darkModeDisabled}
+                disabled={!darkModeDisabled}
               />
             </div>
           ))}
@@ -270,7 +300,7 @@ function BrandColors({ darkModeDisabled }: { darkModeDisabled: boolean }) {
 }
 
 export default function BrandSettings() {
-  const [darkModeDisabled, setDarkModeDisabled] = useState(false);
+  const [darkModeDisabled, setDarkModeDisabled] = useState(true);
   return (
     <div className="h-full p-4 sm:p-6">
       <header className="mb-md">
@@ -300,9 +330,10 @@ export default function BrandSettings() {
           description="Supported formats (JPG, PNG, WebP) Minimum size: 100px"
         >
           <div className="flex gap-x-4">
-            <ImageUploadPlaceholder label="Light Mode" />
+            <ImageUploadPlaceholder className="w-28 h-16" label="Light Mode" />
             <ImageUploadPlaceholder
-              disabled={darkModeDisabled}
+              disabled={!darkModeDisabled}
+              className="w-28 h-16"
               label="Dark Mode"
             />
           </div>
@@ -312,7 +343,7 @@ export default function BrandSettings() {
           title="Favicon"
           description="Supported formats (JPG, PNG, WebP) Recommended size: 100px x 100px"
         >
-          <ImageUploadPlaceholder />
+          <ImageUploadPlaceholder className="w-18 h-18" />
         </SettingsSection>
 
         <BrandColors darkModeDisabled={darkModeDisabled} />

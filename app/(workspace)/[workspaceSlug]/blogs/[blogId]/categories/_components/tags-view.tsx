@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -12,15 +12,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -28,16 +28,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 import {
   deleteBlogTag,
   reorderBlogTags,
   updateBlogTag,
-} from '@/modules/blogs/actions/tag-actions';
+} from "@/modules/blogs/actions/tag-actions";
 
 // Icons
-import { ExternalLink, MoreVertical, Trash2 } from 'lucide-react';
+import { ExternalLink, MoreVertical, Trash2 } from "lucide-react";
 
 // Drag and Drop
 import {
@@ -48,15 +48,15 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface TagType {
   name: string;
@@ -94,7 +94,7 @@ function SortableTableRow({
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 10 : 'auto',
+    zIndex: isDragging ? 10 : "auto",
   };
 
   return (
@@ -116,29 +116,25 @@ function SortableTableRow({
         </Link>
       </TableCell>
       <TableCell>{tag.posts}</TableCell>
-      <TableCell>{tag.traffic.toLocaleString()} <span className="rounded bg-red-50 px-1 text-xs font-medium text-red-600">
+      {/* <TableCell>{tag.traffic.toLocaleString()} <span className="rounded bg-red-50 px-1 text-xs font-medium text-red-600">
           {Math.floor(Math.random() * 60)}%
         </span></TableCell>
       <TableCell>{tag.leads} <span className="rounded bg-green-50 px-1 text-xs font-medium text-green-600">
           {Math.floor(Math.random() * 60)}%
-        </span></TableCell>
+        </span></TableCell> */}
       <TableCell
         className="sticky right-0 bg-background group-hover:bg-accent/50"
         onClick={(e) => e.stopPropagation()} // Prevents drag from firing on button clicks
       >
         <div className="flex items-center justify-end gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className='text-normal-muted'
-          >
+          <Button variant="outline" size="sm" className="text-normal-muted">
             View Posts
           </Button>
           <Button
             variant="outline"
             size="sm"
-            className='text-normal-muted'
-            onClick={() => onEdit(tag) }
+            className="text-normal-muted"
+            onClick={() => onEdit(tag)}
           >
             Edit
           </Button>
@@ -174,8 +170,8 @@ export function BlogTagsView({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<TagType | null>(null);
-  const [editTagName, setEditTagName] = useState('');
-  const [editTagDescription, setEditTagDescription] = useState('');
+  const [editTagName, setEditTagName] = useState("");
+  const [editTagDescription, setEditTagDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const sensors = useSensors(
@@ -199,7 +195,7 @@ export function BlogTagsView({
           newTags.map((tag) => tag.name)
         );
       } catch (error) {
-        console.error('Failed to update tag order:', error);
+        console.error("Failed to update tag order:", error);
         setTags(tags); // Revert on failure
       }
     }
@@ -213,7 +209,7 @@ export function BlogTagsView({
       setIsEditDialogOpen(false);
       router.refresh();
     } catch (error) {
-      console.error('Failed to update tag:', error);
+      console.error("Failed to update tag:", error);
     } finally {
       setIsLoading(false);
     }
@@ -227,7 +223,7 @@ export function BlogTagsView({
       setIsDeleteDialogOpen(false);
       router.refresh();
     } catch (error) {
-      console.error('Failed to delete tag:', error);
+      console.error("Failed to delete tag:", error);
     } finally {
       setIsLoading(false);
     }
@@ -248,10 +244,10 @@ export function BlogTagsView({
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50 hover:bg-muted/50">
-                 <TableHead className="pl-lg">Tag</TableHead>
+                  <TableHead className="pl-lg">Tag</TableHead>
                   <TableHead>Posts</TableHead>
-                  <TableHead>Traffic</TableHead>
-                  <TableHead>Leads</TableHead>
+                  {/* <TableHead>Traffic</TableHead>
+                  <TableHead>Leads</TableHead> */}
                   <TableHead className="sticky right-0 w-12  text-center"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -278,7 +274,7 @@ export function BlogTagsView({
                         onEdit={(t) => {
                           setSelectedTag(t);
                           setEditTagName(t.name);
-                          setEditTagDescription('');
+                          setEditTagDescription("");
                           setIsEditDialogOpen(true);
                         }}
                         onDelete={(t) => {
@@ -328,7 +324,7 @@ export function BlogTagsView({
               Cancel
             </Button>
             <Button onClick={handleEditTag} disabled={isLoading}>
-              {isLoading ? 'Updating...' : 'Save Changes'}
+              {isLoading ? "Updating..." : "Save Changes"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -356,7 +352,7 @@ export function BlogTagsView({
               onClick={handleDeleteTag}
               disabled={isLoading}
             >
-              {isLoading ? 'Deleting...' : 'Delete Tag'}
+              {isLoading ? "Deleting..." : "Delete Tag"}
             </Button>
           </DialogFooter>
         </DialogContent>

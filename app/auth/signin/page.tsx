@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { signIn, useSession } from 'next-auth/react';
-import { Button } from '@/components/custom/Button';
-import { Input } from '@/components/custom/Input';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import LogoWithText, { GitHubIcon, GoogleIcon } from '@/components/icons/icons';
-import ReCAPTCHA from 'react-google-recaptcha';
-import { Loader } from 'lucide-react';
+import { useState, useEffect, useRef } from "react";
+import { signIn, useSession } from "next-auth/react";
+import { Button } from "@/app/auth/_components/Button";
+import { Input } from "@/app/auth/_components/Input";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import LogoWithText, { GitHubIcon, GoogleIcon } from "@/components/icons/icons";
+import ReCAPTCHA from "react-google-recaptcha";
+import { Loader } from "lucide-react";
 
 export default function SignInPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
   const recaptchaRef = useRef<ReCAPTCHA>(null);
@@ -25,19 +25,19 @@ export default function SignInPage() {
 
   const getRedirectDestination = async (): Promise<string> => {
     try {
-      const response = await fetch('/api/auth/redirect');
+      const response = await fetch("/api/auth/redirect");
       if (response.ok) {
         const { redirectTo } = await response.json();
         return redirectTo;
       }
     } catch (error) {
-      console.error('Error getting redirect destination:', error);
+      console.error("Error getting redirect destination:", error);
     }
-    return '/onboarding';
+    return "/onboarding";
   };
 
   useEffect(() => {
-    if (status === 'authenticated' && session?.user?.id) {
+    if (status === "authenticated" && session?.user?.id) {
       getRedirectDestination().then((redirectTo) => {
         router.push(redirectTo);
       });
@@ -46,22 +46,22 @@ export default function SignInPage() {
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
-    setError('');
+    setError("");
     // Remove the callbackUrl - let NextAuth redirect callback handle it
-    await signIn('google');
+    await signIn("google");
   };
 
   const handleGitHubSignIn = async () => {
     setLoading(true);
-    setError('');
+    setError("");
     // Remove the callbackUrl - let NextAuth redirect callback handle it
-    await signIn('github');
+    await signIn("github");
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!recaptchaToken && siteKey) {
-      setError('Please complete the CAPTCHA.');
+      setError("Please complete the CAPTCHA.");
       return;
     }
 
@@ -74,28 +74,28 @@ export default function SignInPage() {
 
   const handleEmailSignIn = async () => {
     if (!email || !password) {
-      setError('Please fill in all fields');
+      setError("Please fill in all fields");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const result = await signIn('credentials', {
+      const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
       });
 
       if (result?.error) {
-        setError('Invalid email or password');
+        setError("Invalid email or password");
       } else if (result?.ok) {
         const redirectTo = await getRedirectDestination();
         router.push(redirectTo);
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError("An error occurred. Please try again.");
     } finally {
       setLoading(false);
       recaptchaRef.current?.reset();
@@ -105,38 +105,38 @@ export default function SignInPage() {
 
   const handleSignUp = async () => {
     if (!email || !password || !name) {
-      setError('Please fill in all fields');
+      setError("Please fill in all fields");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, name }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Failed to create account');
+        setError(data.error || "Failed to create account");
         return;
       }
 
-      const result = await signIn('credentials', {
+      const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
       });
 
       if (result?.ok) {
-        router.push('/onboarding');
+        router.push("/onboarding");
       }
     } catch (error) {
-      setError('An error occurred. Please try again.');
+      setError("An error occurred. Please try again.");
     } finally {
       setLoading(false);
       recaptchaRef.current?.reset();
@@ -144,7 +144,7 @@ export default function SignInPage() {
     }
   };
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div>Loading...</div>
@@ -152,7 +152,7 @@ export default function SignInPage() {
     );
   }
 
-  if (status === 'authenticated') {
+  if (status === "authenticated") {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div>
@@ -169,7 +169,7 @@ export default function SignInPage() {
           <LogoWithText />
         </div>
         <h2 className="text-center text-muted-foreground mb-6 text-md italic">
-          {isSignUp ? 'Create your account' : 'Sign in to your account'}
+          {isSignUp ? "Create your account" : "Sign in to your account"}
         </h2>
       </div>
 
@@ -262,10 +262,10 @@ export default function SignInPage() {
 
           <Button type="submit" variant="primary" disabled={loading}>
             {loading
-              ? 'Loading...'
+              ? "Loading..."
               : isSignUp
-              ? 'Create Account'
-              : 'Continue with email'}
+              ? "Create Account"
+              : "Continue with email"}
           </Button>
         </form>
 
@@ -273,16 +273,16 @@ export default function SignInPage() {
           <button
             onClick={() => {
               setIsSignUp(!isSignUp);
-              setError('');
-              setPassword('');
-              setName('');
+              setError("");
+              setPassword("");
+              setName("");
               setRecaptchaToken(null);
               recaptchaRef.current?.reset();
             }}
             className="text-sm text-primary hover:underline"
           >
             {isSignUp
-              ? 'Already have an account? Sign in'
+              ? "Already have an account? Sign in"
               : "Don't have an account? Sign up"}
           </button>
         </div>
@@ -292,8 +292,8 @@ export default function SignInPage() {
         By continuing you agree to the <br />
         <Link href="/terms" className="underline hover:text-primary">
           Terms of Use
-        </Link>{' '}
-        and{' '}
+        </Link>{" "}
+        and{" "}
         <Link href="/privacy" className="underline hover:text-primary">
           Privacy Policy
         </Link>
