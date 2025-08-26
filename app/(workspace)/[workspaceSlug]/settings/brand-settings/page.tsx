@@ -1,18 +1,11 @@
 "use client";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Bold, Italic, ImageIcon, MoreHorizontal } from "lucide-react";
+import { ImageIcon } from "lucide-react";
 import { useState } from "react";
 import { ChromePicker } from "react-color";
 import { Dialog } from "@/components/ui/dialog";
 import { DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import FontSettings from "./components/font-setting-row";
 
 function ColorSwatch({
   hex,
@@ -118,70 +111,6 @@ const SettingsSection = ({
       <p className="text-small">{description}</p>
     </div>
     <div className="flex items-start mt-1">{children}</div>
-  </div>
-);
-
-const FontSettingRow = ({
-  label,
-  fontFamily,
-  fontSize,
-  isBold,
-  isItalic,
-  isEditable = false,
-}: {
-  label: string;
-  fontFamily: string;
-  fontSize: number;
-  isBold?: boolean;
-  isItalic?: boolean;
-  isEditable?: boolean;
-}) => (
-  <div className="flex max-w-[400px] items-center justify-between rounded-md border p-2">
-    <p
-      className={`text-foreground ${isBold ? "font-bold" : ""} ${
-        isItalic ? "italic" : ""
-      }`}
-      style={{ fontFamily, fontSize: `${fontSize}px` }}
-    >
-      {label}, {fontFamily}, {fontSize}, {isBold && "B"} {isItalic && "I"}
-    </p>
-    {isEditable ? (
-      <div className="flex items-center gap-x-2 rounded-md border p-1">
-        <Select defaultValue="dm-sans">
-          <SelectTrigger className="w-[120px] border-none !ring-0">
-            <SelectValue placeholder="DM Sans" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="dm-sans">DM Sans</SelectItem>
-            <SelectItem value="dm-sherif">DM Sherif</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select defaultValue="12">
-          <SelectTrigger className="w-[60px] border-none !ring-0">
-            <SelectValue placeholder="12" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="12">12</SelectItem>
-            <SelectItem value="14">14</SelectItem>
-            <SelectItem value="18">18</SelectItem>
-            <SelectItem value="24">24</SelectItem>
-            <SelectItem value="36">36</SelectItem>
-          </SelectContent>
-        </Select>
-        <div className="flex items-center gap-x-1">
-          <Button variant="ghost" size="icon" className="h-7 w-7">
-            <Bold className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7">
-            <Italic className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-    ) : (
-      <Button variant="ghost" size="icon" className="h-8 w-8">
-        <MoreHorizontal className="h-5 w-5 " />
-      </Button>
-    )}
   </div>
 );
 
@@ -359,30 +288,7 @@ export default function BrandSettings() {
           title="Fonts"
           description="Supported formats (JPG, PNG, WebP) Recommended size: 100px x 100px"
         >
-          <div className="flex w-full flex-col gap-y-3">
-            <FontSettingRow
-              label="H1"
-              fontFamily="DM Sherif"
-              fontSize={36}
-              isBold
-              // isEditable
-            />
-            <FontSettingRow
-              label="H2"
-              fontFamily="DM Sherif"
-              fontSize={24}
-              isBold
-              isItalic
-            />
-            <FontSettingRow
-              label="H3"
-              fontFamily="DM Sherif"
-              fontSize={18}
-              isBold
-              isItalic
-            />
-            <FontSettingRow label="Body" fontFamily="DM Sans" fontSize={14} />
-          </div>
+          <FontSettings />
         </SettingsSection>
       </main>
     </div>
