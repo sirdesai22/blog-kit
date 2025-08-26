@@ -110,7 +110,7 @@ export async function getFeaturedPosts(
   };
 }
 
-// Update featured posts for a category (or global) with ORDER
+
 export async function updateFeaturedPosts(
   workspaceSlug: string,
   pageId: string,
@@ -212,7 +212,7 @@ export async function updateFeaturedPosts(
               where: { id: postId },
               data: {
                 featuredInCategories: updatedCategories,
-                // ✅ ADD: Store order in JSON format
+            
                 featuredCategoryOrders: {
                   ...(post.featuredCategoryOrders as any),
                   [categoryId]: index,

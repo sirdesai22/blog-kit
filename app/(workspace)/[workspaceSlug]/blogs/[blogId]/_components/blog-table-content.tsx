@@ -133,7 +133,6 @@ function LoadingRow() {
   );
 }
 
-// Enhanced Bulk Actions Component
 function BulkActions({
   selectedCount,
   selectedIds,
@@ -157,12 +156,10 @@ function BulkActions({
   const selectedPostIds = Array.from(selectedIds);
 
   const refreshTable = () => {
-    // Invalidate all blog posts table queries for this workspace and blog
     queryClient.invalidateQueries({
       queryKey: ['blog-posts-table', workspaceSlug, currentPageId],
     });
 
-    // Also invalidate filter options in case categories/tags/authors changed
     queryClient.invalidateQueries({
       queryKey: ['workspace-categories', workspaceSlug, currentPageId],
     });
@@ -468,7 +465,7 @@ export function BlogTableContent({
               <TableHead className="w-12">
                 <Checkbox
                   checked={isAllSelected(allPostIds)}
-                  ref={(el) => {
+                  ref={(el: any) => {
                     if (el) el.indeterminate = isIndeterminate(allPostIds);
                   }}
                   onCheckedChange={() => selectAll(allPostIds)}

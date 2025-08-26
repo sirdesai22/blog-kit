@@ -176,7 +176,7 @@ model Author {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   pages       Page[]    @relation("AuthorToPage")
-  blogPosts   BlogPost[] // Add this relation
+  blogPosts   BlogPost[] 
 
   @@unique([name, workspaceId])
 }
@@ -231,8 +231,8 @@ model BlogPost {
   readTime          Int?     // Estimated read time in minutes
   
   // Author & Workspace Relations
-  authorId          String?  // Primary author
-  coAuthorIds       String[] // Additional authors
+  authorId          String? 
+  coAuthorIds       String[]
   workspaceId       String
   
  

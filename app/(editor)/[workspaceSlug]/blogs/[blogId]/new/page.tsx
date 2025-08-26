@@ -29,10 +29,10 @@ export default async function NewPostPage(props: NewPostPageProps) {
 
   // ✅ Use new ID-based actions
   const [categoriesData, authors, blogPosts, tagsData] = await Promise.all([
-    getWorkspaceCategoriesWithStats(workspaceSlug),
+    getWorkspaceCategoriesWithStats(workspaceSlug, blogId),
     getWorkspaceAuthors(workspaceSlug),
     getBlogPostsByBlogId(workspaceSlug, blogId),
-    getWorkspaceTagsWithStats(workspaceSlug),
+    getWorkspaceTagsWithStats(workspaceSlug, blogId),
   ]);
 
   return (
