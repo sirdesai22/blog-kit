@@ -14,15 +14,15 @@ export interface BlogPostData {
   content: any; // PlateJS content
   excerpt?: string;
   featuredImage?: string;
-  tags: string[];
-  category?: string;
+  tagIds: string[]; // CHANGED from tags: string[]
+  categoryIds: string[]; // CHANGED from category?: string
   metaTitle?: string;
   metaDescription?: string;
   featured?: boolean;
   pinned?: boolean;
   scheduledFor?: Date;
   publishedAt?: Date;
-  authorIds?: string[]; // Add this - array of author IDs
+  authorIds?: string[];
 }
 // Convert content to HTML using PlateJS's built-in serializer
 
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
       editorComponent: EditorStatic, // You'll need to import this
       props: { style: { padding: '0' } }, // Minimal styling for API use
     });
-    console.log(htmlContent);
+
     // Verify the blog publication exists and user has access
     const blogPage = await db.page.findFirst({
       where: {
@@ -91,26 +91,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate slug
-    const slug = postData.slug || generateSlug(postData.title);
+    // Generate unique slug
+    const baseSlug = postData.slug || generateSlug(postData.title);
+    const slug = await generateUniqueSlug(baseSlug, workspaceId, blogPostId);
 
-    // Check slug uniqueness within this workspace (not just blog)
-    const existingPost = await db.blogPost.findFirst({
-      where: {
-        slug,
-        workspaceId, // Unique within workspace
-        ...(blogPostId && { id: { not: blogPostId } }),
-      },
-    });
+    // Validate categories exist
+    if (postData.categoryIds && postData.categoryIds.length > 0) {
+      const validCategories = await db.category.findMany({
+        where: {
+          id: { in: postData.categoryIds },
+          workspaceId,
+        },
+      });
 
-    if (existingPost) {
-      return NextResponse.json(
-        { error: 'A post with this slug already exists in this workspace' },
-        { status: 409 }
-      );
+      if (validCategories.length !== postData.categoryIds.length) {
+        return NextResponse.json(
+          { error: 'One or more categories not found' },
+          { status: 400 }
+        );
+      }
     }
 
-    // Validate author if provided
+    // Validate tags exist
+    if (postData.tagIds && postData.tagIds.length > 0) {
+      const validTags = await db.tag.findMany({
+        where: {
+          id: { in: postData.tagIds },
+          workspaceId,
+        },
+      });
+
+      if (validTags.length !== postData.tagIds.length) {
+        return NextResponse.json(
+          { error: 'One or more tags not found' },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Validate authors
     if (postData.authorIds && postData.authorIds.length > 0) {
       const validAuthors = await db.author.findMany({
         where: {
@@ -151,10 +170,13 @@ export async function POST(request: NextRequest) {
             mdx: '',
             excerpt: postData.excerpt,
             featuredImage: postData.featuredImage,
-            tags: postData.tags,
-            categories: postData.category ? [postData.category] : [],
-            metaTitle: postData.metaTitle,
-            metaDescription: postData.metaDescription,
+            // ✅ UPDATE relationships
+            categories: {
+              set: postData.categoryIds?.map((id) => ({ id })) || [],
+            },
+            tags: {
+              set: postData.tagIds?.map((id) => ({ id })) || [],
+            },
             featured: postData.featured || false,
             pinned: postData.pinned || false,
             readTime: 2,
@@ -175,10 +197,13 @@ export async function POST(request: NextRequest) {
             excerpt: postData.excerpt,
             status: PostStatus.DRAFT,
             featuredImage: postData.featuredImage,
-            tags: postData.tags,
-            categories: postData.category ? [postData.category] : [],
-            metaTitle: postData.metaTitle,
-            metaDescription: postData.metaDescription,
+            // ✅ CREATE relationships
+            categories: {
+              connect: postData.categoryIds?.map((id) => ({ id })) || [],
+            },
+            tags: {
+              connect: postData.tagIds?.map((id) => ({ id })) || [],
+            },
             featured: postData.featured || false,
             pinned: postData.pinned || false,
             readTime: 2,
@@ -202,6 +227,7 @@ export async function POST(request: NextRequest) {
         message: 'Draft saved successfully!',
         data: {
           blogPost,
+          generatedSlug: slug,
         },
       },
       { status: 200 }
@@ -223,4 +249,39 @@ function generateSlug(title: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
+}
+
+// ✅ NEW: Generate unique slug by handling conflicts automatically
+async function generateUniqueSlug(
+  baseSlug: string,
+  workspaceId: string,
+  excludePostId?: string
+): Promise<string> {
+  let slug = baseSlug;
+  let counter = 1;
+
+  while (true) {
+    const existingPost = await db.blogPost.findFirst({
+      where: {
+        slug,
+        workspaceId,
+        ...(excludePostId && { id: { not: excludePostId } }),
+      },
+    });
+
+    if (!existingPost) {
+      return slug;
+    }
+
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+
+    // Safety limit to prevent infinite loops
+    if (counter > 100) {
+      slug = `${baseSlug}-${Date.now()}`;
+      break;
+    }
+  }
+
+  return slug;
 }

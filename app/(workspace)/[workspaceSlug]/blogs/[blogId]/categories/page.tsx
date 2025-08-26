@@ -1,10 +1,8 @@
 import { notFound } from 'next/navigation';
-import {
-  getPageById,
-  getWorkspaceBlogCategories,
-} from '@/modules/workspace/actions/workspace-actions';
+import { getPageById } from '@/modules/workspace/actions/workspace-actions';
 import { CategoriesAndTagsView } from './_components/categories-and-tags-view';
-import { getWorkspaceBlogTags } from '@/modules/blogs/actions/tag-actions';
+import { getWorkspaceCategoriesWithStats } from '@/modules/blogs/actions/category-actions';
+import { getWorkspaceTagsWithStats } from '@/modules/blogs/actions/tag-actions-new';
 import { Suspense } from 'react';
 
 interface PageProps {
@@ -14,7 +12,7 @@ interface PageProps {
   }>;
 }
 
-// Separate loading component
+
 function CategoriesLoading() {
   return (
     <div className="p-6 animate-pulse">
@@ -45,8 +43,8 @@ async function CategoriesContent({
 
   const [page, categoriesData, tagsData] = await Promise.all([
     getPageById(workspaceSlug, blogId),
-    getWorkspaceBlogCategories(workspaceSlug),
-    getWorkspaceBlogTags(workspaceSlug),
+    getWorkspaceCategoriesWithStats(workspaceSlug, blogId),
+    getWorkspaceTagsWithStats(workspaceSlug, blogId),
   ]);
 
   if (!page || !categoriesData || !tagsData || !workspaceSlug) {

@@ -35,7 +35,7 @@ interface MultiSelectFilterProps {
   selectedValues: string[];
   onSelectionChange: (values: string[]) => void;
   loading?: boolean;
-  colorScheme: {
+  colorScheme?: {
     button: string;
     icon: string;
   };
@@ -72,12 +72,13 @@ export function MultiSelectFilter({
   };
 
   const getButtonText = () => {
-    if (selectedValues.length === 0) return placeholder;
-    if (selectedValues.length === 1) {
-      const option = options.find((opt) => opt.id === selectedValues[0]);
-      return option?.label || option?.name || placeholder;
+    if (selectedValues.length === 0) {
+      return placeholder;
     }
-    return `${placeholder} (${selectedValues.length})`;
+    // ✅ Show placeholder with subtle indicator
+    return `${placeholder} ${
+      selectedValues.length > 0 ? '(' + selectedValues.length + ')' : ''
+    }`;
   };
 
   const defaultRenderOption = (option: Option, isSelected: boolean) => (
@@ -92,7 +93,12 @@ export function MultiSelectFilter({
           <Check className="h-2.5 w-2.5 text-primary-foreground" />
         )}
       </div>
-      <Icon className={cn('mr-2 h-4 w-4', colorScheme.icon)} />
+      <Icon
+        className={cn(
+          'mr-2 h-4 w-4',
+          colorScheme?.icon || 'text-muted-foreground'
+        )}
+      />
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center">
           {option.image && (
@@ -130,7 +136,7 @@ export function MultiSelectFilter({
           aria-expanded={open}
           className={cn(
             'h-8 text-normal justify-between',
-            selectedValues.length > 0 && colorScheme.button
+            selectedValues.length > 0 && colorScheme?.button
           )}
           disabled={loading}
         >

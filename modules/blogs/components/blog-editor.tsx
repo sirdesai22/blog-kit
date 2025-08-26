@@ -5,21 +5,50 @@ import { toast } from 'sonner';
 import { BlogEditorSidebar, BlogPost, Author } from './blog-editor-sidebar';
 import { PlateEditor } from '../../../components/platejs/components/editor/plate-editor';
 
+// ✅ Add interfaces for rich data
+interface CategoryWithStats {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+  posts: number;
+  traffic: number;
+  leads: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface TagWithStats {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  color?: string;
+  posts: number;
+  traffic: number;
+  leads: number;
+  usageCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 interface BlogEditorProps {
   workspaceSlug: string;
-  blogId?: string; // This is actually pageId (the blog publication)
+  blogId?: string;
   initialPost?: BlogPost;
-  categories: string[];
+  categories: CategoryWithStats[]; // ✅ Updated type
   authors: Author[];
   allPosts: any[];
-  tags: string[];
+  tags: TagWithStats[]; // ✅ Updated type
   isNewPost?: boolean;
   workspaceId: string;
 }
 
 export function BlogEditor({
   workspaceSlug,
-  blogId, // This is the pageId of the blog publication
+  blogId,
   initialPost,
   categories,
   authors,
@@ -32,8 +61,8 @@ export function BlogEditor({
     title: '',
     content: '',
     description: '',
-    category: '',
-    tags: [],
+    categoryIds: [], // ✅ Changed from category?: string
+    tagIds: [], // ✅ Changed from tags: string[]
     authorIds: [],
     featuredImage: '',
     publishDate: undefined,
@@ -99,8 +128,8 @@ export function BlogEditor({
         content,
         excerpt: post.description,
         featuredImage: post.featuredImage,
-        tags: post.tags,
-        category: post.category,
+        tagIds: post.tagIds, // ✅ Send tag IDs
+        categoryIds: post.categoryIds, // ✅ Send category IDs
         metaTitle: post.title,
         metaDescription: post.description,
         featured: false,
@@ -166,8 +195,8 @@ export function BlogEditor({
         content,
         excerpt: post.description,
         featuredImage: post.featuredImage,
-        tags: post.tags,
-        category: post.category,
+        tagIds: post.tagIds, // ✅ Send tag IDs
+        categoryIds: post.categoryIds, // ✅ Send category IDs
         metaTitle: post.title,
         metaDescription: post.description,
         featured: false,

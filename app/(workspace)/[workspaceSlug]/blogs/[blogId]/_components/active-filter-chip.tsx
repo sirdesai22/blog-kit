@@ -102,6 +102,7 @@ export function ActiveFilterChip({
     if (filter.type === 'statuses') {
       return statusOptions;
     }
+    // ✅ Options are already mapped with IDs from the parent component
     return options.map((opt) => ({
       id: opt.id,
       name: opt.name,

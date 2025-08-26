@@ -25,7 +25,7 @@ interface BlogTableViewProps {
     title: string;
     type: string;
   };
-  initialPosts?: BlogPost[]; // For SSR fallback
+  initialPosts?: BlogPost[];
 }
 
 function BlogTable({
@@ -33,9 +33,8 @@ function BlogTable({
   currentPage,
   initialPosts = [],
 }: BlogTableViewProps) {
-  // Local state for filters and pagination
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilters, setStatusFilters] = useState<string[]>([]); // Changed to array
+  const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
   const [tagFilters, setTagFilters] = useState<string[]>([]);
   const [authorFilters, setAuthorFilters] = useState<string[]>([]);
@@ -51,7 +50,6 @@ function BlogTable({
 
   const { pinnedIds } = useBlogTable();
 
-  // Build filters object
   const filters: BlogPostFilters = useMemo(() => {
     const filterObj: BlogPostFilters = {};
 
@@ -84,7 +82,6 @@ function BlogTable({
     authorFilters,
   ]);
 
-  // Build pagination object
   const pagination: BlogPostPagination = useMemo(
     () => ({
       page: currentPageNum,
@@ -118,14 +115,12 @@ function BlogTable({
     authorFilters,
   ]);
 
-  // Memoize blogPosts to prevent unnecessary re-renders
   const blogPosts = useMemo(() => {
     return queryResult?.success ? queryResult.blogPosts || [] : initialPosts;
   }, [queryResult?.success, queryResult?.blogPosts, initialPosts]);
 
   const paginationInfo = queryResult?.pagination;
 
-  // Apply local pinning logic (from context) to the server data
   const processedPosts = useMemo(() => {
     return blogPosts
       .map((post) => ({
@@ -133,7 +128,6 @@ function BlogTable({
         pinned: pinnedIds.has(post.id) || post.pinned,
       }))
       .sort((a, b) => {
-        // Ensure pinned posts are always at the top
         if (a.pinned && !b.pinned) return -1;
         if (!a.pinned && b.pinned) return 1;
         return 0;
@@ -195,6 +189,7 @@ function BlogTable({
           postsCount={paginationInfo?.totalCount || blogPosts.length}
           loading={isLoading || isFetching}
           workspaceSlug={workspaceSlug}
+          pageId={currentPage.id}
         />
 
         <div className="flex-1 overflow-y-auto">

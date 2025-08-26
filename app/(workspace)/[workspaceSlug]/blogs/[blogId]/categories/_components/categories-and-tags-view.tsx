@@ -17,29 +17,45 @@ import {
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { addBlogCategory } from '@/modules/workspace/actions/workspace-actions';
-import { addBlogTag } from '@/modules/blogs/actions/tag-actions';
+import { createCategory } from '@/modules/blogs/actions/category-actions';
+import { createTag } from '@/modules/blogs/actions/tag-actions-new';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
-interface Category {
+// UPDATED interfaces to match new rich data
+interface CategoryWithStats {
+  id: string;
   name: string;
+  slug: string;
+  description?: string;
+  color?: string;
+  icon?: string;
   posts: number;
   traffic: number;
   leads: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-interface TagType {
+interface TagWithStats {
+  id: string;
   name: string;
+  slug: string;
+  description?: string;
+  color?: string;
   posts: number;
   traffic: number;
   leads: number;
+  usageCount: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface CategoriesAndTagsViewProps {
   workspaceSlug: string;
   blogId: string;
-  categories: Category[] | any;
-  tags: TagType[];
+  categories: CategoryWithStats[];
+  tags: TagWithStats[];
 }
 
 export function CategoriesAndTagsView({
@@ -65,13 +81,20 @@ export function CategoriesAndTagsView({
 
     setIsLoading(true);
     try {
-      await addBlogCategory(workspaceSlug, newCategoryName.trim());
+      await createCategory(workspaceSlug, blogId, {
+        name: newCategoryName.trim(),
+        description: newCategoryDescription.trim() || undefined,
+      });
+
+      toast.success('Category created successfully!');
       setIsAddCategoryDialogOpen(false);
       setNewCategoryName('');
       setNewCategoryDescription('');
       router.refresh();
     } catch (error) {
-      console.error('Failed to add category:', error);
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to create category'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -82,13 +105,20 @@ export function CategoriesAndTagsView({
 
     setIsLoading(true);
     try {
-      await addBlogTag(workspaceSlug, newTagName.trim());
+      await createTag(workspaceSlug, blogId, {
+        name: newTagName.trim(),
+        description: newTagDescription.trim() || undefined,
+      });
+
+      toast.success('Tag created successfully!');
       setIsAddTagDialogOpen(false);
       setNewTagName('');
       setNewTagDescription('');
       router.refresh();
     } catch (error) {
-      console.error('Failed to add tag:', error);
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to create tag'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -170,7 +200,7 @@ export function CategoriesAndTagsView({
                           id="category-name"
                           value={newCategoryName}
                           onChange={(e) => setNewCategoryName(e.target.value)}
-                          placeholder=""
+                          placeholder="Enter category name"
                         />
                       </div>
                       <div className="space-y-2">
@@ -183,7 +213,7 @@ export function CategoriesAndTagsView({
                           onChange={(e) =>
                             setNewCategoryDescription(e.target.value)
                           }
-                          placeholder=""
+                          placeholder="Brief description of this category"
                           rows={4}
                         />
                       </div>
@@ -226,7 +256,7 @@ export function CategoriesAndTagsView({
                           id="tag-name"
                           value={newTagName}
                           onChange={(e) => setNewTagName(e.target.value)}
-                          placeholder=""
+                          placeholder="Enter tag name"
                         />
                       </div>
                       <div className="space-y-2">
@@ -235,7 +265,7 @@ export function CategoriesAndTagsView({
                           id="tag-description"
                           value={newTagDescription}
                           onChange={(e) => setNewTagDescription(e.target.value)}
-                          placeholder=""
+                          placeholder="Brief description of this tag"
                           rows={4}
                         />
                       </div>
@@ -291,7 +321,7 @@ function CategoriesContent({
 }: {
   workspaceSlug: string;
   blogId: string;
-  categories: Category[];
+  categories: CategoryWithStats[];
 }) {
   return (
     <div className="space-y-6">
@@ -312,7 +342,7 @@ function TagsContent({
 }: {
   workspaceSlug: string;
   blogId: string;
-  tags: TagType[];
+  tags: TagWithStats[];
 }) {
   return (
     <div className="space-y-6">

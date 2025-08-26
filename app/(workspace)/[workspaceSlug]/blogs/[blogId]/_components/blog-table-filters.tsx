@@ -9,7 +9,7 @@ import { MultiSelectFilter } from '@/components/ui/multi-select-filter';
 interface BlogTableFiltersProps {
   searchTerm: string;
   setSearchTerm: (value: string) => void;
-  statusFilters: string[]; // Changed to array
+  statusFilters: string[];
   setStatusFilters: (values: string[]) => void;
   categoryFilters: string[];
   setCategoryFilters: (values: string[]) => void;
@@ -20,6 +20,7 @@ interface BlogTableFiltersProps {
   postsCount: number;
   loading?: boolean;
   workspaceSlug: string;
+  pageId: string;
 }
 
 const statusOptions = [
@@ -43,26 +44,26 @@ export function BlogTableFilters({
   postsCount,
   loading = false,
   workspaceSlug,
+  pageId,
 }: BlogTableFiltersProps) {
   const {
     categories,
     tags,
     authors,
     isLoading: optionsLoading,
-  } = useBlogFilterOptions(workspaceSlug);
+  } = useBlogFilterOptions(workspaceSlug, pageId);
 
-  // Transform data for reusable components
   const categoryOptions = categories.map((cat) => ({
-    id: cat,
-    name: cat,
-    label: cat,
+    id: cat.id,
+    name: cat.name,
+    label: cat.name,
   }));
 
   const tagOptions = tags.map((tag) => ({
-    id: tag.name,
+    id: tag.id,
     name: tag.name,
     label: tag.name,
-    count: tag.posts,
+    count: tag.usageCount,
   }));
 
   const authorOptions = authors.map((author) => ({
@@ -73,7 +74,6 @@ export function BlogTableFilters({
     image: author.image,
   }));
 
-  // Build active filters array - CREATE INDIVIDUAL CHIPS FOR EACH SELECTION
   const activeFilters: ActiveFilter[] = [];
 
   if (searchTerm) {
@@ -96,27 +96,26 @@ export function BlogTableFilters({
     });
   });
 
-  // Create individual chips for each selected category
-  categoryFilters.forEach((category) => {
+  categoryFilters.forEach((categoryId) => {
+    const category = categories.find((c) => c.id === categoryId);
     activeFilters.push({
-      id: `category-${category}`,
+      id: `category-${categoryId}`,
       type: 'categories',
-      label: category,
-      value: category,
+      label: category?.name || categoryId,
+      value: categoryId,
     });
   });
 
-  // Create individual chips for each selected tag
-  tagFilters.forEach((tag) => {
+  tagFilters.forEach((tagId) => {
+    const tag = tags.find((t) => t.id === tagId);
     activeFilters.push({
-      id: `tag-${tag}`,
+      id: `tag-${tagId}`,
       type: 'tags',
-      label: tag,
-      value: tag,
+      label: tag?.name || tagId,
+      value: tagId,
     });
   });
 
-  // Create individual chips for each selected author
   authorFilters.forEach((authorId) => {
     const author = authors.find((a) => a.id === authorId);
     activeFilters.push({
@@ -133,21 +132,20 @@ export function BlogTableFilters({
       setSearchTerm('');
     } else if (filterId.startsWith('status-')) {
       const statusId = filterId.replace('status-', '');
-      setStatusFilters((prev) => prev.filter((id) => id !== statusId));
+      setStatusFilters((prev: string[]) =>
+        prev.filter((id) => id !== statusId)
+      ); // ✅ Fixed type
     } else if (filterId.startsWith('category-')) {
-      const category = filterId.replace('category-', '');
-      setCategoryFilters((prev) => prev.filter((cat) => cat !== category));
+      const categoryId = filterId.replace('category-', '');
+      setCategoryFilters((prev) => prev.filter((id) => id !== categoryId));
     } else if (filterId.startsWith('tag-')) {
-      const tag = filterId.replace('tag-', '');
-      setTagFilters((prev) => prev.filter((t) => t !== tag));
+      const tagId = filterId.replace('tag-', '');
+      setTagFilters((prev) => prev.filter((id) => id !== tagId));
     } else if (filterId.startsWith('author-')) {
       const authorId = filterId.replace('author-', '');
       setAuthorFilters((prev) => prev.filter((id) => id !== authorId));
     }
   };
-
-  // Remove the handleUpdateFilter since we're not using grouped filters anymore
-  const handleUpdateFilter = undefined;
 
   const handleClearAll = () => {
     setSearchTerm('');
@@ -177,7 +175,7 @@ export function BlogTableFilters({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {/* Categories Filter */}
+          {/* Categories Filter  */}
           <MultiSelectFilter
             icon={Hash}
             placeholder="Categories"
@@ -186,13 +184,9 @@ export function BlogTableFilters({
             selectedValues={categoryFilters}
             onSelectionChange={setCategoryFilters}
             loading={loading || optionsLoading}
-            colorScheme={{
-              button: 'bg-purple-50 border-purple-200 text-purple-700',
-              icon: 'text-purple-500',
-            }}
           />
 
-          {/* Tags Filter */}
+          {/* Tags Filter  */}
           <MultiSelectFilter
             icon={Tag}
             placeholder="Tags"
@@ -201,13 +195,9 @@ export function BlogTableFilters({
             selectedValues={tagFilters}
             onSelectionChange={setTagFilters}
             loading={loading || optionsLoading}
-            colorScheme={{
-              button: 'bg-orange-50 border-orange-200 text-orange-700',
-              icon: 'text-orange-500',
-            }}
           />
 
-          {/* Status Filter */}
+          {/* Status Filter  */}
           <MultiSelectFilter
             icon={Circle}
             placeholder="Status"
@@ -217,10 +207,6 @@ export function BlogTableFilters({
             onSelectionChange={setStatusFilters}
             loading={loading}
             showSearch={false}
-            colorScheme={{
-              button: 'bg-green-50 border-green-200 text-green-700',
-              icon: 'text-green-500',
-            }}
           />
 
           {/* Authors Filter */}
@@ -232,10 +218,6 @@ export function BlogTableFilters({
             selectedValues={authorFilters}
             onSelectionChange={setAuthorFilters}
             loading={loading || optionsLoading}
-            colorScheme={{
-              button: 'bg-pink-50 border-pink-200 text-pink-700',
-              icon: 'text-pink-500',
-            }}
           />
         </div>
       </div>
@@ -244,10 +226,14 @@ export function BlogTableFilters({
       <ActiveFiltersBar
         activeFilters={activeFilters}
         onRemoveFilter={handleRemoveFilter}
-        // Remove onUpdateFilter since we're showing individual chips
         onClearAll={handleClearAll}
-        categories={categories}
-        tags={tags}
+        categories={categories.map((c) => c.name)}
+        tags={tags.map((t) => ({
+          name: t.name,
+          posts: t.usageCount,
+          traffic: 0,
+          leads: 0,
+        }))}
         authors={authors}
       />
     </div>

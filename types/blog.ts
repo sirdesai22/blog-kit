@@ -9,8 +9,23 @@ export interface BlogPost {
   publishedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
-  tags: string[];
-  categories: string[];
+
+  // ✅ UPDATED: Rich category and tag data instead of strings
+  tags: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    color?: string;
+    usageCount: number;
+  }>;
+  categories: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    color?: string;
+    description?: string;
+  }>;
+
   featured: boolean;
   pinned: boolean;
   views: number;

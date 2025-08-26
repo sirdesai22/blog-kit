@@ -16,6 +16,12 @@ import {
   ArrowDown,
   Trash2,
   Archive,
+  Eye,
+  EyeOff,
+  Hash,
+  Tag,
+  User,
+  ChevronDown,
 } from 'lucide-react';
 import { Heading } from '@/components/ui/heading';
 import { useRouter } from 'next/navigation';
@@ -25,6 +31,28 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useBlogTable } from '@/modules/blogs/contexts/BlogTableContext';
 import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useState } from 'react';
+import { CategorySelectionDialog } from '@/modules/blogs/components/table/blogs/category-selection-dialog';
+import { TagSelectionDialog } from '@/modules/blogs/components/table/blogs/tag-selection-dialog';
+import { AuthorSelectionDialog } from '@/modules/blogs/components/table/blogs/author-selection-dialog';
+import {
+  bulkPublishPosts,
+  bulkUnpublishPosts,
+  bulkUpdateCategories,
+  bulkUpdateTags,
+  bulkUpdateAuthor,
+  bulkDeletePosts,
+  bulkArchivePosts,
+} from '@/modules/blogs/actions/post-bulk-actions';
+import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface BlogTableContentProps {
   posts: BlogPost[];
@@ -105,42 +133,272 @@ function LoadingRow() {
   );
 }
 
-// Bulk Actions Component
+// Enhanced Bulk Actions Component
 function BulkActions({
   selectedCount,
+  selectedIds,
   onClearSelection,
+  workspaceSlug,
+  currentPageId,
 }: {
   selectedCount: number;
+  selectedIds: Set<string>;
   onClearSelection: () => void;
+  workspaceSlug: string;
+  currentPageId: string;
 }) {
+  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
+  const [showTagDialog, setShowTagDialog] = useState(false);
+  const [showAuthorDialog, setShowAuthorDialog] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const selectedPostIds = Array.from(selectedIds);
+
+  const refreshTable = () => {
+    // Invalidate all blog posts table queries for this workspace and blog
+    queryClient.invalidateQueries({
+      queryKey: ['blog-posts-table', workspaceSlug, currentPageId],
+    });
+
+    // Also invalidate filter options in case categories/tags/authors changed
+    queryClient.invalidateQueries({
+      queryKey: ['workspace-categories', workspaceSlug, currentPageId],
+    });
+    queryClient.invalidateQueries({
+      queryKey: ['workspace-tags', workspaceSlug, currentPageId],
+    });
+    queryClient.invalidateQueries({
+      queryKey: ['workspace-authors', workspaceSlug],
+    });
+  };
+
+  const handleBulkAction = async (
+    action: () => Promise<{
+      success: boolean;
+      message?: string;
+      error?: string;
+    }>,
+    loadingMessage: string
+  ) => {
+    setIsLoading(true);
+    const toastId = toast.loading(loadingMessage);
+
+    try {
+      const result = await action();
+
+      if (result.success) {
+        toast.success(result.message || 'Action completed successfully', {
+          id: toastId,
+        });
+        onClearSelection();
+        // Refresh the table data
+        refreshTable();
+      } else {
+        toast.error(result.error || 'Action failed', {
+          id: toastId,
+        });
+      }
+    } catch (error) {
+      console.error('Bulk action error:', error);
+      toast.error('An unexpected error occurred', {
+        id: toastId,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePublish = () => {
+    handleBulkAction(
+      () => bulkPublishPosts(workspaceSlug, selectedPostIds),
+      'Publishing posts...'
+    );
+  };
+
+  const handleUnpublish = () => {
+    handleBulkAction(
+      () => bulkUnpublishPosts(workspaceSlug, selectedPostIds),
+      'Unpublishing posts...'
+    );
+  };
+
+  const handleArchive = () => {
+    handleBulkAction(
+      () => bulkArchivePosts(workspaceSlug, selectedPostIds),
+      'Archiving posts...'
+    );
+  };
+
+  const handleDelete = () => {
+    if (
+      confirm(
+        `Are you sure you want to delete ${selectedCount} post${
+          selectedCount > 1 ? 's' : ''
+        }? This action cannot be undone.`
+      )
+    ) {
+      handleBulkAction(
+        () => bulkDeletePosts(workspaceSlug, selectedPostIds),
+        'Deleting posts...'
+      );
+    }
+  };
+
+  const handleCategoryUpdate = (categoryIds: string[]) => {
+    handleBulkAction(
+      () => bulkUpdateCategories(workspaceSlug, selectedPostIds, categoryIds),
+      'Updating categories...'
+    );
+  };
+
+  const handleTagUpdate = (tagIds: string[]) => {
+    handleBulkAction(
+      () => bulkUpdateTags(workspaceSlug, selectedPostIds, tagIds),
+      'Updating tags...'
+    );
+  };
+
+  const handleAuthorUpdate = (authorId: string) => {
+    handleBulkAction(
+      () => bulkUpdateAuthor(workspaceSlug, selectedPostIds, authorId),
+      'Updating author...'
+    );
+  };
+
   return (
-    <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border-b border-blue-200">
-      <span className="text-sm font-medium text-blue-900">
-        {selectedCount} post{selectedCount > 1 ? 's' : ''} selected
-      </span>
-      <div className="flex items-center gap-1 ml-4">
-        <Button size="sm" variant="outline" className="h-7">
-          <Archive className="mr-1 h-3 w-3" />
-          Archive
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          className="h-7 text-red-600 hover:text-red-700"
-        >
-          <Trash2 className="mr-1 h-3 w-3" />
-          Delete
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={onClearSelection}
-          className="h-7"
-        >
-          Cancel
-        </Button>
+    <>
+      <div className="flex items-center justify-between gap-4 px-4 py-3 bg-blue-50 border-b border-blue-200">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-blue-900">
+            {selectedCount} post{selectedCount > 1 ? 's' : ''} selected
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {/* Individual action buttons */}
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7"
+            onClick={handlePublish}
+            disabled={isLoading}
+          >
+            <Eye className="mr-1 h-3 w-3" />
+            Publish
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7"
+            onClick={handleUnpublish}
+            disabled={isLoading}
+          >
+            <EyeOff className="mr-1 h-3 w-3" />
+            Unpublish
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7"
+            onClick={() => setShowCategoryDialog(true)}
+            disabled={isLoading}
+          >
+            <Hash className="mr-1 h-3 w-3" />
+            Change Category
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7"
+            onClick={() => setShowTagDialog(true)}
+            disabled={isLoading}
+          >
+            <Tag className="mr-1 h-3 w-3" />
+            Change Tag
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7"
+            onClick={() => setShowAuthorDialog(true)}
+            disabled={isLoading}
+          >
+            <User className="mr-1 h-3 w-3" />
+            Change Author
+          </Button>
+
+          {/* Bulk Actions Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7"
+                disabled={isLoading}
+              >
+                Bulk Actions
+                <ChevronDown className="ml-1 h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleArchive}>
+                <Archive className="mr-2 h-4 w-4" />
+                Archive
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleDelete}
+                className="text-red-600 focus:text-red-700"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={onClearSelection}
+            className="h-7"
+            disabled={isLoading}
+          >
+            Cancel
+          </Button>
+        </div>
       </div>
-    </div>
+
+      {/* Dialogs */}
+      <CategorySelectionDialog
+        open={showCategoryDialog}
+        onOpenChange={setShowCategoryDialog}
+        onSave={handleCategoryUpdate}
+        workspaceSlug={workspaceSlug}
+        pageId={currentPageId}
+      />
+
+      <TagSelectionDialog
+        open={showTagDialog}
+        onOpenChange={setShowTagDialog}
+        onSave={handleTagUpdate}
+        workspaceSlug={workspaceSlug}
+        pageId={currentPageId}
+      />
+
+      <AuthorSelectionDialog
+        open={showAuthorDialog}
+        onOpenChange={setShowAuthorDialog}
+        onSave={handleAuthorUpdate}
+        workspaceSlug={workspaceSlug}
+        pageId={currentPageId}
+      />
+    </>
   );
 }
 
@@ -196,7 +454,10 @@ export function BlogTableContent({
       {showBulkActions && (
         <BulkActions
           selectedCount={selectedCount}
+          selectedIds={selectedIds}
           onClearSelection={clearSelection}
+          workspaceSlug={workspaceSlug}
+          currentPageId={currentPageId}
         />
       )}
 

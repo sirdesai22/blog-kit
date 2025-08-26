@@ -17,14 +17,43 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CalendarDays, Clock, X, Settings2, Plus, Check } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
+// ✅ Simplified interfaces - we still need the full data but won't show all details
+interface CategoryWithStats {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+  posts: number;
+  traffic: number;
+  leads: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface TagWithStats {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  color?: string;
+  posts: number;
+  traffic: number;
+  leads: number;
+  usageCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface BlogPost {
   id?: string;
   title: string;
   slug?: string;
   content: any;
   description?: string;
-  category?: string;
-  tags: string[];
+  categoryIds: string[];
+  tagIds: string[];
   authorIds: string[];
   featuredImage?: string;
   publishDate?: Date;
@@ -42,10 +71,10 @@ export interface Author {
 
 interface BlogEditorSidebarProps {
   post: BlogPost;
-  categories: string[];
+  categories: CategoryWithStats[];
   authors: Author[];
   allPosts: BlogPost[];
-  tags: string[]; // Add this line
+  tags: TagWithStats[];
   onPostChange: (post: BlogPost) => void;
   onSave: () => void;
   onPublish: () => void;
@@ -60,7 +89,7 @@ export function BlogEditorSidebar({
   categories,
   authors,
   allPosts,
-  tags, // Add this line
+  tags,
   onPostChange,
   onSave,
   onPublish,
@@ -72,7 +101,8 @@ export function BlogEditorSidebar({
   const [selectedRelatedArticles, setSelectedRelatedArticles] = useState<
     BlogPost[]
   >([]);
-  const [tagInput, setTagInput] = useState('');
+  const [categorySelectOpen, setCategorySelectOpen] = useState(false);
+  const [categorySearch, setCategorySearch] = useState('');
   const [tagSelectOpen, setTagSelectOpen] = useState(false);
   const [tagSearch, setTagSearch] = useState('');
 
@@ -81,11 +111,19 @@ export function BlogEditorSidebar({
   const [seoDescription, setSeoDescription] = useState('');
   const [seoKeywords, setSeoKeywords] = useState('');
 
+  const categorySelectRef = useRef<HTMLDivElement>(null);
   const tagSelectRef = useRef<HTMLDivElement>(null);
 
-  // Add click outside handler
+  // Click outside handlers
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      if (
+        categorySelectRef.current &&
+        !categorySelectRef.current.contains(event.target as Node)
+      ) {
+        setCategorySelectOpen(false);
+        setCategorySearch('');
+      }
       if (
         tagSelectRef.current &&
         !tagSelectRef.current.contains(event.target as Node)
@@ -111,26 +149,22 @@ export function BlogEditorSidebar({
     setSelectedRelatedArticles(relatedPosts);
   }, [post.authorIds, post.relatedArticleIds, authors, allPosts]);
 
-  const handleCategoryChange = (category: string) => {
-    onPostChange({ ...post, category });
+  const handleCategoryToggle = (categoryId: string) => {
+    const isSelected = post.categoryIds.includes(categoryId);
+    const newCategoryIds = isSelected
+      ? post.categoryIds.filter((id) => id !== categoryId)
+      : [...post.categoryIds, categoryId];
+
+    onPostChange({ ...post, categoryIds: newCategoryIds });
   };
 
-  const handleAddTag = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && tagInput.trim()) {
-      e.preventDefault();
-      const newTag = tagInput.trim();
-      if (!post.tags.includes(newTag)) {
-        onPostChange({ ...post, tags: [...post.tags, newTag] });
-      }
-      setTagInput('');
-    }
-  };
+  const handleTagToggle = (tagId: string) => {
+    const isSelected = post.tagIds.includes(tagId);
+    const newTagIds = isSelected
+      ? post.tagIds.filter((id) => id !== tagId)
+      : [...post.tagIds, tagId];
 
-  const handleRemoveTag = (tagToRemove: string) => {
-    onPostChange({
-      ...post,
-      tags: post.tags.filter((tag) => tag !== tagToRemove),
-    });
+    onPostChange({ ...post, tagIds: newTagIds });
   };
 
   const handleAuthorToggle = (author: Author) => {
@@ -164,60 +198,147 @@ export function BlogEditorSidebar({
 
   const renderSettingsTab = () => (
     <div className="space-y-6">
-      {/* Category */}
+      {/* ✅ Clean Category Multiselect */}
       <div>
-        <Label className="text-sm font-medium text-foreground">Category</Label>
-        <Select value={post.category} onValueChange={handleCategoryChange}>
-          <SelectTrigger className="w-full mt-2">
-            <SelectValue placeholder="Select Categories" />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Tags - Updated to use multiselect */}
-      <div>
-        <Label className="text-sm font-medium text-foreground">Tags</Label>
+        <Label className="text-sm font-medium text-foreground">
+          Categories
+        </Label>
         <div className="mt-2">
-          {/* Custom multiselect for tags */}
-          <div className="relative" ref={tagSelectRef}>
+          <div className="relative" ref={categorySelectRef}>
             <div
-              className="min-h-[40px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
-              onClick={() => setTagSelectOpen(!tagSelectOpen)}
+              className="min-h-[40px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              onClick={() => setCategorySelectOpen(!categorySelectOpen)}
             >
               <div className="flex flex-wrap gap-1">
-                {post.tags.length === 0 ? (
-                  <span className="text-muted-foreground">Select tags...</span>
+                {post.categoryIds.length === 0 ? (
+                  <span className="text-muted-foreground">
+                    Select categories...
+                  </span>
                 ) : (
-                  post.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
-                      {tag}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveTag(tag);
-                        }}
-                        className="ml-1 hover:text-destructive transition-colors"
+                  post.categoryIds.map((categoryId) => {
+                    const category = categories.find(
+                      (c) => c.id === categoryId
+                    );
+                    return category ? (
+                      <Badge
+                        key={category.id}
+                        variant="secondary"
+                        className="text-xs"
                       >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </Badge>
-                  ))
+                        {category.name}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCategoryToggle(category.id);
+                          }}
+                          className="ml-1 hover:text-destructive transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </Badge>
+                    ) : null;
+                  })
                 )}
               </div>
             </div>
 
-            {/* Dropdown */}
+            {/* Categories Dropdown */}
+            {categorySelectOpen && (
+              <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-auto">
+                <div className="p-2">
+                  <Input
+                    placeholder="Search categories..."
+                    value={categorySearch}
+                    onChange={(e) => setCategorySearch(e.target.value)}
+                    className="mb-2"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+
+                  <div className="space-y-1">
+                    {categories
+                      .filter((category) =>
+                        category.name
+                          .toLowerCase()
+                          .includes(categorySearch.toLowerCase())
+                      )
+                      .map((category) => (
+                        <div
+                          key={category.id}
+                          className="flex items-center justify-between p-2 hover:bg-accent hover:text-accent-foreground rounded cursor-pointer transition-colors"
+                          onClick={() => handleCategoryToggle(category.id)}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm">{category.name}</span>
+                          </div>
+                          {post.categoryIds.includes(category.id) ? (
+                            <Check className="w-4 h-4 text-primary" />
+                          ) : (
+                            <Plus className="w-4 h-4 text-muted-foreground" />
+                          )}
+                        </div>
+                      ))}
+
+                    {categories.filter((category) =>
+                      category.name
+                        .toLowerCase()
+                        .includes(categorySearch.toLowerCase())
+                    ).length === 0 && (
+                      <div className="text-sm text-muted-foreground text-center py-2">
+                        {categorySearch
+                          ? 'No categories found'
+                          : 'No categories available'}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ✅ Clean Tags Multiselect */}
+      <div>
+        <Label className="text-sm font-medium text-foreground">Tags</Label>
+        <div className="mt-2">
+          <div className="relative" ref={tagSelectRef}>
+            <div
+              className="min-h-[40px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              onClick={() => setTagSelectOpen(!tagSelectOpen)}
+            >
+              <div className="flex flex-wrap gap-1">
+                {post.tagIds.length === 0 ? (
+                  <span className="text-muted-foreground">Select tags...</span>
+                ) : (
+                  post.tagIds.map((tagId) => {
+                    const tag = tags.find((t) => t.id === tagId);
+                    return tag ? (
+                      <Badge
+                        key={tag.id}
+                        variant="secondary"
+                        className="text-xs"
+                      >
+                        {tag.name}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleTagToggle(tag.id);
+                          }}
+                          className="ml-1 hover:text-destructive transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </Badge>
+                    ) : null;
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Tags Dropdown */}
             {tagSelectOpen && (
               <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-auto">
                 <div className="p-2">
-                  {/* Search input */}
                   <Input
                     placeholder="Search tags..."
                     value={tagSearch}
@@ -226,91 +347,44 @@ export function BlogEditorSidebar({
                     onClick={(e) => e.stopPropagation()}
                   />
 
-                  {/* Tag options */}
                   <div className="space-y-1">
                     {tags
-                      .filter(
-                        (tag) =>
-                          tag.toLowerCase().includes(tagSearch.toLowerCase()) &&
-                          !post.tags.includes(tag)
+                      .filter((tag) =>
+                        tag.name.toLowerCase().includes(tagSearch.toLowerCase())
                       )
                       .map((tag) => (
                         <div
-                          key={tag}
+                          key={tag.id}
                           className="flex items-center justify-between p-2 hover:bg-accent hover:text-accent-foreground rounded cursor-pointer transition-colors"
-                          onClick={() => {
-                            onPostChange({
-                              ...post,
-                              tags: [...post.tags, tag],
-                            });
-                            setTagSearch('');
-                          }}
+                          onClick={() => handleTagToggle(tag.id)}
                         >
-                          <span className="text-sm">{tag}</span>
-                          <Plus className="w-4 h-4 text-muted-foreground" />
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm">{tag.name}</span>
+                          </div>
+                          {post.tagIds.includes(tag.id) ? (
+                            <Check className="w-4 h-4 text-primary" />
+                          ) : (
+                            <Plus className="w-4 h-4 text-muted-foreground" />
+                          )}
                         </div>
                       ))}
 
-                    {/* Show message if no tags available */}
-                    {tags.filter(
-                      (tag) =>
-                        tag.toLowerCase().includes(tagSearch.toLowerCase()) &&
-                        !post.tags.includes(tag)
+                    {tags.filter((tag) =>
+                      tag.name.toLowerCase().includes(tagSearch.toLowerCase())
                     ).length === 0 && (
                       <div className="text-sm text-muted-foreground text-center py-2">
                         {tagSearch ? 'No tags found' : 'No tags available'}
                       </div>
                     )}
                   </div>
-
-                  {/* Add new tag option */}
-                  {tagSearch && !tags.includes(tagSearch) && (
-                    <div
-                      className="flex items-center justify-between p-2 hover:bg-accent hover:text-accent-foreground rounded cursor-pointer border-t border-border mt-2 pt-2 transition-colors"
-                      onClick={() => {
-                        onPostChange({
-                          ...post,
-                          tags: [...post.tags, tagSearch],
-                        });
-                        setTagSearch('');
-                      }}
-                    >
-                      <span className="text-sm text-primary">
-                        Create "{tagSearch}"
-                      </span>
-                      <Plus className="w-4 h-4 text-primary" />
-                    </div>
-                  )}
                 </div>
               </div>
             )}
           </div>
-
-          {/* Selected tags summary */}
-          {post.tags.length > 0 && (
-            <div className="mt-2">
-              <div className="text-xs text-muted-foreground mb-1">
-                Selected tags ({post.tags.length}):
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {post.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="text-xs">
-                    {tag}
-                    <button
-                      onClick={() => handleRemoveTag(tag)}
-                      className="ml-1 hover:text-destructive transition-colors"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
-      {/* Authors */}
+      {/* Authors - unchanged */}
       <div>
         <Label className="text-sm font-medium text-foreground">Authors</Label>
         <Select
@@ -364,7 +438,7 @@ export function BlogEditorSidebar({
         </div>
       </div>
 
-      {/* Publish Date */}
+      {/* Publish Date - unchanged */}
       <div>
         <Label className="text-sm font-medium text-foreground">
           Publish Date
@@ -384,7 +458,7 @@ export function BlogEditorSidebar({
         </div>
       </div>
 
-      {/* Related Articles - Updated */}
+      {/* Related Articles - unchanged */}
       <div>
         <div className="flex items-center justify-between mb-2">
           <Label className="text-sm font-medium text-foreground">
@@ -408,14 +482,12 @@ export function BlogEditorSidebar({
         </div>
 
         <div className="space-y-2">
-          {/* Show message if no articles available */}
           {allPosts.length === 0 && (
             <p className="text-sm text-muted-foreground text-center py-4">
               No other articles in this blog yet
             </p>
           )}
 
-          {/* Show up to 5 article selectors */}
           {[1, 2, 3, 4, 5].map((num) => (
             <Select
               key={num}
@@ -429,7 +501,7 @@ export function BlogEditorSidebar({
               </SelectTrigger>
               <SelectContent>
                 {allPosts
-                  .filter((p) => p.id !== post.id) // Exclude current post
+                  .filter((p) => p.id !== post.id)
                   .map((article) => (
                     <SelectItem key={article.id} value={article.id || ''}>
                       <div className="flex items-center justify-between w-full">
@@ -445,7 +517,6 @@ export function BlogEditorSidebar({
           ))}
         </div>
 
-        {/* Show selected related articles */}
         {selectedRelatedArticles.length > 0 && (
           <div className="mt-3 space-y-2">
             <Label className="text-xs text-muted-foreground">
@@ -474,7 +545,7 @@ export function BlogEditorSidebar({
         )}
       </div>
 
-      {/* Form Section */}
+      {/* Form Section - unchanged */}
       <div>
         <Label className="text-sm font-medium text-foreground">Form</Label>
         <div className="mt-2 p-3 border border-border rounded-md text-center text-muted-foreground text-sm bg-muted/30">

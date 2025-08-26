@@ -109,7 +109,7 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
         {post.categories && post.categories.length > 0 ? (
           <div className="flex items-center gap-1">
             <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-1 text-xs font-medium text-muted-foreground">
-              {post.categories[0]}
+              {post.categories[0].name}
             </span>
             {post.categories.length > 1 && (
               <span className="text-xs text-muted-foreground">
@@ -126,7 +126,7 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
         {post.tags && post.tags.length > 0 ? (
           <div className="flex items-center gap-1">
             <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-1 text-xs font-medium text-muted-foreground">
-              {post.tags[0]}
+              {post.tags[0].name}
             </span>
             {post.tags.length > 1 && (
               <span className="text-xs text-muted-foreground">

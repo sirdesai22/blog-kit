@@ -9,7 +9,7 @@ import { BlogPost } from '@/types/blog';
 
 export interface BlogPostFilters {
   search?: string;
-  statuses?: PostStatus[]; // Changed from status?: PostStatus | 'all'
+  statuses?: PostStatus[];
   categories?: string[];
   tags?: string[];
   authorIds?: string[];
@@ -65,7 +65,6 @@ export async function getBlogPostsForTable(
       redirect('/auth/signin');
     }
 
-    // First, get the workspace and verify access
     const workspace = await db.workspace.findFirst({
       where: {
         slug: workspaceSlug,
@@ -89,7 +88,6 @@ export async function getBlogPostsForTable(
       };
     }
 
-    // Verify the blog publication exists and user has access
     const blogPage = await db.page.findFirst({
       where: {
         id: blogId,
@@ -105,7 +103,6 @@ export async function getBlogPostsForTable(
       };
     }
 
-    // Build where clause based on filters
     const whereClause: any = {
       pageId: blogId,
       workspaceId: workspace.id,
@@ -114,7 +111,7 @@ export async function getBlogPostsForTable(
     if (filters) {
       if (filters.statuses && filters.statuses.length > 0) {
         whereClause.status = {
-          in: filters.statuses, // Use 'in' operator for multiple statuses
+          in: filters.statuses,
         };
       }
 
@@ -137,13 +134,21 @@ export async function getBlogPostsForTable(
 
       if (filters.categories && filters.categories.length > 0) {
         whereClause.categories = {
-          hasSome: filters.categories, // Use hasSome for multiple categories
+          some: {
+            id: {
+              in: filters.categories,
+            },
+          },
         };
       }
 
       if (filters.tags && filters.tags.length > 0) {
         whereClause.tags = {
-          hasSome: filters.tags, // Use hasSome for multiple tags
+          some: {
+            id: {
+              in: filters.tags, // Now expecting tag IDs
+            },
+          },
         };
       }
 
@@ -168,9 +173,7 @@ export async function getBlogPostsForTable(
     }
 
     // Build order by clause
-    let orderBy: any = [
-      { pinned: 'desc' }, // Always prioritize pinned posts
-    ];
+    let orderBy: any = [{ pinned: 'desc' }];
 
     if (sort) {
       if (sort.field === 'publishedAt') {
@@ -211,6 +214,24 @@ export async function getBlogPostsForTable(
             name: true,
             image: true,
             email: true,
+          },
+        },
+
+        categories: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            color: true,
+            description: true,
+          },
+        },
+        tags: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            color: true,
           },
         },
         workspace: {
@@ -264,8 +285,23 @@ export async function getBlogPostsForTable(
           publishedAt: post.publishedAt || undefined,
           createdAt: post.createdAt,
           updatedAt: post.updatedAt,
-          tags: post.tags,
-          categories: post.categories,
+
+          tags: post.tags.map((tag) => ({
+            id: tag.id,
+            name: tag.name,
+            slug: tag.slug,
+            color: tag.color || undefined,
+
+            usageCount: 0,
+          })),
+          categories: post.categories.map((category) => ({
+            id: category.id,
+            name: category.name,
+            slug: category.slug,
+            color: category.color || undefined,
+            description: category.description || undefined,
+          })),
+
           featured: post.featured,
           pinned: post.pinned,
           views: post.views,
@@ -546,7 +582,7 @@ export async function deleteBlogPost(
 export async function getBlogPostCategories(
   workspaceSlug: string,
   blogId: string
-): Promise<string[]> {
+): Promise<Array<{ id: string; name: string; slug: string; color?: string }>> {
   try {
     const session = await auth();
 
@@ -569,22 +605,22 @@ export async function getBlogPostCategories(
       return [];
     }
 
-    const posts = await db.blogPost.findMany({
+    const categories = await db.category.findMany({
       where: {
         pageId: blogId,
         workspaceId: workspace.id,
+        blogPosts: { some: {} },
       },
       select: {
-        categories: true,
+        id: true,
+        name: true,
+        slug: true,
+        color: true,
       },
+      orderBy: { name: 'asc' },
     });
 
-    const categoriesSet = new Set<string>();
-    posts.forEach((post) => {
-      post.categories.forEach((category) => categoriesSet.add(category));
-    });
-
-    return Array.from(categoriesSet).sort();
+    return categories;
   } catch (error) {
     console.error('Error fetching categories:', error);
     return [];
@@ -597,7 +633,7 @@ export async function getBlogPostCategories(
 export async function getBlogPostTags(
   workspaceSlug: string,
   blogId: string
-): Promise<string[]> {
+): Promise<Array<{ id: string; name: string; slug: string; color?: string }>> {
   try {
     const session = await auth();
 
@@ -620,22 +656,22 @@ export async function getBlogPostTags(
       return [];
     }
 
-    const posts = await db.blogPost.findMany({
+    const tags = await db.tag.findMany({
       where: {
         pageId: blogId,
         workspaceId: workspace.id,
+        blogPosts: { some: {} },
       },
       select: {
-        tags: true,
+        id: true,
+        name: true,
+        slug: true,
+        color: true,
       },
+      orderBy: { name: 'asc' },
     });
 
-    const tagsSet = new Set<string>();
-    posts.forEach((post) => {
-      post.tags.forEach((tag) => tagsSet.add(tag));
-    });
-
-    return Array.from(tagsSet).sort();
+    return tags;
   } catch (error) {
     console.error('Error fetching tags:', error);
     return [];

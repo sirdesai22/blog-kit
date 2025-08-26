@@ -1,11 +1,11 @@
 import React from 'react';
 import db from '@/lib/db';
 import {
-  getBlogCategories,
   getWorkspaceAuthors,
   getBlogPostsByBlogId,
-  getBlogTags, // Add this import
 } from '@/modules/blogs/actions/blog-actions';
+import { getWorkspaceCategoriesWithStats } from '@/modules/blogs/actions/category-actions';
+import { getWorkspaceTagsWithStats } from '@/modules/blogs/actions/tag-actions-new';
 import { BlogEditor } from '@/modules/blogs/components/blog-editor';
 import { auth } from '@/lib/auth';
 
@@ -26,12 +26,13 @@ export default async function NewPostPage(props: NewPostPageProps) {
       members: { some: { userId: session?.user.id } },
     },
   });
-  // Fetch necessary data - now including tags
-  const [categories, authors, blogPosts, tags] = await Promise.all([
-    getBlogCategories(workspaceSlug),
+
+  // ✅ Use new ID-based actions
+  const [categoriesData, authors, blogPosts, tagsData] = await Promise.all([
+    getWorkspaceCategoriesWithStats(workspaceSlug),
     getWorkspaceAuthors(workspaceSlug),
     getBlogPostsByBlogId(workspaceSlug, blogId),
-    getBlogTags(workspaceSlug),
+    getWorkspaceTagsWithStats(workspaceSlug),
   ]);
 
   return (
@@ -39,10 +40,10 @@ export default async function NewPostPage(props: NewPostPageProps) {
       workspaceSlug={workspaceSlug}
       blogId={blogId}
       workspaceId={workspace?.id}
-      categories={categories}
+      categories={categoriesData?.categories || []}
       authors={authors}
       allPosts={blogPosts}
-      tags={tags}
+      tags={tagsData?.tags || []}
       isNewPost={true}
     />
   );

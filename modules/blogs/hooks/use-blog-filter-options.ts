@@ -1,32 +1,30 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import {
-  getBlogCategories,
-  getWorkspaceAuthors,
-} from '../actions/blog-actions';
-import { getWorkspaceBlogTags } from '../actions/tag-actions';
+import { getWorkspaceAuthors } from '../actions/blog-actions';
+import { getWorkspaceCategoriesWithStats } from '../actions/category-actions';
+import { getWorkspaceTagsWithStats } from '../actions/tag-actions-new';
 
-export function useBlogFilterOptions(workspaceSlug: string) {
-  // Get categories from workspace config
+export function useBlogFilterOptions(workspaceSlug: string, pageId: string) {
+  // ✅ Pass pageId to get categories for specific page
   const categoriesQuery = useQuery({
-    queryKey: ['blog-categories', workspaceSlug],
-    queryFn: () => getBlogCategories(workspaceSlug),
-    enabled: !!workspaceSlug,
+    queryKey: ['workspace-categories', workspaceSlug, pageId],
+    queryFn: () => getWorkspaceCategoriesWithStats(workspaceSlug, pageId),
+    enabled: !!workspaceSlug && !!pageId,
     staleTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false,
   });
 
-  // Get tags from workspace config
+  // ✅ Pass pageId to get tags for specific page
   const tagsQuery = useQuery({
-    queryKey: ['blog-tags', workspaceSlug],
-    queryFn: () => getWorkspaceBlogTags(workspaceSlug),
-    enabled: !!workspaceSlug,
+    queryKey: ['workspace-tags', workspaceSlug, pageId],
+    queryFn: () => getWorkspaceTagsWithStats(workspaceSlug, pageId),
+    enabled: !!workspaceSlug && !!pageId,
     staleTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false,
   });
 
-  // Get authors from workspace
+  // Authors remain workspace-wide
   const authorsQuery = useQuery({
     queryKey: ['workspace-authors', workspaceSlug],
     queryFn: () => getWorkspaceAuthors(workspaceSlug),
@@ -36,13 +34,12 @@ export function useBlogFilterOptions(workspaceSlug: string) {
   });
 
   return {
-    categories: categoriesQuery.data || [],
+    categories: categoriesQuery.data?.categories || [],
     tags: tagsQuery.data?.tags || [],
     authors: authorsQuery.data || [],
     isLoading:
       categoriesQuery.isLoading ||
       tagsQuery.isLoading ||
       authorsQuery.isLoading,
-    error: categoriesQuery.error || tagsQuery.error || authorsQuery.error,
   };
 }
