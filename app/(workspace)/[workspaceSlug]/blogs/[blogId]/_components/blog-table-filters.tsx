@@ -1,12 +1,12 @@
 // @ts-ignore
 // @ts-nocheck
-'use client';
+"use client";
 
-import { Input } from '@/components/ui/input';
-import { Search, Hash, Circle, User, Tag } from 'lucide-react';
-import { ActiveFiltersBar, ActiveFilter } from './active-filter-chip';
-import { useBlogFilterOptions } from '@/modules/blogs/hooks/use-blog-filter-options';
-import { MultiSelectFilter } from '@/components/ui/multi-select-filter';
+import { Input } from "@/components/ui/input";
+import { Search, Hash, Circle, Users, Tag } from "lucide-react";
+import { ActiveFiltersBar, ActiveFilter } from "./active-filter-chip";
+import { useBlogFilterOptions } from "@/modules/blogs/hooks/use-blog-filter-options";
+import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 
 interface BlogTableFiltersProps {
   searchTerm: string;
@@ -26,10 +26,10 @@ interface BlogTableFiltersProps {
 }
 
 const statusOptions = [
-  { id: 'PUBLISHED', name: 'Published', label: 'Published' },
-  { id: 'DRAFT', name: 'Draft', label: 'Draft' },
-  { id: 'SCHEDULED', name: 'Scheduled', label: 'Scheduled' },
-  { id: 'ARCHIVED', name: 'Archived', label: 'Archived' },
+  { id: "PUBLISHED", name: "Published", label: "Published" },
+  { id: "DRAFT", name: "Draft", label: "Draft" },
+  { id: "SCHEDULED", name: "Scheduled", label: "Scheduled" },
+  { id: "ARCHIVED", name: "Archived", label: "Archived" },
 ];
 
 export function BlogTableFilters({
@@ -80,8 +80,8 @@ export function BlogTableFilters({
 
   if (searchTerm) {
     activeFilters.push({
-      id: 'search',
-      type: 'search',
+      id: "search",
+      type: "search",
       label: `"${searchTerm}"`,
       value: searchTerm,
     });
@@ -92,7 +92,7 @@ export function BlogTableFilters({
     const statusOption = statusOptions.find((s) => s.id === statusId);
     activeFilters.push({
       id: `status-${statusId}`,
-      type: 'statuses',
+      type: "statuses",
       label: statusOption?.label || statusId,
       value: statusId,
     });
@@ -102,7 +102,7 @@ export function BlogTableFilters({
     const category = categories.find((c) => c.id === categoryId);
     activeFilters.push({
       id: `category-${categoryId}`,
-      type: 'categories',
+      type: "categories",
       label: category?.name || categoryId,
       value: categoryId,
     });
@@ -112,7 +112,7 @@ export function BlogTableFilters({
     const tag = tags.find((t) => t.id === tagId);
     activeFilters.push({
       id: `tag-${tagId}`,
-      type: 'tags',
+      type: "tags",
       label: tag?.name || tagId,
       value: tagId,
     });
@@ -122,7 +122,7 @@ export function BlogTableFilters({
     const author = authors.find((a) => a.id === authorId);
     activeFilters.push({
       id: `author-${authorId}`,
-      type: 'authors',
+      type: "authors",
       label: author?.name || authorId,
       value: authorId,
     });
@@ -130,27 +130,27 @@ export function BlogTableFilters({
 
   const handleRemoveFilter = (filterId: string) => {
     // Extract type and value from filterId
-    if (filterId === 'search') {
-      setSearchTerm('');
-    } else if (filterId.startsWith('status-')) {
-      const statusId = filterId.replace('status-', '');
+    if (filterId === "search") {
+      setSearchTerm("");
+    } else if (filterId.startsWith("status-")) {
+      const statusId = filterId.replace("status-", "");
       setStatusFilters((prev: string[]) =>
         prev.filter((id) => id !== statusId)
       ); // ✅ Fixed type
-    } else if (filterId.startsWith('category-')) {
-      const categoryId = filterId.replace('category-', '');
+    } else if (filterId.startsWith("category-")) {
+      const categoryId = filterId.replace("category-", "");
       setCategoryFilters((prev) => prev.filter((id) => id !== categoryId));
-    } else if (filterId.startsWith('tag-')) {
-      const tagId = filterId.replace('tag-', '');
+    } else if (filterId.startsWith("tag-")) {
+      const tagId = filterId.replace("tag-", "");
       setTagFilters((prev) => prev.filter((id) => id !== tagId));
-    } else if (filterId.startsWith('author-')) {
-      const authorId = filterId.replace('author-', '');
+    } else if (filterId.startsWith("author-")) {
+      const authorId = filterId.replace("author-", "");
       setAuthorFilters((prev) => prev.filter((id) => id !== authorId));
     }
   };
 
   const handleClearAll = () => {
-    setSearchTerm('');
+    setSearchTerm("");
     setStatusFilters([]);
     setCategoryFilters([]);
     setTagFilters([]);
@@ -213,7 +213,7 @@ export function BlogTableFilters({
 
           {/* Authors Filter */}
           <MultiSelectFilter
-            icon={User}
+            icon={Users}
             placeholder="Authors"
             searchPlaceholder="Search authors..."
             options={authorOptions}

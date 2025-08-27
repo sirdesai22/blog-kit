@@ -3,11 +3,10 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { InputWithSuffix, Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
-
 import { useRouter } from "next/navigation";
 import { SiteHeader } from "@/components/layout/header";
 
@@ -93,7 +92,7 @@ export default function OnboardingPage() {
         {/* Navigation Bar */}
         {/* Main Content */}
         <div className="flex items-center justify-center px-4 py-8">
-          <div className="max-w-[400px] w-full">
+          <div className=" w-full">
             <Card className="border-none shadow-none">
               <CardHeader className="">
                 <h1 className="text-2xl font-bold text-primary">
@@ -105,7 +104,7 @@ export default function OnboardingPage() {
                 {/* Workspace Name */}
                 <label
                   htmlFor="workspaceName"
-                  className="text-sm font-semibold text-gray-800"
+                  className="text-normal  text-gray-800"
                 >
                   Workspace Name*
                 </label>
@@ -119,11 +118,11 @@ export default function OnboardingPage() {
                 {/* Workspace Address */}
                 <label
                   htmlFor="workspaceAddress"
-                  className="text-sm font-semibold text-gray-800"
+                  className="text-normal  text-gray-800"
                 >
                   Workspace Address*
                 </label>
-                <Input
+                <InputWithSuffix
                   id="workspaceAddress"
                   type="text"
                   value={workspaceAddress}
@@ -137,7 +136,7 @@ export default function OnboardingPage() {
                   <div className="flex gap-2 items-baseline">
                     <label
                       htmlFor="description"
-                      className="text-sm font-semibold text-gray-800"
+                      className="text-normal  text-gray-800"
                     >
                       Description
                     </label>

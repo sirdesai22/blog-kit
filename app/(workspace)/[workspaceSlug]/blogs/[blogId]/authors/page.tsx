@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useState, use } from 'react';
-import { Card, CardContent, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useEffect, useState, use } from "react";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -10,14 +10,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { MoreHorizontal, Plus, Trash2, ExternalLink } from 'lucide-react';
+} from "@/components/ui/table";
+import { MoreHorizontal, Plus, Trash2, ExternalLink } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -25,16 +25,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Heading } from '@/components/ui/heading';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+} from "@/components/ui/dialog";
+import { Heading } from "@/components/ui/heading";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   getWorkspaceAuthors,
   addAuthor,
   updateAuthor,
   deleteAuthor,
-} from '@/modules/workspace/actions/workspace-actions';
-import { AuthorDialog } from './_components/author-dialog';
+} from "@/modules/workspace/actions/workspace-actions";
+import { AuthorDialog } from "./_components/author-dialog";
 
 interface Author {
   id: string;
@@ -83,7 +83,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
         setAuthors(result.authors as unknown as Author[]);
       }
     } catch (error) {
-      console.error('Failed to load authors:', error);
+      console.error("Failed to load authors:", error);
     } finally {
       setIsInitialLoading(false);
     }
@@ -111,7 +111,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
       setIsAddDialogOpen(false);
       await loadAuthors();
     } catch (error) {
-      console.error('Failed to add author:', error);
+      console.error("Failed to add author:", error);
     } finally {
       setIsLoading(false);
     }
@@ -137,7 +137,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
       setSelectedAuthor(null);
       await loadAuthors();
     } catch (error) {
-      console.error('Failed to update author:', error);
+      console.error("Failed to update author:", error);
     } finally {
       setIsLoading(false);
     }
@@ -153,7 +153,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
       setSelectedAuthor(null);
       await loadAuthors();
     } catch (error) {
-      console.error('Failed to delete author:', error);
+      console.error("Failed to delete author:", error);
     } finally {
       setIsLoading(false);
     }
@@ -173,10 +173,10 @@ export default function AuthorsPage(props: AuthorsPageProps) {
   const editData: AuthorFormData | undefined = selectedAuthor
     ? {
         name: selectedAuthor.name,
-        bio: selectedAuthor.bio || '',
-        email: selectedAuthor.email || '',
-        website: selectedAuthor.website || '',
-        image: selectedAuthor.image || '',
+        bio: selectedAuthor.bio || "",
+        email: selectedAuthor.email || "",
+        website: selectedAuthor.website || "",
+        image: selectedAuthor.image || "",
         socialLinks: selectedAuthor.socialLinks || {},
       }
     : undefined;
@@ -206,7 +206,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
     <div className="bg-background">
       {/* Header */}
       <div className="px-4 py-6 sm:px-md lg:px-lg">
-          <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-start">
+        <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-start">
           <div>
             <Heading
               level="h1"
@@ -216,7 +216,8 @@ export default function AuthorsPage(props: AuthorsPageProps) {
               className="text-primary"
               subtitle={
                 <p className="max-w-xl text-small">
-                  Manage authors who can write and be attributed to posts.{' '} <br />
+                  Manage authors who can write and be attributed to posts.{" "}
+                  <br />
                   <span className="cursor-pointer text-small hover:underline">
                     Learn more
                   </span>
@@ -235,15 +236,17 @@ export default function AuthorsPage(props: AuthorsPageProps) {
 
       {/* Authors Table */}
       <div>
-        <CardTitle className="flex items-center justify-between ml-lg mb-md">
-          <span className="text-normal">{authors.length} <span className='text-small'>Authors</span></span>
+        <CardTitle className="flex items-center justify-between ml-4 mb-4">
+          <span className="text-normal">
+            {authors.length} <span className="text-small">Authors</span>
+          </span>
         </CardTitle>
         <Card className="p-0 shadow-none border-none">
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted">
-                  <TableHead className='pl-lg'>Author</TableHead>
+                  <TableHead className="pl-4">Author</TableHead>
                   <TableHead>Posts</TableHead>
                 </TableRow>
               </TableHeader>
@@ -261,10 +264,10 @@ export default function AuthorsPage(props: AuthorsPageProps) {
                 ) : (
                   authors.map((author) => (
                     <TableRow key={author.id}>
-                      <TableCell className='pl-lg'>
+                      <TableCell className="pl-4">
                         <div className="flex items-center space-x-3">
                           <Avatar className="w-8 h-8">
-                            <AvatarImage src={author.image || ''} />
+                            <AvatarImage src={author.image || ""} />
                             <AvatarFallback className="text-sm">
                               {author.name[0].toUpperCase()}
                             </AvatarFallback>
@@ -283,14 +286,12 @@ export default function AuthorsPage(props: AuthorsPageProps) {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center justify-between">
-                          <span className="font-medium">
-                            {author.posts}
-                          </span>
+                          <span className="font-medium">{author.posts}</span>
                           <div className="flex items-center gap-2">
                             <Button
                               variant="outline"
                               size="sm"
-                              className='text-normal-muted'
+                              className="text-normal-muted"
                             >
                               View Posts
                             </Button>
@@ -298,16 +299,13 @@ export default function AuthorsPage(props: AuthorsPageProps) {
                               variant="outline"
                               size="sm"
                               onClick={() => handleEditClick(author)}
-                              className='text-normal-muted'
+                              className="text-normal-muted"
                             >
                               Edit
                             </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  className="h-8 w-8 p-0"
-                                >
+                                <Button variant="ghost" className="h-8 w-8 p-0">
                                   <MoreHorizontal className="h-4 w-4 text-normal-muted" />
                                 </Button>
                               </DropdownMenuTrigger>
@@ -382,7 +380,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
               onClick={handleDeleteAuthor}
               disabled={isLoading}
             >
-              {isLoading ? 'Deleting...' : 'Delete Author'}
+              {isLoading ? "Deleting..." : "Delete Author"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Table,
@@ -6,9 +6,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { BlogTableRow } from './blog-table-row';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/table";
+import { BlogTableRow } from "./blog-table-row";
+import { Button } from "@/components/ui/button";
 import {
   Plus,
   ArrowUpDown,
@@ -22,26 +22,27 @@ import {
   Tag,
   User,
   ChevronDown,
-} from 'lucide-react';
-import { Heading } from '@/components/ui/heading';
-import { useRouter } from 'next/navigation';
-import { BlogPost } from '@/types/blog';
-import { BlogPostSort } from '@/modules/blogs/actions/blog-table-actions';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useBlogTable } from '@/modules/blogs/contexts/BlogTableContext';
-import { cn } from '@/lib/utils';
+  X,
+} from "lucide-react";
+import { Heading } from "@/components/ui/heading";
+import { useRouter } from "next/navigation";
+import { BlogPost } from "@/types/blog";
+import { BlogPostSort } from "@/modules/blogs/actions/blog-table-actions";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useBlogTable } from "@/modules/blogs/contexts/BlogTableContext";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useState } from 'react';
-import { CategorySelectionDialog } from '@/modules/blogs/components/table/blogs/category-selection-dialog';
-import { TagSelectionDialog } from '@/modules/blogs/components/table/blogs/tag-selection-dialog';
-import { AuthorSelectionDialog } from '@/modules/blogs/components/table/blogs/author-selection-dialog';
+} from "@/components/ui/dropdown-menu";
+import { useEffect, useState } from "react";
+import { CategorySelectionDialog } from "@/modules/blogs/components/table/blogs/category-selection-dialog";
+import { TagSelectionDialog } from "@/modules/blogs/components/table/blogs/tag-selection-dialog";
+import { AuthorSelectionDialog } from "@/modules/blogs/components/table/blogs/author-selection-dialog";
 import {
   bulkPublishPosts,
   bulkUnpublishPosts,
@@ -50,16 +51,18 @@ import {
   bulkUpdateAuthor,
   bulkDeletePosts,
   bulkArchivePosts,
-} from '@/modules/blogs/actions/post-bulk-actions';
-import { toast } from 'sonner';
-import { useQueryClient } from '@tanstack/react-query';
+} from "@/modules/blogs/actions/post-bulk-actions";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { ConfirmationDialog } from "@/components/models/confirmation-dialog";
+import { Separator } from "@/components/ui/separator";
 
 interface BlogTableContentProps {
   posts: BlogPost[];
   workspaceSlug: string;
   currentPageId: string;
   loading?: boolean;
-  onSort?: (field: BlogPostSort['field']) => void;
+  onSort?: (field: BlogPostSort["field"]) => void;
   sortConfig?: BlogPostSort;
 }
 
@@ -68,11 +71,11 @@ function SortableHeader({
   field,
   onSort,
   sortConfig,
-  className = '',
+  className = "",
 }: {
   children: React.ReactNode;
-  field: BlogPostSort['field'];
-  onSort?: (field: BlogPostSort['field']) => void;
+  field: BlogPostSort["field"];
+  onSort?: (field: BlogPostSort["field"]) => void;
   sortConfig?: BlogPostSort;
   className?: string;
 }) {
@@ -85,11 +88,11 @@ function SortableHeader({
         variant="ghost"
         size="sm"
         onClick={() => onSort?.(field)}
-        className="h-auto p-0 font-medium hover:bg-transparent"
+        className="h-auto p-0 font-medium hover:bg-transparent !px-0"
       >
         <span>{children}</span>
         {isActive ? (
-          direction === 'asc' ? (
+          direction === "asc" ? (
             <ArrowUp className="ml-1 h-3 w-3" />
           ) : (
             <ArrowDown className="ml-1 h-3 w-3" />
@@ -150,24 +153,26 @@ function BulkActions({
   const [showTagDialog, setShowTagDialog] = useState(false);
   const [showAuthorDialog, setShowAuthorDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // New state for the delete confirmation modal
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const queryClient = useQueryClient();
-
   const selectedPostIds = Array.from(selectedIds);
 
   const refreshTable = () => {
     queryClient.invalidateQueries({
-      queryKey: ['blog-posts-table', workspaceSlug, currentPageId],
-    });
-
-    queryClient.invalidateQueries({
-      queryKey: ['workspace-categories', workspaceSlug, currentPageId],
+      queryKey: ["blog-posts-table", workspaceSlug, currentPageId],
     });
     queryClient.invalidateQueries({
-      queryKey: ['workspace-tags', workspaceSlug, currentPageId],
+      queryKey: ["workspace-categories", workspaceSlug, currentPageId],
     });
     queryClient.invalidateQueries({
-      queryKey: ['workspace-authors', workspaceSlug],
+      queryKey: ["workspace-tags", workspaceSlug, currentPageId],
+    });
+    queryClient.invalidateQueries({
+      queryKey: ["workspace-authors", workspaceSlug],
     });
   };
 
@@ -179,199 +184,192 @@ function BulkActions({
     }>,
     loadingMessage: string
   ) => {
+    setIsMenuOpen(false);
     setIsLoading(true);
     const toastId = toast.loading(loadingMessage);
 
     try {
       const result = await action();
-
       if (result.success) {
-        toast.success(result.message || 'Action completed successfully', {
+        toast.success(result.message || "Action completed successfully", {
           id: toastId,
         });
         onClearSelection();
-        // Refresh the table data
         refreshTable();
       } else {
-        toast.error(result.error || 'Action failed', {
-          id: toastId,
-        });
+        toast.error(result.error || "Action failed", { id: toastId });
       }
     } catch (error) {
-      console.error('Bulk action error:', error);
-      toast.error('An unexpected error occurred', {
-        id: toastId,
-      });
+      console.error("Bulk action error:", error);
+      toast.error("An unexpected error occurred", { id: toastId });
     } finally {
       setIsLoading(false);
+      setShowDeleteConfirm(false); // Ensure modal is closed on completion
     }
   };
 
-  const handlePublish = () => {
+  const handlePublish = () =>
     handleBulkAction(
       () => bulkPublishPosts(workspaceSlug, selectedPostIds),
-      'Publishing posts...'
+      "Publishing posts..."
     );
-  };
-
-  const handleUnpublish = () => {
+  const handleUnpublish = () =>
     handleBulkAction(
       () => bulkUnpublishPosts(workspaceSlug, selectedPostIds),
-      'Unpublishing posts...'
+      "Unpublishing posts..."
     );
-  };
-
-  const handleArchive = () => {
+  const handleArchive = () =>
     handleBulkAction(
       () => bulkArchivePosts(workspaceSlug, selectedPostIds),
-      'Archiving posts...'
+      "Archiving posts..."
+    );
+
+  // This function is now called by the modal on confirmation
+  const confirmDelete = () => {
+    handleBulkAction(
+      () => bulkDeletePosts(workspaceSlug, selectedPostIds),
+      "Deleting posts..."
     );
   };
 
-  const handleDelete = () => {
-    if (
-      confirm(
-        `Are you sure you want to delete ${selectedCount} post${
-          selectedCount > 1 ? 's' : ''
-        }? This action cannot be undone.`
-      )
-    ) {
-      handleBulkAction(
-        () => bulkDeletePosts(workspaceSlug, selectedPostIds),
-        'Deleting posts...'
-      );
-    }
-  };
-
-  const handleCategoryUpdate = (categoryIds: string[]) => {
+  const handleCategoryUpdate = (categoryIds: string[]) =>
     handleBulkAction(
       () => bulkUpdateCategories(workspaceSlug, selectedPostIds, categoryIds),
-      'Updating categories...'
+      "Updating categories..."
     );
-  };
-
-  const handleTagUpdate = (tagIds: string[]) => {
+  const handleTagUpdate = (tagIds: string[]) =>
     handleBulkAction(
       () => bulkUpdateTags(workspaceSlug, selectedPostIds, tagIds),
-      'Updating tags...'
+      "Updating tags..."
     );
-  };
-
-  const handleAuthorUpdate = (authorId: string) => {
+  const handleAuthorUpdate = (authorId: string) =>
     handleBulkAction(
       () => bulkUpdateAuthor(workspaceSlug, selectedPostIds, authorId),
-      'Updating author...'
+      "Updating author..."
     );
+  const handleCancel = () => {
+    onClearSelection();
+    setIsMenuOpen(false);
   };
 
   return (
     <>
-      <div className="flex items-center justify-between gap-4 px-4 py-3 bg-blue-50 border-b border-blue-200">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-blue-900">
-            {selectedCount} post{selectedCount > 1 ? 's' : ''} selected
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {/* Individual action buttons */}
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-7"
-            onClick={handlePublish}
-            disabled={isLoading}
-          >
-            <Eye className="mr-1 h-3 w-3" />
-            Publish
-          </Button>
-
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-7"
-            onClick={handleUnpublish}
-            disabled={isLoading}
-          >
-            <EyeOff className="mr-1 h-3 w-3" />
-            Unpublish
-          </Button>
-
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-7"
-            onClick={() => setShowCategoryDialog(true)}
-            disabled={isLoading}
-          >
-            <Hash className="mr-1 h-3 w-3" />
-            Change Category
-          </Button>
-
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-7"
-            onClick={() => setShowTagDialog(true)}
-            disabled={isLoading}
-          >
-            <Tag className="mr-1 h-3 w-3" />
-            Change Tag
-          </Button>
-
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-7"
-            onClick={() => setShowAuthorDialog(true)}
-            disabled={isLoading}
-          >
-            <User className="mr-1 h-3 w-3" />
-            Change Author
-          </Button>
-
-          {/* Bulk Actions Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+      <div className="relative left-30 ">
+        {isMenuOpen && (
+          <div className="absolute bottom-full w-[98%] origin-bottom rounded-xl bg-white shadow-xl ring-[1px] ring-black/10 focus:outline-none z-10 mb-2">
+            <div className="p-1" role="menu" aria-orientation="vertical">
+              <p className="px-3 py-1.5 text-small">Edit</p>
               <Button
-                size="sm"
-                variant="outline"
-                className="h-7"
+                variant="ghost"
+                className="w-full text-normal justify-start h-8 px-2"
+                onClick={handlePublish}
                 disabled={isLoading}
               >
-                Bulk Actions
-                <ChevronDown className="ml-1 h-3 w-3" />
+                <Eye className="mr-2 h-4 w-4" />
+                Publish
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleArchive}>
+              <Button
+                variant="ghost"
+                className="w-full text-normal justify-start h-8 px-2"
+                onClick={handleUnpublish}
+                disabled={isLoading}
+              >
+                <EyeOff className="mr-2 h-4 w-4" />
+                Unpublish
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full text-normal justify-start h-8 px-2"
+                onClick={() => setShowCategoryDialog(true)}
+                disabled={isLoading}
+              >
+                <Hash className="mr-2 h-4 w-4" />
+                Change Category
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full text-normal justify-start h-8 px-2"
+                onClick={() => setShowTagDialog(true)}
+                disabled={isLoading}
+              >
+                <Tag className="mr-2 h-4 w-4" />
+                Change Tag
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full text-normal justify-start h-8 px-2"
+                onClick={() => setShowAuthorDialog(true)}
+                disabled={isLoading}
+              >
+                <User className="mr-2 h-4 w-4" />
+                Change Author
+              </Button>
+
+              <p className="px-3 py-1.5 text-small">Actions</p>
+              <Button
+                variant="ghost"
+                className="w-full text-normal justify-start h-8 px-2"
+                onClick={handleArchive}
+                disabled={isLoading}
+              >
                 <Archive className="mr-2 h-4 w-4" />
                 Archive
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={handleDelete}
-                className="text-red-600 focus:text-red-700"
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full text-normal justify-start h-8 px-2 text-red-600 hover:text-red-700 focus:text-red-700"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={isLoading}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </Button>
 
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={onClearSelection}
-            className="h-7"
-            disabled={isLoading}
-          >
-            Cancel
-          </Button>
-        </div>
+              <Separator />
+
+              <Button
+                variant="ghost"
+                className="w-full text-normal justify-start h-8 px-2"
+                onClick={handleCancel}
+                disabled={isLoading}
+              >
+                <X className="mr-2 h-4 w-4" />
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-10 px-4 bg-white shadow-xl rounded-full flex items-center gap-3"
+          onClick={() => setIsMenuOpen((prev) => !prev)}
+          disabled={isLoading}
+        >
+          <span className="font-semibold text-blue-800">
+            {selectedCount} post{selectedCount > 1 ? "s" : ""} selected
+          </span>
+          <div className="h-5 border-l border-gray-300"></div>
+          <span className="font-medium">Bulk Actions</span>
+          <ChevronDown
+            className="ml-1 h-4 w-4 transition-transform"
+            style={{ transform: !isMenuOpen ? "rotate(180deg)" : "none" }}
+          />
+        </Button>
       </div>
 
-      {/* Dialogs */}
+      <ConfirmationDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        onConfirm={confirmDelete}
+        title={`Delete ${selectedCount} post${selectedCount > 1 ? "s" : ""}?`}
+        description="This action cannot be undone. This will permanently delete the selected posts."
+        confirmButtonLabel="Delete"
+        theme="danger"
+        isConfirming={isLoading}
+      />
+
       <CategorySelectionDialog
         open={showCategoryDialog}
         onOpenChange={setShowCategoryDialog}
@@ -379,7 +377,6 @@ function BulkActions({
         workspaceSlug={workspaceSlug}
         pageId={currentPageId}
       />
-
       <TagSelectionDialog
         open={showTagDialog}
         onOpenChange={setShowTagDialog}
@@ -387,7 +384,6 @@ function BulkActions({
         workspaceSlug={workspaceSlug}
         pageId={currentPageId}
       />
-
       <AuthorSelectionDialog
         open={showAuthorDialog}
         onOpenChange={setShowAuthorDialog}
@@ -422,7 +418,22 @@ export function BlogTableContent({
 
   const allPostIds = posts.map((post) => post.id);
   const selectedCount = selectedIds.size;
-  const showBulkActions = selectedCount > 0;
+
+  // --- ANIMATION STATE MANAGEMENT START ---
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [isRendered, setIsRendered] = useState(false);
+
+  useEffect(() => {
+    const show = selectedCount > 0;
+    if (show) {
+      setIsRendered(true);
+      setTimeout(() => setIsAnimating(true), 10); // Animate in
+    } else {
+      setIsAnimating(false);
+      setTimeout(() => setIsRendered(false), 300); // Wait for animation to finish before unmounting
+    }
+  }, [selectedCount]);
+  // --- ANIMATION STATE MANAGEMENT END ---
 
   if (!loading && posts.length === 0) {
     return (
@@ -436,7 +447,6 @@ export function BlogTableContent({
           >
             No blog posts found
           </Heading>
-
           <Button onClick={newPage} className="mt-3">
             <Plus className="mr-2 h-4 w-4" />
             New Post
@@ -447,22 +457,12 @@ export function BlogTableContent({
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border">
-      {showBulkActions && (
-        <BulkActions
-          selectedCount={selectedCount}
-          selectedIds={selectedIds}
-          onClearSelection={clearSelection}
-          workspaceSlug={workspaceSlug}
-          currentPageId={currentPageId}
-        />
-      )}
-
-      <div className="relative max-w-[80vw] overflow-x-auto">
+    <div className="overflow-hidden">
+      <div className="relative overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
-              <TableHead className="w-12">
+              <TableHead className="w-12 pl-4">
                 <Checkbox
                   checked={isAllSelected(allPostIds)}
                   ref={(el: any) => {
@@ -490,20 +490,14 @@ export function BlogTableContent({
               <TableHead>Category</TableHead>
               <TableHead>Tags</TableHead>
               <TableHead>Author</TableHead>
-              <SortableHeader
-                field="publishedAt"
-                onSort={onSort}
-                sortConfig={sortConfig}
-              >
-                Published / Modified
-              </SortableHeader>
+              <TableHead>Published</TableHead>
+              <TableHead>Modified</TableHead>
               <TableHead className="sticky right-0 w-12 bg-muted/50 text-center"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading
-              ? // Show skeleton rows while loading
-                Array.from({ length: 5 }).map((_, index) => (
+              ? Array.from({ length: 5 }).map((_, index) => (
                   <LoadingRow key={`loading-${index}`} />
                 ))
               : posts.map((post) => (
@@ -516,6 +510,25 @@ export function BlogTableContent({
           </TableBody>
         </Table>
       </div>
+
+      {isRendered && (
+        <div
+          className={cn(
+            "fixed bottom-20 left-1/2 -translate-x-1/2 z-30 transition-all duration-300 ease-in-out",
+            isAnimating
+              ? "translate-y-0 opacity-100"
+              : "translate-y-20 opacity-0"
+          )}
+        >
+          <BulkActions
+            selectedCount={selectedCount}
+            selectedIds={selectedIds}
+            onClearSelection={clearSelection}
+            workspaceSlug={workspaceSlug}
+            currentPageId={currentPageId}
+          />
+        </div>
+      )}
     </div>
   );
 }

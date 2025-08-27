@@ -187,13 +187,13 @@ export default function SignInPage() {
             <GoogleIcon className="mr-2.5 h-5 w-5" /> Continue with Google
           </Button>
 
-          <Button
+          {/* <Button
             onClick={handleGitHubSignIn}
             variant="social"
             disabled={loading}
           >
             <GitHubIcon className="mr-2.5 h-5 w-5" /> Continue with GitHub
-          </Button>
+          </Button> */}
         </div>
 
         <div className="relative my-3">

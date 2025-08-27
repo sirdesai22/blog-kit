@@ -17,6 +17,7 @@ import {
   Palette,
   Globe,
   Puzzle,
+  Hash,
   Command,
 } from 'lucide-react';
 
@@ -33,7 +34,7 @@ export const pageManagementSidebarData = [
     label: 'Post Management',
     items: [
       { title: 'Posts', url: '#', icon: FileText },
-      { title: 'Categories', url: 'categories', icon: FolderOpen },
+      { title: 'Categories', url: 'categories', icon: Hash },
       { title: 'Authors', url: 'authors', icon: Users },
       { title: 'Forms', url: 'forms', icon: ClipboardList },
       { title: 'Leads', url: 'leads', icon: Target },

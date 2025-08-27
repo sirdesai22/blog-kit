@@ -46,11 +46,6 @@
   --height-header: var(--header-height);
   --padding-header-horizontal: var(--header-horizontal-padding);
 
-  --spacing-xs: var(--gap-xs);
-  --spacing-sm: var(--gap-sm);
-  --spacing-md: var(--gap-md);
-  --spacing-lg: var(--gap-lg);
-
   --text-xs: 0.75rem;
   --text-sm: 0.8rem;
   --text-md: 1rem;

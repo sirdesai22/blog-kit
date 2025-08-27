@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -12,15 +12,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -28,17 +28,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 
 import {
   deleteCategory,
   reorderCategories,
   updateCategory,
-} from '@/modules/blogs/actions/category-actions';
+} from "@/modules/blogs/actions/category-actions";
 
 // Icons
-import { ExternalLink, GripVertical, MoreVertical, Trash2 } from 'lucide-react';
+import { ExternalLink, GripVertical, MoreVertical, Trash2 } from "lucide-react";
 
 // Drag and Drop
 import {
@@ -49,16 +49,16 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { toast } from 'sonner';
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { toast } from "sonner";
 
 // ✅ Updated interface to match new rich data
 interface CategoryWithStats {
@@ -104,7 +104,7 @@ function SortableTableRow({
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 10 : 'auto',
+    zIndex: isDragging ? 10 : "auto",
   };
 
   return (
@@ -131,7 +131,6 @@ function SortableTableRow({
         </div>
       </TableCell>
       <TableCell>{category.posts}</TableCell>
-<<<<<<< HEAD
       {/* <TableCell>
         {category.traffic.toLocaleString()}{" "}
         <span className="rounded bg-red-50 px-1 text-xs font-medium text-red-600">
@@ -142,20 +141,6 @@ function SortableTableRow({
         <span className="rounded bg-green-50 px-1 text-xs font-medium text-green-600">
           {Math.floor(Math.random() * 60)}%
         </span></TableCell> */}
-=======
-      <TableCell>
-        {(category.traffic || 0).toLocaleString()}{' '}
-        <span className="rounded bg-red-50 px-1 text-xs font-medium text-red-600">
-          {Math.floor(Math.random() * 20)}%
-        </span>
-      </TableCell>
-      <TableCell>
-        {category.leads || 0}
-        <span className="rounded bg-green-50 px-1 text-xs font-medium text-green-600">
-          {Math.floor(Math.random() * 60)}%
-        </span>
-      </TableCell>
->>>>>>> a1ed7ea3613c5f747b8b3b31105430d4612cc3d0
       <TableCell className="sticky right-0 bg-background group-hover:bg-accent/50">
         <div className="flex items-center justify-end gap-2">
           <Button variant="outline" size="sm" className="text-normal-muted">
@@ -205,8 +190,8 @@ export function BlogCategoriesView({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryWithStats | null>(null);
-  const [editCategoryName, setEditCategoryName] = useState('');
-  const [editCategoryDescription, setEditCategoryDescription] = useState('');
+  const [editCategoryName, setEditCategoryName] = useState("");
+  const [editCategoryDescription, setEditCategoryDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const sensors = useSensors(
@@ -217,13 +202,13 @@ export function BlogCategoriesView({
   );
 
   const handleDragStart = (event: any) => {
-    console.log('🚀 Drag STARTED:', event.active.id);
+    console.log("🚀 Drag STARTED:", event.active.id);
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
-    console.log('🔄 Drag ENDED:', {
+    console.log("🔄 Drag ENDED:", {
       activeId: active.id,
       overId: over?.id,
     });
@@ -232,7 +217,7 @@ export function BlogCategoriesView({
       const oldIndex = categories.findIndex((c) => c.id === active.id);
       const newIndex = categories.findIndex((c) => c.id === over.id);
 
-      console.log('📊 Reorder details:', {
+      console.log("📊 Reorder details:", {
         oldIndex,
         newIndex,
         activeId: active.id,
@@ -248,17 +233,17 @@ export function BlogCategoriesView({
           order: index + 1,
         }));
 
-        console.log('🚀 Sending reorder request:', categoryOrders);
+        console.log("🚀 Sending reorder request:", categoryOrders);
 
         await reorderCategories(workspaceSlug, categoryOrders);
-        toast.success('Categories reordered successfully!');
+        toast.success("Categories reordered successfully!");
 
-        console.log('✅ Reorder successful');
+        console.log("✅ Reorder successful");
 
         router.refresh();
       } catch (error) {
-        console.error('❌ Failed to update category order:', error);
-        toast.error('Failed to reorder categories');
+        console.error("❌ Failed to update category order:", error);
+        toast.error("Failed to reorder categories");
         setCategories(categories);
       }
     }
@@ -273,13 +258,13 @@ export function BlogCategoriesView({
         description: editCategoryDescription.trim() || undefined,
       });
 
-      toast.success('Category updated successfully!');
+      toast.success("Category updated successfully!");
       setIsEditDialogOpen(false);
       router.refresh();
     } catch (error) {
-      console.error('Failed to update category:', error);
+      console.error("Failed to update category:", error);
       toast.error(
-        error instanceof Error ? error.message : 'Failed to update category'
+        error instanceof Error ? error.message : "Failed to update category"
       );
     } finally {
       setIsLoading(false);
@@ -291,13 +276,13 @@ export function BlogCategoriesView({
     setIsLoading(true);
     try {
       await deleteCategory(workspaceSlug, selectedCategory.id);
-      toast.success('Category deleted successfully!');
+      toast.success("Category deleted successfully!");
       setIsDeleteDialogOpen(false);
       router.refresh();
     } catch (error) {
-      console.error('Failed to delete category:', error);
+      console.error("Failed to delete category:", error);
       toast.error(
-        error instanceof Error ? error.message : 'Failed to delete category'
+        error instanceof Error ? error.message : "Failed to delete category"
       );
     } finally {
       setIsLoading(false);
@@ -306,7 +291,7 @@ export function BlogCategoriesView({
 
   return (
     <>
-      <CardTitle className="text-normal ml-lg mb-md">
+      <CardTitle className="text-normal ml-4 ">
         {categories.length} <span className="text-small">Categories</span>
       </CardTitle>
       <div className="overflow-hidden">
@@ -323,15 +308,9 @@ export function BlogCategoriesView({
                   <TableHead className="w-14"></TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Posts</TableHead>
-<<<<<<< HEAD
                   {/* <TableHead>Traffic</TableHead> */}
                   {/* <TableHead>Leads</TableHead> */}
                   <TableHead className="sticky right-0 w-12  text-center"></TableHead>
-=======
-                  <TableHead>Traffic</TableHead>
-                  <TableHead>Leads</TableHead>
-                  <TableHead className="sticky right-0 w-12 text-center"></TableHead>
->>>>>>> a1ed7ea3613c5f747b8b3b31105430d4612cc3d0
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -357,7 +336,7 @@ export function BlogCategoriesView({
                         onEdit={(cat) => {
                           setSelectedCategory(cat);
                           setEditCategoryName(cat.name);
-                          setEditCategoryDescription(cat.description || '');
+                          setEditCategoryDescription(cat.description || "");
                           setIsEditDialogOpen(true);
                         }}
                         onDelete={(cat) => {
@@ -407,7 +386,7 @@ export function BlogCategoriesView({
               Cancel
             </Button>
             <Button onClick={handleEditCategory} disabled={isLoading}>
-              {isLoading ? 'Updating...' : 'Save Changes'}
+              {isLoading ? "Updating..." : "Save Changes"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -435,7 +414,7 @@ export function BlogCategoriesView({
               onClick={handleDeleteCategory}
               disabled={isLoading}
             >
-              {isLoading ? 'Deleting...' : 'Delete Category'}
+              {isLoading ? "Deleting..." : "Delete Category"}
             </Button>
           </DialogFooter>
         </DialogContent>

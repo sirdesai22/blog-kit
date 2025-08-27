@@ -1,21 +1,27 @@
-'use client';
+"use client";
 
-import { TableCell, TableRow } from '@/components/ui/table';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { TableCell, TableRow } from "@/components/ui/table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Edit2, Pin, Copy, Trash2, Eye } from 'lucide-react';
-import Link from 'next/link';
-import { BlogPost } from '@/types/blog';
-import { useBlogTable } from '@/modules/blogs/contexts/BlogTableContext';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Edit2, Pin, Copy, Trash2, Eye } from "lucide-react";
+import Link from "next/link";
+import { BlogPost } from "@/types/blog";
+import { useBlogTable } from "@/modules/blogs/contexts/BlogTableContext";
+import { cn } from "@/lib/utils";
+import { TooltipArrow } from "@radix-ui/react-tooltip";
 
 interface BlogTableRowProps {
   post: BlogPost;
@@ -29,33 +35,33 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PUBLISHED':
-        return 'bg-green-100 text-green-700 border border-green-200';
-      case 'DRAFT':
-        return 'bg-gray-100 text-gray-700 border border-gray-200';
-      case 'SCHEDULED':
-        return 'bg-orange-100 text-orange-700 border border-orange-200';
-      case 'ARCHIVED':
-        return 'bg-blue-100 text-blue-700 border border-blue-200';
-      case 'DELETED':
-        return 'bg-red-100 text-red-700 border border-red-200';
+      case "PUBLISHED":
+        return "bg-green-100 text-green-700 border border-green-200";
+      case "DRAFT":
+        return "bg-gray-100 text-gray-700 border border-gray-200";
+      case "SCHEDULED":
+        return "bg-orange-100 text-orange-700 border border-orange-200";
+      case "ARCHIVED":
+        return "bg-blue-100 text-blue-700 border border-blue-200";
+      case "DELETED":
+        return "bg-red-100 text-red-700 border border-red-200";
       default:
-        return 'bg-gray-100 text-gray-700 border border-gray-200';
+        return "bg-gray-100 text-gray-700 border border-gray-200";
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'PUBLISHED':
-        return 'Published';
-      case 'DRAFT':
-        return 'Draft';
-      case 'SCHEDULED':
-        return 'Scheduled';
-      case 'ARCHIVED':
-        return 'Archived';
-      case 'DELETED':
-        return 'Deleted';
+      case "PUBLISHED":
+        return "Published";
+      case "DRAFT":
+        return "Draft";
+      case "SCHEDULED":
+        return "Scheduled";
+      case "ARCHIVED":
+        return "Archived";
+      case "DELETED":
+        return "Deleted";
       default:
         return status;
     }
@@ -69,8 +75,8 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
   return (
     <TableRow
       className={cn(
-        'group hover:bg-muted/50',
-        isSelected && 'bg-blue-50 hover:bg-blue-50'
+        "group hover:bg-muted/50",
+        isSelected && "bg-blue-50 hover:bg-blue-50"
       )}
     >
       <TableCell className="pl-4">
@@ -101,6 +107,7 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
             post.status
           )}`}
         >
+          <span className="text-small mr-1">●</span>{" "}
           {getStatusLabel(post.status)}
         </span>
       </TableCell>
@@ -108,12 +115,28 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
       <TableCell>
         {post.categories && post.categories.length > 0 ? (
           <div className="flex items-center gap-1">
-            <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-1 text-xs font-medium text-muted-foreground">
-              {post.categories[0].name}
-            </span>
-            {post.categories.length > 1 && (
-              <span className="text-xs text-muted-foreground">
-                +{post.categories.length - 1}
+            {post.categories.length > 1 ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-1 text-xs font-medium text-muted-foreground ">
+                    {post.categories[0].name}
+                    <span className="ml-1 ">+{post.categories.length - 1}</span>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent
+                  sideOffset={5}
+                  className="flex flex-col gap-1 p-2 bg-popover border border-border rounded-md shadow-lg"
+                >
+                  {post.categories.map((category, index) => (
+                    <span key={index} className=" text-normal">
+                      {category.name}
+                    </span>
+                  ))}
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-1 text-xs font-medium text-muted-foreground">
+                {post.categories[0].name}
               </span>
             )}
           </div>
@@ -125,12 +148,28 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
       <TableCell>
         {post.tags && post.tags.length > 0 ? (
           <div className="flex items-center gap-1">
-            <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-1 text-xs font-medium text-muted-foreground">
-              {post.tags[0].name}
-            </span>
-            {post.tags.length > 1 && (
-              <span className="text-xs text-muted-foreground">
-                +{post.tags.length - 1}
+            {post.tags.length > 1 ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-1 text-xs font-medium text-muted-foreground">
+                    {post.tags[0].name}
+                    <span className="ml-1">+{post.tags.length - 1}</span>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent
+                  sideOffset={5}
+                  className="flex flex-col gap-1 p-2 bg-popover border border-border rounded-md shadow-lg"
+                >
+                  {post.tags.map((tag, index) => (
+                    <span key={index} className="text-normal">
+                      {tag.name}
+                    </span>
+                  ))}
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-1 text-xs font-medium text-muted-foreground">
+                {post.tags[0].name}
               </span>
             )}
           </div>
@@ -143,10 +182,10 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
         <div className="flex items-center space-x-2">
           {post.author ? (
             <>
-              <Avatar className="h-6 w-6">
-                <AvatarImage src={post.author.image || ''} />
+              <Avatar className="h-6 w-6 border border-border">
+                <AvatarImage src={post.author.image || ""} />
                 <AvatarFallback className="bg-muted text-xs text-muted-foreground">
-                  {post.author.name ? post.author.name[0].toUpperCase() : 'A'}
+                  {post.author.name ? post.author.name[0].toUpperCase() : "A"}
                 </AvatarFallback>
               </Avatar>
               {totalAuthors > 1 && (
@@ -163,21 +202,22 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
 
       <TableCell>
         <div className="text-xs text-muted-foreground">
-          <div>
-            {post.publishedAt
-              ? new Date(post.publishedAt).toLocaleDateString('en-US', {
-                  day: 'numeric',
-                  month: 'short',
-                  year: '2-digit',
-                })
-              : 'Not published'}{' '}
-            /{' '}
-            {new Date(post.updatedAt).toLocaleDateString('en-US', {
-              day: 'numeric',
-              month: 'short',
-              year: '2-digit',
-            })}
-          </div>
+          {post.publishedAt
+            ? new Date(post.publishedAt).toLocaleDateString("en-US", {
+                day: "numeric",
+                month: "short",
+                year: "2-digit",
+              })
+            : "Not published"}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="text-xs text-muted-foreground">
+          {new Date(post.updatedAt).toLocaleDateString("en-US", {
+            day: "numeric",
+            month: "short",
+            year: "2-digit",
+          })}
         </div>
       </TableCell>
 
@@ -199,7 +239,7 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => togglePin(post.id)}>
               <Pin className="mr-2 h-4 w-4" />
-              {isPinned ? 'Unpin' : 'Pin'}
+              {isPinned ? "Unpin" : "Pin"}
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Copy className="mr-2 h-4 w-4" />
