@@ -10,6 +10,9 @@ import {
   Variant,
 } from "@samuelmeuli/font-manager";
 import React, { KeyboardEvent, PureComponent, ReactElement } from "react";
+import FontSearchModal from "./font-search-modal";
+import { Input } from "@/components/ui/input";
+import { ChevronDown } from "lucide-react";
 
 type LoadingStatus = "loading" | "finished" | "error";
 
@@ -138,6 +141,10 @@ export default class FontPicker extends PureComponent<Props, State> {
     }
   };
 
+  toggleModal = (): void => {
+    this.setState((prev) => ({ expanded: !prev.expanded }));
+  };
+
   /**
    * EventListener for closing the font picker when clicking anywhere outside it
    */
@@ -236,35 +243,52 @@ export default class FontPicker extends PureComponent<Props, State> {
     }
   };
 
-  render = (): ReactElement => {
+  onFontSelect = (font: Font): void => {
+    this.setActiveFontFamily(font.family);
+    this.toggleModal();
+  };
+
+  render() {
     const { activeFontFamily, sort } = this.props;
     const { expanded, loadingStatus } = this.state;
 
-    // Extract and sort font list
     const fonts = Array.from(this.fontManager.getFonts().values());
-    if (sort === "alphabet") {
-      fonts.sort((font1: Font, font2: Font): number =>
-        font1.family.localeCompare(font2.family)
-      );
-    }
+    if (sort === "alphabet")
+      fonts.sort((a, b) => a.family.localeCompare(b.family));
 
-    // Render font picker button and attach font list to it
     return (
-      <div
-        id={`font-picker${this.fontManager.selectorSuffix}`}
-        className={expanded ? "expanded  !shadow-none" : " !shadow-none"}
-      >
-        <button
-          type="button"
-          className=""
-          onClick={this.toggleExpanded}
-          onKeyPress={this.toggleExpanded}
-        >
-          <p className="text-normal !p-2">{activeFontFamily}</p>
-          <p className={`dropdown ${loadingStatus}`} />
-        </button>
-        {loadingStatus === "finished" && this.generateFontList(fonts)}
+      <div className="relative w-[150px]">
+        {/* Input lives here */}
+        <div className="relative w-full">
+          <Input
+            readOnly
+            value={activeFontFamily}
+            placeholder="Select font"
+            onClick={this.toggleModal}
+            className="cursor-pointer pr-8"
+          />
+          <ChevronDown
+            className={`absolute right-2 top-1/2 w-4 h-4 -translate-y-1/2 pointer-events-none transition-transform ${
+              this.state.expanded ? "rotate-180" : ""
+            }`}
+          />
+        </div>
+
+        {/* FontSearchModal */}
+        {loadingStatus === "finished" && (
+          <FontSearchModal
+            fonts={fonts}
+            activeFontFamily={activeFontFamily}
+            onSelect={this.onFontSelect}
+            open={expanded}
+            setOpen={(val) => this.setState({ expanded: val })}
+          />
+        )}
+
+        {/* Loading / Error */}
+        {loadingStatus === "loading" && <div>Loading fonts...</div>}
+        {loadingStatus === "error" && <div>Failed to load fonts</div>}
       </div>
     );
-  };
+  }
 }

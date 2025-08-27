@@ -64,7 +64,7 @@ export default function FontSelector() {
     const isEditing = editingKey === key;
 
     // Dynamic width for the popover based on text width
-    const [popoverWidth, setPopoverWidth] = useState(200);
+    const [popoverWidth, setPopoverWidth] = useState(300);
     useLayoutEffect(() => {
       const width = textRefs.current[key]?.offsetWidth || 200;
       setPopoverWidth(width + 100); // some extra space
@@ -110,10 +110,10 @@ export default function FontSelector() {
           </PopoverTrigger>
 
           <PopoverContent
-            className="flex items-center gap-2 p-2 shadow-lg rounded-md !w-[300px] absolute -right-10 bottom-0"
+            className="flex items-center gap-1 p-1 shadow-lg rounded-md min-w-[10px] max-w-[90vw] absolute -right-5 bottom-5"
             side="top"
             align="start"
-            style={{ width: popoverWidth }}
+            style={{ width: "auto" }}
           >
             <FontPicker
               apiKey="AIzaSyBpgwLwmkX5Mjm2MkAxo3P34K-wl2rvHX8"
@@ -131,6 +131,7 @@ export default function FontSelector() {
               }
               className="px-1 w-16"
             />
+
             <Button
               variant="ghost"
               onClick={() =>
@@ -139,11 +140,11 @@ export default function FontSelector() {
                     fontSettings[key].fontWeight === "bold" ? "normal" : "bold",
                 })
               }
-              className={`px-2 py-1 ${
+              className={
                 fontSettings[key].fontWeight === "bold"
-                  ? "text-primary"
-                  : "text-muted-foreground"
-              }`}
+                  ? "text-primary !px-2"
+                  : "text-muted-foreground !px-2"
+              }
             >
               <Bold
                 className="w-5 h-5"
@@ -161,11 +162,11 @@ export default function FontSelector() {
                       : "italic",
                 })
               }
-              className={`px-2 py-1 ${
+              className={
                 fontSettings[key].fontStyle === "italic"
-                  ? "text-primary"
-                  : "text-muted-foreground"
-              }`}
+                  ? "text-primary !px-2"
+                  : "text-muted-foreground !px-2"
+              }
             >
               <Italic
                 className="w-5 h-5"

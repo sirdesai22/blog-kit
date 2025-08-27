@@ -3,6 +3,7 @@
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,15 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  MoreHorizontal,
-  Edit2,
-  Pin,
-  Copy,
-  Trash2,
-  Eye,
-  GripVertical,
-} from 'lucide-react';
+import { MoreHorizontal, Edit2, Pin, Copy, Trash2, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { BlogPost } from '@/types/blog';
 import { useBlogTable } from '@/modules/blogs/contexts/BlogTableContext';
@@ -30,8 +23,9 @@ interface BlogTableRowProps {
 }
 
 export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
-  const { pinnedIds, togglePin } = useBlogTable();
+  const { pinnedIds, togglePin, selectedIds, toggleSelection } = useBlogTable();
   const isPinned = pinnedIds.has(post.id) || post.pinned;
+  const isSelected = selectedIds.has(post.id);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -73,44 +67,31 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
   const totalAuthors = (hasAuthor ? 1 : 0) + coAuthorsCount;
 
   return (
-    <TableRow className="group hover:bg-muted/50">
-      <TableCell className="p-0  m-0 pl-1">
-        <div className="flex items-center space-x-0">
-          <GripVertical className="h-4 w-4 hover:cursor-grab text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn(
-              'h-4 w-4 transition-opacity  hover:cursor-pointer',
-              isPinned ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-            )}
-            onClick={() => togglePin(post.id)}
-          >
-            <Pin
-              className={cn(
-                'h-4 w-4',
-                isPinned
-                  ? 'fill-current text-foreground'
-                  : 'text-muted-foreground'
-              )}
-            />
-          </Button>
-        </div>
+    <TableRow
+      className={cn(
+        'group hover:bg-muted/50',
+        isSelected && 'bg-blue-50 hover:bg-blue-50'
+      )}
+    >
+      <TableCell className="pl-4">
+        <Checkbox
+          checked={isSelected}
+          onCheckedChange={() => toggleSelection(post.id)}
+          aria-label={`Select ${post.title}`}
+        />
       </TableCell>
 
       <TableCell>
-        <div>
-          <Link
-            href={`/${workspaceSlug}/blogs/${post.pageId}/${post.id}/edit`}
-            className="text-sm font-medium text-foreground hover:text-primary"
-          >
-            {post.title}
-          </Link>
-          {post.excerpt && (
-            <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
-              {post.excerpt}
-            </p>
-          )}
+        <div className="flex items-center gap-2">
+          {isPinned && <Pin className="h-3 w-3 fill-current text-blue-600" />}
+          <div>
+            <Link
+              href={`/${workspaceSlug}/blogs/${post.pageId}/${post.id}/edit`}
+              className="text-sm font-medium text-foreground hover:text-primary"
+            >
+              {post.title}
+            </Link>
+          </div>
         </div>
       </TableCell>
 
@@ -128,7 +109,7 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
         {post.categories && post.categories.length > 0 ? (
           <div className="flex items-center gap-1">
             <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-1 text-xs font-medium text-muted-foreground">
-              {post.categories[0]}
+              {post.categories[0].name}
             </span>
             {post.categories.length > 1 && (
               <span className="text-xs text-muted-foreground">
@@ -145,7 +126,7 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
         {post.tags && post.tags.length > 0 ? (
           <div className="flex items-center gap-1">
             <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-1 text-xs font-medium text-muted-foreground">
-              {post.tags[0]}
+              {post.tags[0].name}
             </span>
             {post.tags.length > 1 && (
               <span className="text-xs text-muted-foreground">
@@ -198,32 +179,6 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
             })}
           </div>
         </div>
-      </TableCell>
-
-      <TableCell>
-        <div className="flex items-center space-x-2">
-          <div className="flex items-center space-x-1">
-            <Eye className="h-3 w-3 text-muted-foreground" />
-            <span className="text-xs font-medium text-foreground">
-              {post.views > 1000
-                ? `${(post.views / 1000).toFixed(1)}k`
-                : post.views.toString()}
-            </span>
-          </div>
-          {post.status === 'PUBLISHED' && post.views > 0 && (
-            <div className="flex items-center">
-              <span className="rounded bg-green-50 px-1 text-xs text-green-600">
-                +{Math.floor(Math.random() * 30) + 10}%
-              </span>
-            </div>
-          )}
-        </div>
-      </TableCell>
-
-      <TableCell>
-        <span className="rounded bg-red-50 px-1 text-xs font-medium text-red-600">
-          {Math.floor(Math.random() * 20)} -{Math.floor(Math.random() * 5) + 1}%
-        </span>
       </TableCell>
 
       <TableCell className="text-center group-hover:bg-muted">

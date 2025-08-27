@@ -69,10 +69,12 @@ model Workspace {
   updatedAt DateTime          @updatedAt
   authors   Author[]
   pages     Page[]
-  blogPosts BlogPost[]        // Add this line
+  blogPosts BlogPost[]      
   config    WorkspaceConfig?
   domain    WorkspaceDomain?
   members   WorkspaceMember[]
+  categories Category[]
+  tags       Tag[]
 }
 
 model WorkspaceDomain {
@@ -124,6 +126,8 @@ model WorkspaceConfig {
   workspace          Workspace  @relation(fields: [workspaceId], references: [id])
 }
 
+// BLOG PAGE
+
 model Page {
   id              String           @id @default(cuid())
   title           String
@@ -152,6 +156,10 @@ model Page {
   authors         PageAuthor[]
   pageAuthors     Author[]         @relation("AuthorToPage")
 
+
+  categories     Category[]
+  tags          Tag[]
+  
   @@unique([slug, workspaceId])
 }
 
@@ -168,7 +176,7 @@ model Author {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   pages       Page[]    @relation("AuthorToPage")
-  blogPosts   BlogPost[] // Add this relation
+  blogPosts   BlogPost[] 
 
   @@unique([name, workspaceId])
 }
@@ -210,9 +218,11 @@ model BlogPost {
   featuredImageAlt  String?
   gallery           String[] // Additional images
   
-  // Organization
-  tags              String[]
-  categories        String[]
+  // Page
+  featuredInCategories String[] 
+    featuredOrder     Int?     
+ 
+  featuredCategoryOrders Json? 
   featured          Boolean  @default(false)
   pinned            Boolean  @default(false)
   
@@ -221,25 +231,29 @@ model BlogPost {
   readTime          Int?     // Estimated read time in minutes
   
   // Author & Workspace Relations
-  authorId          String?  // Primary author
-  coAuthorIds       String[] // Additional authors
+  authorId          String? 
+  coAuthorIds       String[]
   workspaceId       String
   
-  // Blog Publication Relation - REMOVE @unique here
-  pageId            String   // Multiple blog posts can belong to same blog publication
-  estimatedReadTime Int?     // Duplicate of readTime for compatibility
+ 
+  pageId            String   
+  estimatedReadTime Int?   
   authorBio         String?
   
   // Relations
   page              Page      @relation(fields: [pageId], references: [id], onDelete: Cascade)
   author            Author?   @relation(fields: [authorId], references: [id])
   workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  categories        Category[] @relation("PostCategories")
+  tags              Tag[]      @relation("PostTags")
   
-  @@unique([slug, workspaceId]) // Slug should be unique within workspace
+ 
+
+  @@unique([slug, workspaceId]) 
   @@index([status, publishedAt])
   @@index([workspaceId, status])
   @@index([authorId])
-  @@index([pageId]) // Add index for better query performance
+  @@index([pageId]) 
 }
 
 model HelpdeskArticle {
@@ -341,4 +355,47 @@ enum PostStatus {
   SCHEDULED
   ARCHIVED
   DELETED
+}
+
+// NEW MODELS
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    
+  description String?
+  color       String?
+  icon        String?
+  order       Int       @default(0)
+  workspaceId String
+  pageId      String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+ 
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  page        Page      @relation(fields: [pageId], references: [id])
+ 
+  blogPosts   BlogPost[] @relation("PostCategories")
+  
+  @@unique([name, pageId])
+}
+
+model Tag {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String
+  description String?
+  color       String?
+  workspaceId String
+  pageId      String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+ 
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  page        Page      @relation(fields: [pageId], references: [id])
+ 
+  blogPosts   BlogPost[] @relation("PostTags")
+  
+  @@unique([name, pageId])
 }
