@@ -52,6 +52,11 @@
   --text-lg: 1.125rem;
   --text-xl: 1.25rem;
 
+   --spacing-xs: var(--gap-xs);
+  --spacing-sm: var(--gap-sm);
+  --spacing-md: var(--gap-md);
+  --spacing-lg: var(--gap-lg);
+
   --sidebar-label-gap: 0.4rem;
 }
 
@@ -163,6 +168,14 @@
   
   .text-normal-muted {
     @apply text-sm text-muted-foreground font-normal;
+  } 
+  
+  .icon-small {
+    @apply w-3 w-4 font-normal;
+  }
+  
+  .icon-normal {
+    @apply w-8 w-8 font-normal;
   }
 }
 

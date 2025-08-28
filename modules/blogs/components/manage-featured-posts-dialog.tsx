@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useMemo, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { useState, useMemo, useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Command,
   CommandEmpty,
@@ -23,20 +23,20 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '@/components/ui/command';
+} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
+} from "@/components/ui/popover";
 import {
   ChevronDown,
   GripVertical,
   X,
   ExternalLink,
   Search,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   DndContext,
   closestCenter,
@@ -45,23 +45,23 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { toast } from 'sonner';
-import { useBlogFilterOptions } from '@/modules/blogs/hooks/use-blog-filter-options';
-import { useBlogPostsTable } from '@/modules/blogs/hooks/use-blog-posts-table';
+} from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { toast } from "sonner";
+import { useBlogFilterOptions } from "@/modules/blogs/hooks/use-blog-filter-options";
+import { useBlogPostsTable } from "@/modules/blogs/hooks/use-blog-posts-table";
 import {
   getFeaturedPosts,
   updateFeaturedPosts,
-} from '@/modules/blogs/actions/featured-posts-actions';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+} from "@/modules/blogs/actions/featured-posts-actions";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface ManageFeaturedPostsDialogProps {
   isOpen: boolean;
@@ -92,18 +92,15 @@ function SortablePostItem({ post, onRemove }: SortablePostItemProps) {
     isDragging,
   } = useSortable({ id: post.id });
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
+  const style = { transform: CSS.Transform.toString(transform), transition };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={cn(
-        'flex items-center gap-3 p-3 bg-white border rounded-lg shadow-sm',
-        isDragging && 'opacity-50 z-50'
+        "flex items-center gap-3 px-3 py-2 border-b last:border-0 bg-white",
+        isDragging && "opacity-50 z-50"
       )}
     >
       <div
@@ -115,11 +112,10 @@ function SortablePostItem({ post, onRemove }: SortablePostItemProps) {
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-sm truncate">{post.title}</span>
-          <ExternalLink className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-        </div>
+        <span className="font-medium text-sm truncate">{post.title}</span>
       </div>
+
+      <ExternalLink className="h-3 w-3 text-muted-foreground flex-shrink-0" />
 
       <Button
         variant="ghost"
@@ -140,10 +136,10 @@ export function ManageFeaturedPostsDialog({
   pageId,
 }: ManageFeaturedPostsDialogProps) {
   const queryClient = useQueryClient();
-  const [selectedCategory, setSelectedCategory] = useState<string>('global');
+  const [selectedCategory, setSelectedCategory] = useState<string>("global");
   const [featuredPosts, setFeaturedPosts] = useState<FeaturedPost[]>([]);
   const [isSelectOpen, setIsSelectOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { categories } = useBlogFilterOptions(workspaceSlug, pageId);
 
@@ -156,7 +152,7 @@ export function ManageFeaturedPostsDialog({
 
   // Get current featured posts for selected category
   const { data: featuredData } = useQuery({
-    queryKey: ['featured-posts', workspaceSlug, pageId, selectedCategory],
+    queryKey: ["featured-posts", workspaceSlug, pageId, selectedCategory],
     queryFn: () => getFeaturedPosts(workspaceSlug, pageId, selectedCategory),
     enabled: isOpen && !!selectedCategory,
   });
@@ -166,13 +162,13 @@ export function ManageFeaturedPostsDialog({
     mutationFn: (data: { categoryId: string; postIds: string[] }) =>
       updateFeaturedPosts(workspaceSlug, pageId, data.categoryId, data.postIds),
     onSuccess: () => {
-      toast.success('Featured posts updated successfully!');
-      queryClient.invalidateQueries({ queryKey: ['featured-posts'] });
+      toast.success("Featured posts updated successfully!");
+      queryClient.invalidateQueries({ queryKey: ["featured-posts"] });
       onClose();
     },
     onError: (error) => {
-      toast.error('Failed to update featured posts');
-      console.error('Featured posts update error:', error);
+      toast.error("Failed to update featured posts");
+      console.error("Featured posts update error:", error);
     },
   });
 
@@ -193,7 +189,7 @@ export function ManageFeaturedPostsDialog({
 
   // Category options for dropdown
   const categoryOptions = useMemo(() => {
-    const options = [{ id: 'global', name: 'Global' }];
+    const options = [{ id: "global", name: "Global" }];
     if (categories) {
       options.push(
         ...categories.map((cat) => ({ id: cat.id, name: cat.name }))
@@ -242,7 +238,7 @@ export function ManageFeaturedPostsDialog({
         };
         setFeaturedPosts((prev) => [...prev, newPost]);
       }
-      setSearchQuery('');
+      setSearchQuery("");
       setIsSelectOpen(false);
     }
   };
@@ -264,7 +260,7 @@ export function ManageFeaturedPostsDialog({
   };
 
   const selectedCategoryName =
-    categoryOptions.find((c) => c.id === selectedCategory)?.name || 'Global';
+    categoryOptions.find((c) => c.id === selectedCategory)?.name || "Global";
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -273,7 +269,7 @@ export function ManageFeaturedPostsDialog({
           <DialogTitle>Manage Featured Post</DialogTitle>
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">
-              Select up to 5 posts to feature for{' '}
+              Select up to 5 posts to feature for{" "}
               {selectedCategoryName.toLowerCase()}.
             </p>
           </div>
@@ -324,7 +320,7 @@ export function ManageFeaturedPostsDialog({
                     <ChevronDown className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-full p-0" align="start">
+                <PopoverContent className="w-132 p-0" align="start">
                   <Command>
                     <CommandInput
                       placeholder="Search posts..."
@@ -343,11 +339,9 @@ export function ManageFeaturedPostsDialog({
                             <CommandItem
                               key={post.id}
                               onSelect={() => handleAddPost(post.id)}
-                              className="cursor-pointer"
+                              className="w-full cursor-pointer px-3 py-2 border-b last:border-0"
                             >
-                              <div className="flex items-center gap-2 w-full">
-                                <span className="truncate">{post.title}</span>
-                              </div>
+                              <span className="truncate">{post.title}</span>
                             </CommandItem>
                           ))}
                       </CommandGroup>
@@ -392,7 +386,7 @@ export function ManageFeaturedPostsDialog({
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={updateMutation.isPending}>
-            {updateMutation.isPending ? 'Saving...' : 'Save'}
+            {updateMutation.isPending ? "Saving..." : "Save"}
           </Button>
         </DialogFooter>
       </DialogContent>

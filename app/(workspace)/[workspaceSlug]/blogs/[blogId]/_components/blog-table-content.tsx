@@ -477,6 +477,7 @@ export function BlogTableContent({
                 field="title"
                 onSort={onSort}
                 sortConfig={sortConfig}
+                className="min-w-[300px] w-[20%]"
               >
                 Posts
               </SortableHeader>

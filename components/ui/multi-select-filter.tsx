@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Check, ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Check, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
+} from "@/components/ui/popover";
 import {
   Command,
   CommandEmpty,
@@ -16,7 +16,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '@/components/ui/command';
+} from "@/components/ui/command";
 
 interface Option {
   id: string;
@@ -77,7 +77,7 @@ export function MultiSelectFilter({
     }
     // ✅ Show placeholder with subtle indicator
     return `${placeholder} ${
-      selectedValues.length > 0 ? '(' + selectedValues.length + ')' : ''
+      selectedValues.length > 0 ? "(" + selectedValues.length + ")" : ""
     }`;
   };
 
@@ -85,18 +85,16 @@ export function MultiSelectFilter({
     <>
       <div
         className={cn(
-          'mr-2 h-4 w-4 border border-primary rounded flex items-center justify-center',
-          isSelected ? 'bg-primary' : 'bg-background'
+          "size-4 border border-primary rounded flex items-center justify-center shrink-0 mr-2",
+          isSelected ? "bg-primary" : "bg-background"
         )}
       >
-        {isSelected && (
-          <Check className="h-2.5 w-2.5 text-primary-foreground" />
-        )}
+        {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
       </div>
       <Icon
         className={cn(
-          'mr-2 h-4 w-4',
-          colorScheme?.icon || 'text-muted-foreground'
+          "mr-2 h-3 w-3",
+          colorScheme?.icon || "text-muted-foreground"
         )}
       />
       <div className="flex items-center justify-between w-full">
@@ -135,14 +133,14 @@ export function MultiSelectFilter({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            'h-8 text-normal justify-between',
+            "h-8 text-normal justify-between",
             selectedValues.length > 0 && colorScheme?.button
           )}
           disabled={loading}
         >
-          <Icon className="mr-1 h-3 w-3" />
+          <Icon className="!h-3 !w-3" />
           {getButtonText()}
-          <ChevronDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
+          {/* <ChevronDown className="ml-1 h-3 w-3 shrink-0 opacity-50" /> */}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[320px] p-0" align="start">
@@ -157,7 +155,7 @@ export function MultiSelectFilter({
                 <CommandItem
                   value="clear-all"
                   onSelect={clearAll}
-                  className="text-muted-foreground"
+                  className="text-muted-foreground gap-0"
                 >
                   <div className="mr-2 h-4 w-4 border border-muted-foreground rounded flex items-center justify-center">
                     {/* Empty checkbox for clear all */}
@@ -171,6 +169,7 @@ export function MultiSelectFilter({
                   <CommandItem
                     key={option.id}
                     value={option.id}
+                    className="gap-0"
                     onSelect={() => toggleSelection(option.id)}
                   >
                     {renderOption

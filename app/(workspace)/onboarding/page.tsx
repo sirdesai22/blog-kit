@@ -111,6 +111,7 @@ export default function OnboardingPage() {
                 <Input
                   id="workspaceName"
                   type="text"
+                  className="w-[400px]"
                   value={workspaceName}
                   onChange={(e) => setWorkspaceName(e.target.value)}
                 />

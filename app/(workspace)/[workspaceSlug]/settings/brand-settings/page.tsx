@@ -6,6 +6,7 @@ import { ChromePicker } from "react-color";
 import { Dialog } from "@/components/ui/dialog";
 import { DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import FontSettings from "./components/font-setting-row";
+import Image from "next/image";
 
 function ColorSwatch({
   hex,
@@ -63,7 +64,7 @@ const ImageUploadPlaceholder = ({
 
   return (
     <div
-      className={`flex flex-col items-center gap-y-2 ${
+      className={`flex flex-col items-start gap-y-2 ${
         disabled ? "opacity-50 cursor-not-allowed" : ""
       }`}
     >
@@ -75,10 +76,12 @@ const ImageUploadPlaceholder = ({
         }`}
       >
         {preview ? (
-          <img
+          <Image
             src={preview}
             alt="Uploaded"
-            className="object-cover w-full h-full"
+            width={400}
+            height={400}
+            className="object-contain w-full h-full"
           />
         ) : (
           <ImageIcon className="h-8 w-8 text-muted-foreground" />

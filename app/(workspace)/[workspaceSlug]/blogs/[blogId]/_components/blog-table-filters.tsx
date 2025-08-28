@@ -3,7 +3,15 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { Search, Hash, Circle, Users, Tag } from "lucide-react";
+import {
+  Search,
+  Hash,
+  Circle,
+  Users,
+  Tag,
+  FilterIcon,
+  Filter,
+} from "lucide-react";
 import { ActiveFiltersBar, ActiveFilter } from "./active-filter-chip";
 import { useBlogFilterOptions } from "@/modules/blogs/hooks/use-blog-filter-options";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
@@ -159,24 +167,25 @@ export function BlogTableFilters({
 
   return (
     <div className="space-y-0">
-      <div className="px-4 py-6 sm:px-md lg:px-lg pt-0 flex flex-wrap items-center gap-2">
-        <div className="flex items-center gap-4">
+      <div className="px-4 py-4 sm:px-md lg:px-lg pt-0 flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-4  mr-2 ">
           <div className="text-normal font-medium">
             {postsCount} <span className="text-small">Posts</span>
           </div>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
               placeholder="Search Posts..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-8 w-64 pl-10 text-small"
+              className="h-8 w-64 pr-10 text-small"
               disabled={loading}
             />
+            <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <Filter className="h-4 w-4 text-muted-foreground" />
           {/* Categories Filter  */}
           <MultiSelectFilter
             icon={Hash}

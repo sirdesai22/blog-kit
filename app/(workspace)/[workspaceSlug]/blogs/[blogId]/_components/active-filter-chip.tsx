@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { X, Hash, Circle, User, Tag, ChevronDown, Check } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { X, Hash, Circle, User, Tag, ChevronDown, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   Command,
   CommandEmpty,
@@ -12,16 +12,16 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '@/components/ui/command';
+} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
+} from "@/components/ui/popover";
 
 export interface ActiveFilter {
   id: string;
-  type: 'search' | 'statuses' | 'categories' | 'tags' | 'authors';
+  type: "search" | "statuses" | "categories" | "tags" | "authors";
   label: string;
   value: string | string[];
   count?: number;
@@ -44,19 +44,19 @@ const filterIcons = {
 };
 
 const filterColors = {
-  search: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
-  statuses: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100',
+  search: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100",
+  statuses: "bg-green-50 text-green-700 border-green-200 hover:bg-green-100",
   categories:
-    'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100',
-  tags: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100',
-  authors: 'bg-pink-50 text-pink-700 border-pink-200 hover:bg-pink-100',
+    "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100",
+  tags: "bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100",
+  authors: "bg-pink-50 text-pink-700 border-pink-200 hover:bg-pink-100",
 };
 
 const statusOptions = [
-  { id: 'PUBLISHED', name: 'Published', label: 'Published' },
-  { id: 'DRAFT', name: 'Draft', label: 'Draft' },
-  { id: 'SCHEDULED', name: 'Scheduled', label: 'Scheduled' },
-  { id: 'ARCHIVED', name: 'Archived', label: 'Archived' },
+  { id: "PUBLISHED", name: "Published", label: "Published" },
+  { id: "DRAFT", name: "Draft", label: "Draft" },
+  { id: "SCHEDULED", name: "Scheduled", label: "Scheduled" },
+  { id: "ARCHIVED", name: "Archived", label: "Archived" },
 ];
 
 export function ActiveFilterChip({
@@ -70,12 +70,12 @@ export function ActiveFilterChip({
   const Icon = filterIcons[filter.type];
 
   // For search filters only - show simple remove button
-  if (filter.type === 'search' || !onUpdate) {
+  if (filter.type === "search" || !onUpdate) {
     return (
       <Badge
         variant="secondary"
         className={cn(
-          'flex items-center gap-1.5 pr-1 pl-2.5 py-1 text-xs font-medium border',
+          "flex items-center gap-1.5 pr-1 pl-2.5 py-1 text-xs font-medium border",
           filterColors[filter.type]
         )}
       >
@@ -99,7 +99,7 @@ export function ActiveFilterChip({
     : [filter.value];
 
   const getFilterOptions = () => {
-    if (filter.type === 'statuses') {
+    if (filter.type === "statuses") {
       return statusOptions;
     }
     // ✅ Options are already mapped with IDs from the parent component
@@ -126,7 +126,7 @@ export function ActiveFilterChip({
         <Badge
           variant="secondary"
           className={cn(
-            'flex items-center gap-1.5 pr-1 pl-2.5 py-1 text-xs font-medium border cursor-pointer transition-colors',
+            "flex items-center gap-1.5 pr-1 pl-2.5 py-1 text-xs font-medium border cursor-pointer transition-colors",
             filterColors[filter.type]
           )}
         >
@@ -174,8 +174,8 @@ export function ActiveFilterChip({
                   >
                     <div
                       className={cn(
-                        'mr-2 h-4 w-4 border border-primary rounded flex items-center justify-center',
-                        isSelected ? 'bg-primary' : 'bg-background'
+                        "mr-2 h-4 w-4 border border-primary rounded flex items-center justify-center",
+                        isSelected ? "bg-primary" : "bg-background"
                       )}
                     >
                       {isSelected && (
@@ -183,7 +183,7 @@ export function ActiveFilterChip({
                       )}
                     </div>
                     <div className="flex items-center">
-                      {filter.type === 'authors' &&
+                      {filter.type === "authors" &&
                         options.find((a) => a.id === option.id)?.image && (
                           <img
                             src={options.find((a) => a.id === option.id)?.image}
@@ -229,11 +229,11 @@ export function ActiveFiltersBar({
 
   const getOptionsForFilter = (filter: ActiveFilter) => {
     switch (filter.type) {
-      case 'categories':
+      case "categories":
         return categories.map((cat) => ({ id: cat, name: cat }));
-      case 'tags':
+      case "tags":
         return tags.map((tag) => ({ id: tag.name, name: tag.name }));
-      case 'authors':
+      case "authors":
         return authors.map((author) => ({
           id: author.id,
           name: author.name,
@@ -245,7 +245,8 @@ export function ActiveFiltersBar({
   };
 
   return (
-    <div className="flex items-center gap-2 px-4 pb-2 border-b ">
+    <div className="flex items-center gap-2 px-6 pb-4 border-b ">
+      <p className="text-normal">Active filters </p>
       <div className="flex items-center gap-2 flex-wrap">
         {activeFilters.map((filter) => (
           <ActiveFilterChip
@@ -258,13 +259,12 @@ export function ActiveFiltersBar({
           />
         ))}
       </div>
-
       {activeFilters.length > 1 && (
         <Button
           variant="ghost"
           size="sm"
           onClick={onClearAll}
-          className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+          className="text-small"
         >
           Clear all
         </Button>

@@ -81,35 +81,34 @@ export function PageCard({ page, workspaceSlug }: PageCardProps) {
     }
   };
 
- const short = (date: Date) => {
-  return formatDistanceToNowStrict(date, {
-    addSuffix: true,
-    roundingMethod: "floor",
-    locale: {
-      formatDistance: (token, count) => {
-        const map: Record<string, string> = {
-          lessThanXSeconds: `${count}s`,
-          xSeconds: `${count}s`,
-          halfAMinute: "30s",
-          lessThanXMinutes: `${count}m`,
-          xMinutes: `${count}m`,
-          aboutXHours: `${count}h`,
-          xHours: `${count}h`,
-          xDays: `${count}d`,
-          aboutXMonths: `${count}mo`,
-          xMonths: `${count}mo`,
-          aboutXYears: `${count}y`,
-          xYears: `${count}y`,
-          overXYears: `${count}y`,
-          almostXYears: `${count}y`,
-        };
+  const short = (date: Date) => {
+    return formatDistanceToNowStrict(date, {
+      addSuffix: true,
+      roundingMethod: "floor",
+      locale: {
+        formatDistance: (token, count) => {
+          const map: Record<string, string> = {
+            lessThanXSeconds: `${count}s`,
+            xSeconds: `${count}s`,
+            halfAMinute: "30s",
+            lessThanXMinutes: `${count}m`,
+            xMinutes: `${count}m`,
+            aboutXHours: `${count}h`,
+            xHours: `${count}h`,
+            xDays: `${count}d`,
+            aboutXMonths: `${count}mo`,
+            xMonths: `${count}mo`,
+            aboutXYears: `${count}y`,
+            xYears: `${count}y`,
+            overXYears: `${count}y`,
+            almostXYears: `${count}y`,
+          };
 
-        return (map[token] ?? `${count}`) + " ago";
+          return (map[token] ?? `${count}`) + " ago";
+        },
       },
-    },
-  });
-};
-
+    });
+  };
 
   const typeConfig = getTypeConfig(page.type);
   const statusConfig = getStatusConfig(page.status);
@@ -132,9 +131,7 @@ export function PageCard({ page, workspaceSlug }: PageCardProps) {
           {/* Title and URL */}
           <div className="mb-4 flex justify-between">
             <div>
-              <h3 className="text-main mb-1 line-clamp-1">
-                {page.title}
-              </h3>
+              <h3 className="text-main mb-1 line-clamp-1">{page.title}</h3>
               <Link
                 href={page.slug}
                 target="_blank"
