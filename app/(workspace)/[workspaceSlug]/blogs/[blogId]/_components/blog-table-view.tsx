@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import { useState, useMemo, useEffect } from "react";
-import { BlogTableHeader } from "./blog-table-header";
-import { BlogTableFilters } from "./blog-table-filters";
-import { BlogTableContent } from "./blog-table-content";
-import { BlogTablePagination } from "./blog-table-pagination";
-import { BlogPost } from "@/types/blog";
+import { useState, useMemo, useEffect } from 'react';
+import { BlogTableHeader } from './blog-table-header';
+import { BlogTableFilters } from './blog-table-filters';
+import { BlogTableContent } from './blog-table-content';
+import { BlogTablePagination } from './blog-table-pagination';
+import { BlogPost } from '@/types/blog';
 import {
   BlogTableProvider,
   useBlogTable,
-} from "@/modules/blogs/contexts/BlogTableContext";
-import { useBlogPostsTable } from "@/modules/blogs/hooks/use-blog-posts-table";
+} from '@/modules/blogs/contexts/BlogTableContext';
+import { useBlogPostsTable } from '@/modules/blogs/hooks/use-blog-posts-table-enhanced'; // Updated import
 import {
   BlogPostFilters,
   BlogPostSort,
   BlogPostPagination,
-} from "@/modules/blogs/actions/blog-table-actions";
-import { useDebounce } from "@/hooks/use-debounce";
+} from '@/modules/blogs/actions/blog-table-actions';
+import { useDebounce } from '@/hooks/use-debounce';
 
 interface BlogTableViewProps {
   workspaceSlug: string;
@@ -33,7 +33,7 @@ function BlogTable({
   currentPage,
   initialPosts = [],
 }: BlogTableViewProps) {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
   const [tagFilters, setTagFilters] = useState<string[]>([]);
@@ -41,12 +41,12 @@ function BlogTable({
   const [currentPageNum, setCurrentPageNum] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sortConfig, setSortConfig] = useState<BlogPostSort>({
-    field: "createdAt",
-    direction: "desc",
+    field: 'createdAt',
+    direction: 'desc',
   });
 
-  // Debounce search to avoid too many API calls
-  const debouncedSearch = useDebounce(searchTerm, 500);
+  // Debounce search to avoid too many re-computations
+  const debouncedSearch = useDebounce(searchTerm, 300); // Reduced from 500ms since it's client-side
 
   const { pinnedIds } = useBlogTable();
 
@@ -90,7 +90,7 @@ function BlogTable({
     [currentPageNum, pageSize]
   );
 
-  // Fetch data with TanStack Query
+  // Fetch data with enhanced hook (client-side processing)
   const {
     data: queryResult,
     isLoading,
@@ -122,16 +122,11 @@ function BlogTable({
   const paginationInfo = queryResult?.pagination;
 
   const processedPosts = useMemo(() => {
-    return blogPosts
-      .map((post) => ({
-        ...post,
-        pinned: pinnedIds.has(post.id) || post.pinned,
-      }))
-      .sort((a, b) => {
-        if (a.pinned && !b.pinned) return -1;
-        if (!a.pinned && b.pinned) return 1;
-        return 0;
-      });
+    return blogPosts.map((post) => ({
+      ...post,
+      pinned: pinnedIds.has(post.id) || post.pinned,
+    }));
+    // Remove the additional sort since sorting is now handled in the hook
   }, [blogPosts, pinnedIds]);
 
   const handlePageChange = (page: number) => {
@@ -140,16 +135,16 @@ function BlogTable({
 
   const handlePageSizeChange = (newPageSize: number) => {
     setPageSize(newPageSize);
-    setCurrentPageNum(1); // Reset to first page when changing page size
+    setCurrentPageNum(1);
   };
 
-  const handleSort = (field: BlogPostSort["field"]) => {
+  const handleSort = (field: BlogPostSort['field']) => {
     setSortConfig((current) => ({
       field,
       direction:
-        current.field === field && current.direction === "asc" ? "desc" : "asc",
+        current.field === field && current.direction === 'asc' ? 'desc' : 'asc',
     }));
-    setCurrentPageNum(1); // Reset to first page when sorting changes
+    setCurrentPageNum(1);
   };
 
   if (error) {
@@ -160,7 +155,7 @@ function BlogTable({
             Error loading blog posts
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
-            {error instanceof Error ? error.message : "Something went wrong"}
+            {error instanceof Error ? error.message : 'Something went wrong'}
           </p>
         </div>
       </div>
@@ -187,17 +182,19 @@ function BlogTable({
           authorFilters={authorFilters}
           setAuthorFilters={setAuthorFilters}
           postsCount={paginationInfo?.totalCount || blogPosts.length}
-          loading={isLoading || isFetching}
+          loading={isLoading} // Only show loading on initial load, not on isFetching
           workspaceSlug={workspaceSlug}
           pageId={currentPage.id}
+          sortConfig={sortConfig}
+          onSort={handleSort}
         />
 
-        <div className="flex-1 overflow-y-auto ">
+        <div className="flex-1 overflow-y-auto">
           <BlogTableContent
             posts={processedPosts}
             workspaceSlug={workspaceSlug}
             currentPageId={currentPage.id}
-            loading={isLoading}
+            loading={isLoading} // Only show loading on initial load
             onSort={handleSort}
             sortConfig={sortConfig}
           />
@@ -208,7 +205,7 @@ function BlogTable({
             pagination={paginationInfo}
             onPageChange={handlePageChange}
             onPageSizeChange={handlePageSizeChange}
-            loading={isLoading || isFetching}
+            loading={isLoading} // Only show loading on initial load
           />
         )}
       </div>

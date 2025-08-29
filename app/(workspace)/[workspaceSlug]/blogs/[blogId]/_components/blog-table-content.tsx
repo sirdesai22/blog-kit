@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Table,
@@ -6,9 +6,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { BlogTableRow } from "./blog-table-row";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/table';
+import { BlogTableRow } from './blog-table-row';
+import { Button } from '@/components/ui/button';
 import {
   Plus,
   ArrowUpDown,
@@ -23,46 +23,46 @@ import {
   User,
   ChevronDown,
   X,
-} from "lucide-react";
-import { Heading } from "@/components/ui/heading";
-import { useRouter } from "next/navigation";
-import { BlogPost } from "@/types/blog";
-import { BlogPostSort } from "@/modules/blogs/actions/blog-table-actions";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useBlogTable } from "@/modules/blogs/contexts/BlogTableContext";
-import { cn } from "@/lib/utils";
+} from 'lucide-react';
+import { Heading } from '@/components/ui/heading';
+import { useRouter } from 'next/navigation';
+import { BlogPost } from '@/types/blog';
+import { BlogPostSort } from '@/modules/blogs/actions/blog-table-actions';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useBlogTable } from '@/modules/blogs/contexts/BlogTableContext';
+import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useEffect, useState } from "react";
-import { CategorySelectionDialog } from "@/modules/blogs/components/table/blogs/category-selection-dialog";
-import { TagSelectionDialog } from "@/modules/blogs/components/table/blogs/tag-selection-dialog";
-import { AuthorSelectionDialog } from "@/modules/blogs/components/table/blogs/author-selection-dialog";
+} from '@/components/ui/dropdown-menu';
+import { useEffect, useState } from 'react';
+import { CategorySelectionDialog } from '@/modules/blogs/components/table/blogs/category-selection-dialog';
+import { TagSelectionDialog } from '@/modules/blogs/components/table/blogs/tag-selection-dialog';
+import { AuthorSelectionDialog } from '@/modules/blogs/components/table/blogs/author-selection-dialog';
 import {
   bulkPublishPosts,
   bulkUnpublishPosts,
   bulkUpdateCategories,
   bulkUpdateTags,
-  bulkUpdateAuthor,
+  bulkUpdateAuthors, // Updated import
   bulkDeletePosts,
   bulkArchivePosts,
-} from "@/modules/blogs/actions/post-bulk-actions";
-import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
-import { ConfirmationDialog } from "@/components/models/confirmation-dialog";
-import { Separator } from "@/components/ui/separator";
+} from '@/modules/blogs/actions/post-bulk-actions';
+import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
+import { ConfirmationDialog } from '@/components/models/confirmation-dialog';
+import { Separator } from '@/components/ui/separator';
 
 interface BlogTableContentProps {
   posts: BlogPost[];
   workspaceSlug: string;
   currentPageId: string;
   loading?: boolean;
-  onSort?: (field: BlogPostSort["field"]) => void;
+  onSort?: (field: BlogPostSort['field']) => void;
   sortConfig?: BlogPostSort;
 }
 
@@ -71,11 +71,11 @@ function SortableHeader({
   field,
   onSort,
   sortConfig,
-  className = "",
+  className = '',
 }: {
   children: React.ReactNode;
-  field: BlogPostSort["field"];
-  onSort?: (field: BlogPostSort["field"]) => void;
+  field: BlogPostSort['field'];
+  onSort?: (field: BlogPostSort['field']) => void;
   sortConfig?: BlogPostSort;
   className?: string;
 }) {
@@ -92,7 +92,7 @@ function SortableHeader({
       >
         <span>{children}</span>
         {isActive ? (
-          direction === "asc" ? (
+          direction === 'asc' ? (
             <ArrowUp className="ml-1 h-3 w-3" />
           ) : (
             <ArrowDown className="ml-1 h-3 w-3" />
@@ -163,16 +163,16 @@ function BulkActions({
 
   const refreshTable = () => {
     queryClient.invalidateQueries({
-      queryKey: ["blog-posts-table", workspaceSlug, currentPageId],
+      queryKey: ['blog-posts-base', workspaceSlug, currentPageId], // Updated to match enhanced hook
     });
     queryClient.invalidateQueries({
-      queryKey: ["workspace-categories", workspaceSlug, currentPageId],
+      queryKey: ['workspace-categories', workspaceSlug, currentPageId],
     });
     queryClient.invalidateQueries({
-      queryKey: ["workspace-tags", workspaceSlug, currentPageId],
+      queryKey: ['workspace-tags', workspaceSlug, currentPageId],
     });
     queryClient.invalidateQueries({
-      queryKey: ["workspace-authors", workspaceSlug],
+      queryKey: ['workspace-authors', workspaceSlug],
     });
   };
 
@@ -191,17 +191,17 @@ function BulkActions({
     try {
       const result = await action();
       if (result.success) {
-        toast.success(result.message || "Action completed successfully", {
+        toast.success(result.message || 'Action completed successfully', {
           id: toastId,
         });
         onClearSelection();
         refreshTable();
       } else {
-        toast.error(result.error || "Action failed", { id: toastId });
+        toast.error(result.error || 'Action failed', { id: toastId });
       }
     } catch (error) {
-      console.error("Bulk action error:", error);
-      toast.error("An unexpected error occurred", { id: toastId });
+      console.error('Bulk action error:', error);
+      toast.error('An unexpected error occurred', { id: toastId });
     } finally {
       setIsLoading(false);
       setShowDeleteConfirm(false); // Ensure modal is closed on completion
@@ -211,41 +211,43 @@ function BulkActions({
   const handlePublish = () =>
     handleBulkAction(
       () => bulkPublishPosts(workspaceSlug, selectedPostIds),
-      "Publishing posts..."
+      'Publishing posts...'
     );
   const handleUnpublish = () =>
     handleBulkAction(
       () => bulkUnpublishPosts(workspaceSlug, selectedPostIds),
-      "Unpublishing posts..."
+      'Unpublishing posts...'
     );
   const handleArchive = () =>
     handleBulkAction(
       () => bulkArchivePosts(workspaceSlug, selectedPostIds),
-      "Archiving posts..."
+      'Archiving posts...'
     );
 
   // This function is now called by the modal on confirmation
   const confirmDelete = () => {
     handleBulkAction(
       () => bulkDeletePosts(workspaceSlug, selectedPostIds),
-      "Deleting posts..."
+      'Deleting posts...'
     );
   };
 
   const handleCategoryUpdate = (categoryIds: string[]) =>
     handleBulkAction(
       () => bulkUpdateCategories(workspaceSlug, selectedPostIds, categoryIds),
-      "Updating categories..."
+      'Updating categories...'
     );
   const handleTagUpdate = (tagIds: string[]) =>
     handleBulkAction(
       () => bulkUpdateTags(workspaceSlug, selectedPostIds, tagIds),
-      "Updating tags..."
+      'Updating tags...'
     );
-  const handleAuthorUpdate = (authorId: string) =>
+  const handleAuthorUpdate = (
+    authorIds: string[] // Changed parameter name and type
+  ) =>
     handleBulkAction(
-      () => bulkUpdateAuthor(workspaceSlug, selectedPostIds, authorId),
-      "Updating author..."
+      () => bulkUpdateAuthors(workspaceSlug, selectedPostIds, authorIds), // Updated function call
+      'Updating authors...'
     );
   const handleCancel = () => {
     onClearSelection();
@@ -348,13 +350,13 @@ function BulkActions({
           disabled={isLoading}
         >
           <span className="font-semibold text-blue-800">
-            {selectedCount} post{selectedCount > 1 ? "s" : ""} selected
+            {selectedCount} post{selectedCount > 1 ? 's' : ''} selected
           </span>
           <div className="h-5 border-l border-gray-300"></div>
           <span className="font-medium">Bulk Actions</span>
           <ChevronDown
             className="ml-1 h-4 w-4 transition-transform"
-            style={{ transform: !isMenuOpen ? "rotate(180deg)" : "none" }}
+            style={{ transform: !isMenuOpen ? 'rotate(180deg)' : 'none' }}
           />
         </Button>
       </div>
@@ -363,7 +365,7 @@ function BulkActions({
         open={showDeleteConfirm}
         onOpenChange={setShowDeleteConfirm}
         onConfirm={confirmDelete}
-        title={`Delete ${selectedCount} post${selectedCount > 1 ? "s" : ""}?`}
+        title={`Delete ${selectedCount} post${selectedCount > 1 ? 's' : ''}?`}
         description="This action cannot be undone. This will permanently delete the selected posts."
         confirmButtonLabel="Delete"
         theme="danger"
@@ -387,7 +389,7 @@ function BulkActions({
       <AuthorSelectionDialog
         open={showAuthorDialog}
         onOpenChange={setShowAuthorDialog}
-        onSave={handleAuthorUpdate}
+        onSave={handleAuthorUpdate} // This now receives string[] instead of string
         workspaceSlug={workspaceSlug}
         pageId={currentPageId}
       />
@@ -515,10 +517,10 @@ export function BlogTableContent({
       {isRendered && (
         <div
           className={cn(
-            "fixed bottom-20 left-1/2 -translate-x-1/2 z-30 transition-all duration-300 ease-in-out",
+            'fixed bottom-20 left-1/2 -translate-x-1/2 z-30 transition-all duration-300 ease-in-out',
             isAnimating
-              ? "translate-y-0 opacity-100"
-              : "translate-y-20 opacity-0"
+              ? 'translate-y-0 opacity-100'
+              : 'translate-y-20 opacity-0'
           )}
         >
           <BulkActions

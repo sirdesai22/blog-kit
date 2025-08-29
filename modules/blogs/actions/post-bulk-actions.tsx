@@ -281,12 +281,12 @@ export async function bulkUpdateTags(
 }
 
 /**
- * Bulk update author for blog posts
+ * Bulk update authors for blog posts (now supports multiple authors)
  */
-export async function bulkUpdateAuthor(
+export async function bulkUpdateAuthors(
   workspaceSlug: string,
   postIds: string[],
-  authorId: string
+  authorIds: string[] // Changed from single authorId to multiple authorIds
 ): Promise<{
   success: boolean;
   message?: string;
@@ -315,29 +315,85 @@ export async function bulkUpdateAuthor(
       return { success: false, error: 'Access denied' };
     }
 
-    await db.blogPost.updateMany({
-      where: {
-        id: { in: postIds },
-        workspaceId: workspace.id,
-      },
-      data: {
-        authorId: authorId,
-      },
-    });
+    // If no authors selected, clear all authors
+    if (authorIds.length === 0) {
+      await db.blogPost.updateMany({
+        where: {
+          id: { in: postIds },
+          workspaceId: workspace.id,
+        },
+        data: {
+          authorId: null,
+          coAuthorIds: [],
+        },
+      });
+
+      return {
+        success: true,
+        message: `Authors cleared for ${postIds.length} post${
+          postIds.length > 1 ? 's' : ''
+        }!`,
+      };
+    }
+
+    // If only one author, set as primary author
+    if (authorIds.length === 1) {
+      await db.blogPost.updateMany({
+        where: {
+          id: { in: postIds },
+          workspaceId: workspace.id,
+        },
+        data: {
+          authorId: authorIds[0],
+          coAuthorIds: [],
+        },
+      });
+    } else {
+      // Multiple authors: first as primary, rest as co-authors
+      const [primaryAuthorId, ...coAuthorIds] = authorIds;
+
+      await db.blogPost.updateMany({
+        where: {
+          id: { in: postIds },
+          workspaceId: workspace.id,
+        },
+        data: {
+          authorId: primaryAuthorId,
+          coAuthorIds: coAuthorIds,
+        },
+      });
+    }
 
     return {
       success: true,
-      message: `Author updated for ${postIds.length} post${
+      message: `Authors updated for ${postIds.length} post${
         postIds.length > 1 ? 's' : ''
       }!`,
     };
   } catch (error) {
-    console.error('Error bulk updating author:', error);
+    console.error('Error bulk updating authors:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to update author',
+      error:
+        error instanceof Error ? error.message : 'Failed to update authors',
     };
   }
+}
+
+// Keep the old function for backward compatibility, but mark as deprecated
+/**
+ * @deprecated Use bulkUpdateAuthors instead
+ */
+export async function bulkUpdateAuthor(
+  workspaceSlug: string,
+  postIds: string[],
+  authorId: string
+): Promise<{
+  success: boolean;
+  message?: string;
+  error?: string;
+}> {
+  return bulkUpdateAuthors(workspaceSlug, postIds, [authorId]);
 }
 
 /**
