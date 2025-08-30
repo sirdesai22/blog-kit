@@ -7,7 +7,7 @@ import { QueryProvider } from "@/providers/tanstack-query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import "./globals.css";
 import { Inter } from "next/font/google";
-import { HeaderProvider } from "@/modules/blogs/components/global-header/context/HeaderContext";
+import { HeaderProvider } from "@/modules/blogs/components/global-header/context/header-context";
 
 export const metadata: Metadata = {
   title: "BlogKit",

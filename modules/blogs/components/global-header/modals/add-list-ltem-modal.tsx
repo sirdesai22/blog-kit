@@ -1,7 +1,11 @@
 "use client";
 
-import { useState, useContext, useEffect } from "react";
-import { HeaderContext, HeaderItem } from "../context/HeaderContext";
+import { useContext, useState, useEffect } from "react";
+import {
+  HeaderContext,
+  HeaderItem,
+  SubHeaderItem,
+} from "../context/header-context";
 import {
   Dialog,
   DialogContent,
@@ -17,58 +21,47 @@ import { Switch } from "@/components/ui/switch";
 interface Props {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
-  parentItem: HeaderItem | null; // The 'List' item we're adding to
-}
-
-// Define a more specific type for sub-items if needed
-interface ListItem {
-  id: string;
-  name: string;
-  link: string;
-  openInNewTab: boolean;
+  parentItem: HeaderItem;
+  editingSubItem: SubHeaderItem | null;
 }
 
 export default function AddListItemModal({
   isOpen,
   setIsOpen,
   parentItem,
+  editingSubItem,
 }: Props) {
-  const { updateItem } = useContext(HeaderContext);
+  const { addSubItem, updateSubItem } = useContext(HeaderContext);
   const [name, setName] = useState("");
   const [link, setLink] = useState("");
   const [openInNewTab, setOpenInNewTab] = useState(true);
 
-  // Reset state when the modal is closed or the parent item changes
   useEffect(() => {
-    if (!isOpen) {
+    if (editingSubItem) {
+      setName(editingSubItem.name);
+      setLink(editingSubItem.link);
+      setOpenInNewTab(editingSubItem.openInNewTab);
+    } else {
       setName("");
       setLink("");
       setOpenInNewTab(true);
     }
-  }, [isOpen]);
+  }, [editingSubItem, isOpen]);
 
   const handleSave = () => {
-    if (!parentItem || !name || !link) {
-      // Add some validation feedback if necessary
-      return;
+    if (!parentItem || !name || !link) return;
+
+    if (editingSubItem) {
+      updateSubItem(parentItem.id, {
+        ...editingSubItem,
+        name,
+        link,
+        openInNewTab,
+      });
+    } else {
+      addSubItem(parentItem.id, { name, link, openInNewTab });
     }
 
-    const newListItem: ListItem = {
-      id: `sub-${Date.now().toString()}`,
-      name,
-      link,
-      openInNewTab,
-    };
-
-    // Create an updated version of the parent item
-    const updatedParentItem = {
-      ...parentItem,
-      // Ensure children array exists before spreading
-      children: [...(parentItem.children || []), newListItem],
-    };
-
-    // Update the context state
-    // updateItem(updatedParentItem);
     setIsOpen(false);
   };
 
@@ -76,7 +69,7 @@ export default function AddListItemModal({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add List Item</DialogTitle>
+          <DialogTitle>{editingSubItem ? "Edit" : "Add"} List Item</DialogTitle>
         </DialogHeader>
         <div className="grid gap-6 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
@@ -103,13 +96,16 @@ export default function AddListItemModal({
               placeholder="Enter link"
             />
           </div>
-          <div className="flex items-center justify-between pl-12 pr-4">
+          <div className="flex items-center justify-between pl-28">
             <Label htmlFor="new-tab">Open in New Tab</Label>
-            <Switch
-              id="new-tab"
-              checked={openInNewTab}
-              onCheckedChange={setOpenInNewTab}
-            />
+            <div className="flex items-center gap-2">
+              <Switch
+                id="new-tab"
+                checked={openInNewTab}
+                onCheckedChange={setOpenInNewTab}
+              />
+              <span>{openInNewTab ? "ON" : "OFF"}</span>
+            </div>
           </div>
         </div>
         <DialogFooter>

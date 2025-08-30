@@ -1,6 +1,6 @@
 "use client";
 import { useContext } from "react";
-import { HeaderContext } from "../context/HeaderContext";
+import { HeaderContext } from "../context/header-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

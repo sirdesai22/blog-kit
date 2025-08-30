@@ -1,18 +1,23 @@
+"use client";
 import { useContext } from "react";
-import { HeaderContext } from "../context/HeaderContext";
-import DynamicHeader from "./DynamicHeader";
+import { HeaderContext } from "../context/header-context";
+import DynamicHeader from "./dynamic-header";
 
 export default function ContentPanel() {
   const { theme } = useContext(HeaderContext);
 
-  const bg = theme === "dark" ? "bg-zinc-900" : "bg-gray-100/90";
+  // Theme-based colors for placeholder content
+  const bg = theme === "dark" ? "bg-zinc-900" : "bg-gray-50";
   const box = theme === "dark" ? "bg-zinc-700" : "bg-gray-200";
   const card = theme === "dark" ? "bg-zinc-800" : "bg-gray-100";
 
   return (
-    <div className="min-h-screen bg-content">
+    // The parent now controls the width, so this div just handles background and scrolling
+    <div className={`min-h-full ${bg}`}>
       <DynamicHeader />
-      <div className={`p-8 max-w-6xl mx-auto space-y-16 animate-pulse ${bg}`}>
+
+      {/* max-w and mx-auto are removed. Padding is now responsive. */}
+      <div className="p-4 sm:p-8 space-y-16">
         {/* Hero */}
         <div className="space-y-10">
           <div className={`h-12 w-2/3 rounded-lg ${box}`}></div>

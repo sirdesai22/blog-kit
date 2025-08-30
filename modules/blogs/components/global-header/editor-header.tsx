@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { RefreshCcw } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HeaderContext } from "./context/HeaderContext";
+import { HeaderContext } from "./context/header-context";
 
 interface EditorHeaderProps {
   activeTab: string;
@@ -46,8 +46,12 @@ export default function EditorHeader({
           className="w-[250px]"
         >
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="items">Header Items</TabsTrigger>
-            <TabsTrigger value="style">Header Style</TabsTrigger>
+            <TabsTrigger value="items" className="text-normal font-normal">
+              Header Items
+            </TabsTrigger>
+            <TabsTrigger value="style" className="text-normal font-normal">
+              Header Style
+            </TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
