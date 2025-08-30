@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useBlogFilterOptions } from '@/modules/blogs/hooks/use-blog-filter-options';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useBlogFilterOptions } from "@/modules/blogs/hooks/use-blog-filter-options";
 
 interface CategorySelectionDialogProps {
   open: boolean;
@@ -44,7 +44,7 @@ export function CategorySelectionDialog({
     if (selectedCategoryIds.length === categoryOptions.length) {
       setSelectedCategoryIds([]);
     } else {
-      setSelectedCategoryIds(categoryOptions.map((category) => category.id));
+      setSelectedCategoryIds(categoryOptions.map((c) => c.id));
     }
   };
 
@@ -61,14 +61,14 @@ export function CategorySelectionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <DialogTitle className="text-lg font-semibold">
+      <DialogContent className=" w-fit p-4">
+        <DialogHeader className="flex flex-row items-center justify-between pb-2">
+          <DialogTitle className="text-base font-medium">
             Select Categories
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-2 py-2">
           {loading ? (
             <div className="text-sm text-muted-foreground">
               Loading categories...
@@ -79,8 +79,8 @@ export function CategorySelectionDialog({
             </div>
           ) : (
             <>
-              {/* Select All option */}
-              <div className="flex items-center space-x-2 pb-2 border-b">
+              {/* Select All */}
+              <div className="flex items-center gap-1.5 pb-2 border-b">
                 <Checkbox
                   id="select-all-categories"
                   checked={
@@ -97,19 +97,16 @@ export function CategorySelectionDialog({
                 />
                 <label
                   htmlFor="select-all-categories"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  className="text-sm cursor-pointer"
                 >
-                  Select All Categories
+                  Select All
                 </label>
               </div>
 
-              {/* Individual categories */}
-              <div className="max-h-60 overflow-y-auto space-y-3">
+              {/* Category list */}
+              <div className="max-h-48 overflow-y-auto space-y-2">
                 {categoryOptions.map((category) => (
-                  <div
-                    key={category.id}
-                    className="flex items-center space-x-2"
-                  >
+                  <div key={category.id} className="flex items-center gap-1.5">
                     <Checkbox
                       id={category.id}
                       checked={selectedCategoryIds.includes(category.id)}
@@ -117,7 +114,7 @@ export function CategorySelectionDialog({
                     />
                     <label
                       htmlFor={category.id}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      className="text-sm cursor-pointer"
                     >
                       {category.name}
                     </label>
@@ -128,16 +125,17 @@ export function CategorySelectionDialog({
           )}
         </div>
 
-        <DialogFooter className="flex flex-row justify-between">
-          <div className="text-sm text-muted-foreground">
-            {selectedCategoryIds.length} categor
-            {selectedCategoryIds.length !== 1 ? 'ies' : 'y'} selected
+        <DialogFooter className="flex justify-between items-center">
+          <div className="text-xs text-muted-foreground">
+            {selectedCategoryIds.length} selected
           </div>
-          <div className="flex space-x-2">
-            <Button variant="outline" onClick={handleCancel}>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleCancel}>
               Cancel
             </Button>
-            <Button onClick={handleSave}>Save</Button>
+            <Button size="sm" onClick={handleSave}>
+              Save
+            </Button>
           </div>
         </DialogFooter>
       </DialogContent>

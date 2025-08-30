@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useBlogFilterOptions } from '@/modules/blogs/hooks/use-blog-filter-options';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useBlogFilterOptions } from "@/modules/blogs/hooks/use-blog-filter-options";
 
 interface TagSelectionDialogProps {
   open: boolean;
@@ -63,14 +63,14 @@ export function TagSelectionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <DialogTitle className="text-lg font-semibold">
+      <DialogContent className=" w-fit p-4">
+        <DialogHeader className="flex flex-row items-center justify-between pb-2">
+          <DialogTitle className="text-base font-medium">
             Select Tags
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-2 py-2">
           {loading ? (
             <div className="text-sm text-muted-foreground">Loading tags...</div>
           ) : tagOptions.length === 0 ? (
@@ -79,8 +79,8 @@ export function TagSelectionDialog({
             </div>
           ) : (
             <>
-              {/* Select All option */}
-              <div className="flex items-center space-x-2 pb-2 border-b">
+              {/* Select All */}
+              <div className="flex items-center gap-2 pb-2 border-b">
                 <Checkbox
                   id="select-all-tags"
                   checked={selectedTagIds.length === tagOptions.length}
@@ -95,16 +95,16 @@ export function TagSelectionDialog({
                 />
                 <label
                   htmlFor="select-all-tags"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  className="text-sm cursor-pointer"
                 >
-                  Select All Tags
+                  Select All
                 </label>
               </div>
 
-              {/* Individual tags */}
-              <div className="max-h-60 overflow-y-auto space-y-3">
+              {/* Tag list */}
+              <div className="max-h-48 overflow-y-auto space-y-2">
                 {tagOptions.map((tag) => (
-                  <div key={tag.id} className="flex items-center space-x-2">
+                  <div key={tag.id} className="flex items-center gap-2">
                     <Checkbox
                       id={tag.id}
                       checked={selectedTagIds.includes(tag.id)}
@@ -112,12 +112,12 @@ export function TagSelectionDialog({
                     />
                     <label
                       htmlFor={tag.id}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex items-center space-x-2"
+                      className="text-sm cursor-pointer flex items-center gap-1"
                     >
                       <span>{tag.name}</span>
                       {tag.usageCount && (
                         <span className="text-xs text-muted-foreground">
-                          ({tag.usageCount} posts)
+                          ({tag.usageCount})
                         </span>
                       )}
                     </label>
@@ -128,16 +128,17 @@ export function TagSelectionDialog({
           )}
         </div>
 
-        <DialogFooter className="flex flex-row justify-between">
-          <div className="text-sm text-muted-foreground">
-            {selectedTagIds.length} tag{selectedTagIds.length !== 1 ? 's' : ''}{' '}
-            selected
+        <DialogFooter className="flex justify-between items-center">
+          <div className="text-xs text-muted-foreground">
+            {selectedTagIds.length} selected
           </div>
-          <div className="flex space-x-2">
-            <Button variant="outline" onClick={handleCancel}>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleCancel}>
               Cancel
             </Button>
-            <Button onClick={handleSave}>Save</Button>
+            <Button size="sm" onClick={handleSave}>
+              Save
+            </Button>
           </div>
         </DialogFooter>
       </DialogContent>

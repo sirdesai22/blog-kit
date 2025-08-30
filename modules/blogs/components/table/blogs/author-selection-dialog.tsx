@@ -1,22 +1,22 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useBlogFilterOptions } from '@/modules/blogs/hooks/use-blog-filter-options';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useBlogFilterOptions } from "@/modules/blogs/hooks/use-blog-filter-options";
 
 interface AuthorSelectionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (selectedAuthorIds: string[]) => void; // Changed to array
+  onSave: (selectedAuthorIds: string[]) => void;
   workspaceSlug: string;
   pageId: string;
 }
@@ -28,7 +28,7 @@ export function AuthorSelectionDialog({
   workspaceSlug,
   pageId,
 }: AuthorSelectionDialogProps) {
-  const [selectedAuthorIds, setSelectedAuthorIds] = useState<string[]>([]); // Changed to array
+  const [selectedAuthorIds, setSelectedAuthorIds] = useState<string[]>([]);
 
   const { authors: authorOptions, isLoading: loading } = useBlogFilterOptions(
     workspaceSlug,
@@ -64,14 +64,14 @@ export function AuthorSelectionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <DialogTitle className="text-lg font-semibold">
+      <DialogContent className="w-fit p-4">
+        <DialogHeader className="flex flex-row items-center justify-between pb-2">
+          <DialogTitle className="text-base font-medium">
             Select Authors
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-2 py-2">
           {loading ? (
             <div className="text-sm text-muted-foreground">
               Loading authors...
@@ -83,31 +83,30 @@ export function AuthorSelectionDialog({
           ) : (
             <>
               {/* Select All option */}
-              <div className="flex items-center space-x-2 pb-2 border-b">
+              <div className="flex items-center gap-2 pb-2 border-b">
                 <Checkbox
-                  id="select-all"
-                  checked={selectedAuthorIds.length === authorOptions.length}
-                  ref={(el: any) => {
-                    if (el) {
-                      el.indeterminate =
-                        selectedAuthorIds.length > 0 &&
-                        selectedAuthorIds.length < authorOptions.length;
-                    }
-                  }}
+                  id="select-all-authors"
+                  checked={
+                    selectedAuthorIds.length === authorOptions.length
+                      ? true
+                      : selectedAuthorIds.length === 0
+                      ? false
+                      : "indeterminate"
+                  }
                   onCheckedChange={handleSelectAll}
                 />
                 <label
-                  htmlFor="select-all"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  htmlFor="select-all-authors"
+                  className="text-sm cursor-pointer"
                 >
-                  Select All Authors
+                  Select All
                 </label>
               </div>
 
-              {/* Individual authors */}
-              <div className="max-h-60 overflow-y-auto space-y-3">
+              {/* Author list */}
+              <div className="max-h-48 overflow-y-auto space-y-2">
                 {authorOptions.map((author) => (
-                  <div key={author.id} className="flex items-center space-x-2">
+                  <div key={author.id} className="flex items-center gap-2">
                     <Checkbox
                       id={author.id}
                       checked={selectedAuthorIds.includes(author.id)}
@@ -115,12 +114,12 @@ export function AuthorSelectionDialog({
                     />
                     <label
                       htmlFor={author.id}
-                      className="flex items-center space-x-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      className="flex items-center gap-2 text-sm cursor-pointer"
                     >
                       <Avatar className="h-6 w-6">
-                        <AvatarImage src={author.image || ''} />
+                        <AvatarImage src={author.image || ""} />
                         <AvatarFallback className="text-xs">
-                          {author.name?.charAt(0).toUpperCase() || 'A'}
+                          {author.name?.charAt(0).toUpperCase() || "A"}
                         </AvatarFallback>
                       </Avatar>
                       <span>{author.name}</span>
@@ -137,16 +136,17 @@ export function AuthorSelectionDialog({
           )}
         </div>
 
-        <DialogFooter className="flex flex-row justify-between">
-          <div className="text-sm text-muted-foreground">
-            {selectedAuthorIds.length} author
-            {selectedAuthorIds.length !== 1 ? 's' : ''} selected
+        <DialogFooter className="flex justify-between items-center">
+          <div className="text-xs text-muted-foreground">
+            {selectedAuthorIds.length} selected
           </div>
-          <div className="flex space-x-2">
-            <Button variant="outline" onClick={handleCancel}>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleCancel}>
               Cancel
             </Button>
-            <Button onClick={handleSave}>Save</Button>
+            <Button size="sm" onClick={handleSave}>
+              Save
+            </Button>
           </div>
         </DialogFooter>
       </DialogContent>
