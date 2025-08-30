@@ -264,7 +264,7 @@ export function ManageFeaturedPostsDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="">
+      <DialogContent className="w-[400px]">
         <DialogHeader>
           <DialogTitle>Manage Featured Post</DialogTitle>
           <div className="space-y-1">
@@ -320,7 +320,12 @@ export function ManageFeaturedPostsDialog({
                     <ChevronDown className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-132 p-0" align="start">
+                <PopoverContent
+                  align="start"
+                  sideOffset={4}
+                  className="p-0 max-w-none w-[var(--radix-popover-trigger-width)]"
+                  style={{ width: "var(--radix-popover-trigger-width)" }}
+                >
                   <Command>
                     <CommandInput
                       placeholder="Search posts..."

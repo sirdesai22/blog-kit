@@ -7,6 +7,7 @@ import { QueryProvider } from "@/providers/tanstack-query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import "./globals.css";
 import { Inter } from "next/font/google";
+import { HeaderProvider } from "@/modules/blogs/components/global-header/context/HeaderContext";
 
 export const metadata: Metadata = {
   title: "BlogKit",
@@ -32,7 +33,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
-            <SessionProvider>{children}</SessionProvider>
+            <HeaderProvider>
+              <SessionProvider>{children}</SessionProvider>
+            </HeaderProvider>
           </QueryProvider>
         </ThemeProvider>
       </body>

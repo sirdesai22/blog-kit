@@ -24,6 +24,7 @@ import {
   Trash2,
   Eye,
   ExternalLink,
+  Edit,
 } from "lucide-react";
 import Link from "next/link";
 import { BlogPost } from "@/types/blog";
@@ -98,26 +99,27 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
 
       <TableCell>
         <div className="flex items-center gap-2">
-          {isPinned && (
+          {/* {isPinned && (
             <Pin className="h-4 w-4 fill-current text-muted-foreground" />
-          )}
+          )} */}
           <Link
             href={`/${workspaceSlug}/blogs/${post.pageId}/${post.id}/edit`}
-            className="cursor-pointer group inline-flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary"
+            className="cursor-pointer group inline-flex  items-center gap-1 text-normal text-foreground hover:text-primary"
           >
             {post.title}
-            <ExternalLink className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <ExternalLink className="ml-2 h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <Edit className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
           </Link>
         </div>
       </TableCell>
 
       <TableCell>
         <span
-          className={`inline-flex items-center rounded-xl px-2 py-1 text-xs font-medium ${getStatusColor(
+          className={`inline-flex items-center rounded-xl px-2 py-0.5 text-normal ${getStatusColor(
             post.status
           )}`}
         >
-          <span className="text-[8px] mr-1 leading-none">●</span>
+          <span className="text-[8px] mr-1  leading-none">●</span>
           {getStatusLabel(post.status)}
         </span>
       </TableCell>
@@ -129,7 +131,7 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-1">
-                    <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-1 text-small font-medium">
+                    <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-0.5 text-normal-muted">
                       {post.categories[0].name}
                     </span>
                     {post.categories.length > 1 && (
@@ -144,20 +146,20 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
                   className="flex flex-col gap-1 p-2 bg-popover border border-border rounded-md shadow-lg"
                 >
                   {post.categories.map((category, index) => (
-                    <span key={index} className=" text-normal">
+                    <span key={index} className=" text-normal-muted">
                       {category.name}
                     </span>
                   ))}
                 </TooltipContent>
               </Tooltip>
             ) : (
-              <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-1 text-xs font-medium text-muted-foreground">
+              <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-0.5 text-normal-muted">
                 {post.categories[0].name}
               </span>
             )}
           </div>
         ) : (
-          <span className="text-xs text-muted-foreground">No category</span>
+          <span className="text-xs text-muted-foreground"></span>
         )}
       </TableCell>
 
@@ -168,11 +170,11 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-1">
-                    <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-1 text-xs font-medium text-muted-foreground">
+                    <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-0.5 text-normal-muted">
                       {post.tags[0].name}
                     </span>
                     {post.tags.length > 1 && (
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-normal-muted">
                         +{post.tags.length - 1}
                       </span>
                     )}
@@ -183,20 +185,20 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
                   className="flex flex-col gap-1 p-2 bg-popover border border-border rounded-md shadow-lg"
                 >
                   {post.tags.map((tag, index) => (
-                    <span key={index} className="text-normal">
+                    <span key={index} className="text-normal-muted">
                       {tag.name}
                     </span>
                   ))}
                 </TooltipContent>
               </Tooltip>
             ) : (
-              <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-1 text-xs font-medium text-muted-foreground">
+              <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-0.5 text-xs font-medium text-muted-foreground">
                 {post.tags[0].name}
               </span>
             )}
           </div>
         ) : (
-          <span className="text-xs text-muted-foreground">No tags</span>
+          <span className="text-xs text-muted-foreground"></span>
         )}
       </TableCell>
 
@@ -217,14 +219,14 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
               )}
             </div>
           ) : (
-            <span className="text-xs text-muted-foreground">No author</span>
+            <span className="text-xs text-muted-foreground"></span>
           )}
         </div>
       </TableCell>
 
       <TableCell>
         <div className="text-xs text-muted-foreground">
-          {post.publishedAt ? formatDate(post.publishedAt) : "Not published"}
+          {post.publishedAt ? formatDate(post.publishedAt) : ""}
         </div>
       </TableCell>
       <TableCell>
@@ -249,10 +251,10 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
                 Edit Post
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => togglePin(post.id)}>
+            {/* <DropdownMenuItem onClick={() => togglePin(post.id)}>
               <Pin className="mr-2 h-4 w-4" />
               {isPinned ? "Unpin" : "Pin"}
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
             <DropdownMenuItem>
               <Copy className="mr-2 h-4 w-4" />
               Duplicate

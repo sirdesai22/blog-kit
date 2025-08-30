@@ -34,7 +34,10 @@ function ColorSwatch({
           />
         </DialogTrigger>
         {!disabled && (
-          <DialogContent className="w-fit p-0 m-0 rounded-xl overflow-hidden">
+          <DialogContent
+            showCloseButton={false}
+            className="w-fit p-0 m-0 rounded-xl overflow-hidden"
+          >
             <ChromePicker color={hex} onChange={(c) => onChange(c.hex)} />
           </DialogContent>
         )}
@@ -103,15 +106,20 @@ const SettingsSection = ({
   title,
   description,
   children,
+  showRestore = false,
 }: {
   title: string;
   description: string;
   children: React.ReactNode;
+  showRestore?: boolean;
 }) => (
-  <div className="grid grid-cols-1 gap-8 border-t py-md md:grid-cols-[400px_1fr]">
+  <div className="grid grid-cols-1 gap-8 border-t py-md md:grid-cols-[350px_1fr]">
     <div>
       <h3 className="text-main">{title}</h3>
-      <p className="text-small">{description}</p>
+      <p className="text-small max-w-[220px]">{description}</p>
+      {showRestore && (
+        <p className="text-small underline mt-0.5">Restore default</p>
+      )}
     </div>
     <div className="flex items-start mt-1">{children}</div>
   </div>
@@ -188,7 +196,7 @@ function BrandColors({ darkModeDisabled }: { darkModeDisabled: boolean }) {
       <div className="grid grid-cols-1 border-t py-md md:grid-cols-[200px_1fr]">
         <div className="flex flex-col gap-y-6">
           {/* Header Row */}
-          <div className="grid grid-cols-[400px_100px_100px] items-center gap-x-4">
+          <div className="grid grid-cols-[350px_100px_100px] items-center gap-x-4">
             <h3 className="text-main">Brand Colors</h3>
             <p className="text-normal text-center  mt-1 ml-2">Light Mode</p>
             <p
@@ -204,7 +212,7 @@ function BrandColors({ darkModeDisabled }: { darkModeDisabled: boolean }) {
           {brandColors.map((color) => (
             <div
               key={color.label}
-              className="grid grid-cols-[420px_100px_100px] items-start gap-x-4"
+              className="grid grid-cols-[370px_100px_100px] items-start gap-x-4"
             >
               <div>
                 <p className="text-normal">{color.label}</p>
@@ -238,12 +246,14 @@ export default function BrandSettings() {
       <header className="mb-md">
         <h1 className="text-header">Brand Settings</h1>
         <p className="text-normal-muted">Manage your brand</p>
+        <p className="text-small underline mt-0.5">Restore default</p>
       </header>
 
       <main>
         <SettingsSection
           title="Dark Mode"
-          description="Supported formats (JPG, PNG, WebP) Minimum size: 100px"
+          description="Supported formats (JPG, PNG, WebP) 
+          Minimum size: 100px"
         >
           <div className="flex items-center gap-x-2">
             <Switch
@@ -290,6 +300,7 @@ export default function BrandSettings() {
         <SettingsSection
           title="Fonts"
           description="Supported formats (JPG, PNG, WebP) Recommended size: 100px x 100px"
+          showRestore={true}
         >
           <FontSettings />
         </SettingsSection>

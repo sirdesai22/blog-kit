@@ -75,10 +75,10 @@ export function MultiSelectFilter({
     if (selectedValues.length === 0) {
       return placeholder;
     }
-    // ✅ Show placeholder with subtle indicator
-    return `${placeholder} ${
-      selectedValues.length > 0 ? "(" + selectedValues.length + ")" : ""
-    }`;
+    // return `${placeholder} ${
+    //   selectedValues.length > 0 ? "(" + selectedValues.length + ")" : ""
+    // }`;
+    return placeholder;
   };
 
   const defaultRenderOption = (option: Option, isSelected: boolean) => (
@@ -115,11 +115,11 @@ export function MultiSelectFilter({
             )}
           </div>
         </div>
-        {option.count && (
+        {/* {option.count && (
           <span className="text-xs text-muted-foreground ml-2">
             {option.count}
           </span>
-        )}
+        )} */}
       </div>
     </>
   );
@@ -143,7 +143,7 @@ export function MultiSelectFilter({
           {/* <ChevronDown className="ml-1 h-3 w-3 shrink-0 opacity-50" /> */}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[320px] p-0" align="start">
+      <PopoverContent className="w-[180px] p-0" align="start">
         <Command>
           {showSearch && options.length > 5 && (
             <CommandInput placeholder={searchPlaceholder} className="h-9" />
