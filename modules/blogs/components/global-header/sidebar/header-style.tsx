@@ -60,7 +60,7 @@ export default function HeaderStyle() {
       {/* Colors */}
       <Card className="p-0 shadow-none border-none gap-2">
         <div className="flex gap-22 items-center">
-          <CardTitle className="text-main">Colors</CardTitle>
+          <CardTitle className="text-normal">Colors</CardTitle>
           <div className="flex gap-13">
             <span className="text-small">Light Mode</span>
             <span className="text-small">Dark Mode</span>
@@ -94,7 +94,7 @@ export default function HeaderStyle() {
 
       {/* Header Height */}
       <Card className="p-0 shadow-none border-none space-y-2 flex flex-row justify-between items-center">
-        <CardTitle className="text-main font-medium">Header height</CardTitle>
+        <CardTitle className="text-normal font-medium">Header height</CardTitle>
         <div className="flex items-center  gap-2">
           <Slider
             value={[headerStyle.height]}
@@ -109,8 +109,8 @@ export default function HeaderStyle() {
           </span>
         </div>
       </Card>
-      <Card className="p-0 shadow-none border-none space-y-2 flex flex-row items-center justify-between">
-        <CardTitle className="text-main font-medium">Button Radius</CardTitle>
+      {/* <Card className="p-0 shadow-none border-none space-y-2 flex flex-row items-center justify-between">
+        <CardTitle className="text-normal font-medium">Button Radius</CardTitle>
         <div className="flex items-center gap-2">
           <Slider
             value={[headerStyle.buttonRadius]}
@@ -124,11 +124,11 @@ export default function HeaderStyle() {
             {headerStyle.buttonRadius}px
           </span>
         </div>
-      </Card>
+      </Card> */}
 
       {/* Navbar Border Width */}
       <Card className="p-0 shadow-none border-none items-center gap-0 flex flex-row align-center justify-between">
-        <CardTitle className="text-main font-medium">Navbar</CardTitle>
+        <CardTitle className="text-normal font-medium">Navbar</CardTitle>
         <div className="flex items-center gap-2">
           <ColorSwatch
             hex={headerStyle.borderColor}
@@ -150,7 +150,7 @@ export default function HeaderStyle() {
 
       {/* Sticky Header */}
       <Card className="shadow-none border-none flex-row items-center p-0">
-        <CardTitle className="text-main font-medium">Sticky Header</CardTitle>
+        <CardTitle className="text-normal font-medium">Sticky Header</CardTitle>
         <div className="flex items-center gap-2">
           <Switch
             checked={headerStyle.sticky}

@@ -194,7 +194,7 @@ export default function HeaderItems() {
           <CardContent className="space-y-4 p-0">
             <div className="flex items-center justify-between">
               <div className="space-y-2">
-                <h1 className="text-main">Logo</h1>
+                <CardTitle className="text-normal">Logo</CardTitle>
                 <Select
                   value={theme}
                   onValueChange={(v: ThemeType) => setTheme(v)}
@@ -216,7 +216,7 @@ export default function HeaderItems() {
                 </Button>
               </div>
               <div
-                className="w-28 h-28 flex items-center justify-center border-2 border-dashed rounded-lg cursor-pointer"
+                className="w-full ml-2 h-28 flex items-center justify-center border-2 border-dashed rounded-lg cursor-pointer"
                 onClick={() => fileInputRef.current?.click()}
               >
                 {logoUrls[theme] ? (
@@ -262,7 +262,7 @@ export default function HeaderItems() {
         {/* Header Items Section */}
         <Card className=" bg-transparent border-none shadow-none p-0 gap-4">
           <CardHeader className="flex flex-row items-center justify-between p-0">
-            <CardTitle className="text-main font-medium">
+            <CardTitle className="text-normal font-medium">
               Header Items
             </CardTitle>
             <Button variant="outline" size="sm" onClick={handleAddNew}>
