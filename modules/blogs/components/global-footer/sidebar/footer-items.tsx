@@ -149,7 +149,7 @@ function FooterItems() {
         inputEl?.focus();
       }
     }
-  }, [socialLinks.length]); // Reruns only when the number of links changes
+  }, [socialLinks.length, socialLinks]); // Reruns only when the number of links changes
 
   const handleAddSocialLink = (type: SocialType) => {
     addSocialLink(type);
