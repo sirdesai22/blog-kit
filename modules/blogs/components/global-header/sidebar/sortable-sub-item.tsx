@@ -45,7 +45,7 @@ export function SortableSubItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center border rounded-md bg-white dark:bg-zinc-700"
+      className="flex items-center border rounded-md  h-[32px] overflow-hidden bg-white dark:bg-zinc-700"
     >
       <div
         {...attributes}
@@ -67,7 +67,7 @@ export function SortableSubItem({
         size="icon"
         onClick={() => onDelete(parentItem, subItem)}
       >
-        <Trash2 className="h-4 w-4 text-destructive" />
+        <Trash2 className="h-4 w-4 " />
       </Button>
     </div>
   );

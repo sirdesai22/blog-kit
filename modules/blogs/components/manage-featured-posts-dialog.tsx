@@ -264,7 +264,7 @@ export function ManageFeaturedPostsDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[400px]">
+      <DialogContent className="w-[500px]">
         <DialogHeader>
           <DialogTitle>Manage Featured Post</DialogTitle>
           <div className="space-y-1">

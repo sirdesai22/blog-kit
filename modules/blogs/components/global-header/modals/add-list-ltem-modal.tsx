@@ -49,7 +49,7 @@ export default function AddListItemModal({
   }, [editingSubItem, isOpen]);
 
   const handleSave = () => {
-    if (!parentItem || !name || !link) return;
+    if (!parentItem || !name) return;
 
     if (editingSubItem) {
       updateSubItem(parentItem.id, {
@@ -67,13 +67,16 @@ export default function AddListItemModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[320px]">
         <DialogHeader>
           <DialogTitle>{editingSubItem ? "Edit" : "Add"} List Item</DialogTitle>
         </DialogHeader>
         <div className="grid gap-6 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
+            <Label
+              className="text-normal font-normal text-right"
+              htmlFor="name"
+            >
               Name
             </Label>
             <Input
@@ -85,7 +88,10 @@ export default function AddListItemModal({
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="link" className="text-right">
+            <Label
+              className="text-normal font-normal text-right"
+              htmlFor="link"
+            >
               Link
             </Label>
             <Input
@@ -96,15 +102,17 @@ export default function AddListItemModal({
               placeholder="Enter link"
             />
           </div>
-          <div className="flex items-center justify-between pl-28">
-            <Label htmlFor="new-tab">Open in New Tab</Label>
+          <div className="flex items-center gap-4">
+            <Label className="text-normal font-normal" htmlFor="new-tab">
+              Open in New Tab
+            </Label>
             <div className="flex items-center gap-2">
               <Switch
                 id="new-tab"
                 checked={openInNewTab}
                 onCheckedChange={setOpenInNewTab}
               />
-              <span>{openInNewTab ? "ON" : "OFF"}</span>
+              <span className="text-normal">{openInNewTab ? "ON" : "OFF"}</span>
             </div>
           </div>
         </div>
@@ -112,7 +120,7 @@ export default function AddListItemModal({
           <Button variant="outline" onClick={() => setIsOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSave}>Save</Button>
+          <Button onClick={() => handleSave()}>Save</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

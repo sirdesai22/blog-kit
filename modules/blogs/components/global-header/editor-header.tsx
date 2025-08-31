@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { RefreshCcw } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HeaderContext } from "./context/header-context";
+import { useRouter } from "next/navigation";
 
 interface EditorHeaderProps {
   activeTab: string;
@@ -33,10 +34,12 @@ export default function EditorHeader({
     refresh,
   } = useContext(HeaderContext);
 
+  const router = useRouter();
+
   return (
     <header className="flex items-center justify-between px-4 py-1 border-b bg-background">
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="icon">
+        <Button variant="outline" size="icon" onClick={() => router.back()}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
 

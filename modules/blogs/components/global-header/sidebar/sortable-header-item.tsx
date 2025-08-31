@@ -70,9 +70,9 @@ export function SortableHeaderItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="bg-zinc-50 dark:bg-zinc-800 rounded-md"
+      className="bg-zinc-50 dark:bg-zinc-800 rounded-md "
     >
-      <div className="flex items-center  border rounded-md">
+      <div className="flex items-center h-[32px] overflow-hidden border rounded-md">
         <div
           {...attributes}
           {...listeners}
@@ -109,7 +109,7 @@ export function SortableHeaderItem({
           <Pencil className="h-4 w-4" />
         </Button>
         <Button variant="ghost" size="icon" onClick={() => onDelete(item)}>
-          <Trash2 className="h-4 w-4 text-destructive" />
+          <Trash2 className="h-4 w-4 " />
         </Button>
       </div>
 

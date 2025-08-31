@@ -196,8 +196,12 @@ function BrandColors({ darkModeDisabled }: { darkModeDisabled: boolean }) {
       <div className="grid grid-cols-1 border-t py-md md:grid-cols-[200px_1fr]">
         <div className="flex flex-col gap-y-6">
           {/* Header Row */}
-          <div className="grid grid-cols-[350px_100px_100px] items-center gap-x-4">
-            <h3 className="text-main">Brand Colors</h3>
+          <div className="grid grid-cols-[350px_100px_100px] items-center justify-start gap-x-4">
+            <div className="flex flex-col">
+              <h3 className="text-main">Brand Colors</h3>
+              <p className="text-small underline mt-0.5">Restore default</p>
+            </div>
+
             <p className="text-normal text-center  mt-1 ml-2">Light Mode</p>
             <p
               className={`text-normal text-center mt-1 ml-2 ${
@@ -246,7 +250,6 @@ export default function BrandSettings() {
       <header className="mb-md">
         <h1 className="text-header">Brand Settings</h1>
         <p className="text-normal-muted">Manage your brand</p>
-        <p className="text-small underline mt-0.5">Restore default</p>
       </header>
 
       <main>

@@ -188,9 +188,9 @@ export default function HeaderItems() {
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <div className="">
+      <div className="p-4">
         {/* Logo Section */}
-        <Card className="border-none shadow-none p-0">
+        <Card className=" bg-transparent border-none shadow-none p-0">
           <CardContent className="space-y-4 p-0">
             <div className="flex items-center justify-between">
               <div className="space-y-2">
@@ -260,7 +260,7 @@ export default function HeaderItems() {
         <Separator className="my-4" />
 
         {/* Header Items Section */}
-        <Card className="border-none shadow-none p-0 gap-4">
+        <Card className=" bg-transparent border-none shadow-none p-0 gap-4">
           <CardHeader className="flex flex-row items-center justify-between p-0">
             <CardTitle className="text-main font-medium">
               Header Items

@@ -18,11 +18,12 @@ const DesktopNavItem = ({ item }: { item: HeaderItem }) => {
     else window.location.href = link;
   };
   if (item.type === "Button") {
-    const buttonStyles = {
+    const buttonStyles: React.CSSProperties = {
       backgroundColor:
         item.buttonStyle === "solid" ? item.buttonColor : "transparent",
       borderColor: item.buttonColor,
       color: item.textColor,
+      borderRadius: `${headerStyle.buttonRadius}px`,
     };
     return (
       <button
@@ -44,9 +45,9 @@ const DesktopNavItem = ({ item }: { item: HeaderItem }) => {
           className="flex items-center gap-1 text-normal font-medium transition-opacity hover:opacity-70"
         >
           {item.name}
-          <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />
+          <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180 mt-0.5 text-muted-foreground" />
         </button>
-        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 min-w-[180px] bg-white dark:bg-zinc-800 border rounded-md shadow-lg py-1 z-50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
+        <div className="absolute top-2 left-20 -translate-x-1/2 mt-2 min-w-[180px] bg-white dark:bg-zinc-800 border rounded-md shadow-lg py-1 z-50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
           {item.children
             ?.sort((a, b) => a.order - b.order)
             .map((child) => (
@@ -145,12 +146,16 @@ export default function DynamicHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isDarkMode = theme === "dark";
-  const headerContainerStyle = {
+  const headerContainerStyle: React.CSSProperties = {
     height: `${headerStyle.height}px`,
     backgroundColor: isDarkMode
       ? headerStyle.backgroundColorDark
       : headerStyle.backgroundColorLight,
     color: isDarkMode ? headerStyle.textColorDark : headerStyle.textColorLight,
+    borderBottom: `${headerStyle.borderWidth}px solid ${headerStyle.borderColor}`,
+    position: headerStyle.sticky ? "sticky" : "static",
+    top: headerStyle.sticky ? 0 : undefined,
+    zIndex: headerStyle.sticky ? 50 : "auto",
   };
 
   const itemsByAlignment = (alignment: "left" | "center" | "right") =>
@@ -245,18 +250,18 @@ export default function DynamicHeader() {
                   className="object-contain h-10 shrink-0"
                 />
               )}
-              <nav className="flex items-center gap-6">
+              <nav className="flex items-center gap-4">
                 {itemsByAlignment("left").map((item) => (
                   <DesktopNavItem key={item.id} item={item} />
                 ))}
               </nav>
             </div>
-            <nav className="flex items-center gap-6 justify-self-center">
+            <nav className="flex items-center gap-4 justify-self-center">
               {itemsByAlignment("center").map((item) => (
                 <DesktopNavItem key={item.id} item={item} />
               ))}
             </nav>
-            <nav className="flex items-center gap-6 justify-self-end">
+            <nav className="flex items-center gap-4 justify-self-end">
               {itemsByAlignment("right").map((item) => (
                 <DesktopNavItem key={item.id} item={item} />
               ))}

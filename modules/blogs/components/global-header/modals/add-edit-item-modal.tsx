@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { AlignLeft, AlignCenter, AlignRight } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Props {
   isOpen: boolean;
@@ -80,14 +81,14 @@ export default function AddEditItemModal({ isOpen, setIsOpen, item }: Props) {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[350px]">
         <DialogHeader>
           <DialogTitle>{item ? "Edit" : "Add"} Header Item</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           {/* Type */}
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="type" className="text-right">
+            <Label className="text-normal font-normal" htmlFor="type">
               Type
             </Label>
             <Select
@@ -108,7 +109,7 @@ export default function AddEditItemModal({ isOpen, setIsOpen, item }: Props) {
           </div>
           {/* Name */}
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
+            <Label className="text-normal font-normal" htmlFor="name">
               Name
             </Label>
             <Input
@@ -120,9 +121,25 @@ export default function AddEditItemModal({ isOpen, setIsOpen, item }: Props) {
               className="col-span-3"
             />
           </div>
+          {/* Link */}
+          {formState.type !== "List" && (
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-normal font-normal" htmlFor="link">
+                Link
+              </Label>
+              <Input
+                id="link"
+                value={formState.link}
+                onChange={(e) =>
+                  setFormState((p) => ({ ...p, link: e.target.value }))
+                }
+                className="col-span-3"
+              />
+            </div>
+          )}
           {/* Alignment */}
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Alignment</Label>
+            <Label>Alignment</Label>
             <div className="col-span-3 flex items-center gap-2">
               <Button
                 variant={formState.alignment === "left" ? "secondary" : "ghost"}
@@ -151,26 +168,11 @@ export default function AddEditItemModal({ isOpen, setIsOpen, item }: Props) {
               </Button>
             </div>
           </div>
-          {/* Link */}
-          {formState.type !== "List" && (
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="link" className="text-right">
-                Link
-              </Label>
-              <Input
-                id="link"
-                value={formState.link}
-                onChange={(e) =>
-                  setFormState((p) => ({ ...p, link: e.target.value }))
-                }
-                className="col-span-3"
-              />
-            </div>
-          )}
+
           {/* Button Style */}
           {formState.type === "Button" && (
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="button-style" className="text-right">
+              <Label className="text-normal font-normal" htmlFor="button-style">
                 Button Style
               </Label>
               <Select
@@ -190,8 +192,8 @@ export default function AddEditItemModal({ isOpen, setIsOpen, item }: Props) {
             </div>
           )}
           {/* Text Color */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="text-color" className="text-right">
+          {/* <div className="grid grid-cols-4 items-center gap-4">
+            <Label className="text-normal font-normal" htmlFor="text-color">
               Text Color
             </Label>
             <div className="col-span-3 flex items-center gap-2 border rounded-md px-2">
@@ -212,11 +214,11 @@ export default function AddEditItemModal({ isOpen, setIsOpen, item }: Props) {
                 className="border-none"
               />
             </div>
-          </div>
+          </div> */}
           {/* Button Color */}
           {formState.type === "Button" && (
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="button-color" className="text-right">
+              <Label className="text-normal font-normal" htmlFor="button-color">
                 Button Color
               </Label>
               <div className="col-span-3 flex items-center gap-2 border rounded-md px-2">
@@ -241,13 +243,13 @@ export default function AddEditItemModal({ isOpen, setIsOpen, item }: Props) {
           )}
           {/* Open in New Tab */}
           {formState.type !== "List" && (
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Open in New Tab</Label>
+            <div className="flex  gap-2">
+              <Label>Open in New Tab</Label>
               <div className="col-span-3 flex items-center gap-2">
-                <Switch
+                <Checkbox
                   checked={formState.openInNewTab}
                   onCheckedChange={(c) =>
-                    setFormState((p) => ({ ...p, openInNewTab: c }))
+                    setFormState((p) => ({ ...p, openInNewTab: !!c }))
                   }
                 />
                 <span className="text-normal">

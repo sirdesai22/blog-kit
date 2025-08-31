@@ -7,7 +7,6 @@ export type ItemType = "Link" | "List" | "Button";
 export type Alignment = "left" | "center" | "right";
 export type ButtonStyle = "solid" | "outline";
 
-// Sub-item type for clarity
 export interface SubHeaderItem {
   id: string;
   name: string;
@@ -36,7 +35,10 @@ export interface HeaderStyle {
   textColorLight: string;
   backgroundColorDark: string;
   textColorDark: string;
+  borderColor: string;
+  borderWidth: number;
   sticky: boolean;
+  buttonRadius: number;
 }
 
 interface HeaderContextType {
@@ -49,7 +51,7 @@ interface HeaderContextType {
   addItem: (item: Omit<HeaderItem, "id" | "order">) => void;
   updateItem: (item: HeaderItem) => void;
   deleteItem: (id: string) => void;
-  toggleAlignment: (id: string) => void; // Added
+  toggleAlignment: (id: string) => void;
   addSubItem: (
     parentId: string,
     subItem: Omit<SubHeaderItem, "id" | "order">
@@ -68,11 +70,15 @@ interface HeaderContextType {
 export const HeaderContext = createContext<HeaderContextType>(null!);
 
 export const HeaderProvider = ({ children }: { children: ReactNode }) => {
-  const [logoUrls, setLogoUrls] = useState({ light: "", dark: "" });
+  const [logoUrls, setLogoUrls] = useState({
+    light:
+      "https://res.cloudinary.com/dcvcw1ju2/image/upload/v1756567608/rankingFocused_jleoty.png",
+    dark: "https://res.cloudinary.com/dcvcw1ju2/image/upload/v1756567595/gemini_y5zfnb.png",
+  });
   const [headerItems, setHeaderItems] = useState<HeaderItem[]>([
     {
-      id: "1",
-      name: "About",
+      id: "0",
+      name: "Home",
       type: "Link",
       link: "#",
       order: 0,
@@ -81,10 +87,20 @@ export const HeaderProvider = ({ children }: { children: ReactNode }) => {
       textColor: "#000000",
     },
     {
+      id: "1",
+      name: "About",
+      type: "Link",
+      link: "#",
+      order: 1,
+      alignment: "left",
+      openInNewTab: false,
+      textColor: "#000000",
+    },
+    {
       id: "2",
       name: "Resources",
       type: "List",
-      order: 1,
+      order: 2,
       alignment: "left",
       children: [
         { id: "sub-1", name: "Guide", link: "#", order: 0, openInNewTab: true },
@@ -95,30 +111,32 @@ export const HeaderProvider = ({ children }: { children: ReactNode }) => {
       id: "3",
       name: "Log In",
       type: "Button",
-      order: 2,
+      order: 3,
       alignment: "right",
       buttonStyle: "outline",
-      textColor: "#000000",
-      buttonColor: "#FFFFFF",
+      buttonColor: "#B3B3B3",
     },
     {
       id: "4",
       name: "Get Started",
       type: "Button",
-      order: 3,
+      order: 4,
       alignment: "right",
       buttonStyle: "solid",
-      textColor: "#FFFFFF",
       buttonColor: "#000000",
+      textColor: "#FFFFFF",
     },
   ]);
-  const [headerStyle, setHeaderStyle] = useState({
+  const [headerStyle, setHeaderStyle] = useState<HeaderStyle>({
     height: 60,
     backgroundColorLight: "#FFFFFF",
     textColorLight: "#000000",
     backgroundColorDark: "#18181B",
     textColorDark: "#FFFFFF",
-    sticky: false,
+    borderColor: "#E0E0E0",
+    borderWidth: 2,
+    sticky: true,
+    buttonRadius: 8,
   });
   const [theme, setTheme] = useState<ThemeType>("light");
   const [device, setDevice] = useState<DeviceType>("desktop");
