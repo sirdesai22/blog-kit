@@ -73,9 +73,9 @@ export default function EditorHeader({
           )}
         </Button>
 
-        <Button variant="ghost" size="icon" onClick={refresh}>
+        {/* <Button variant="ghost" size="icon" onClick={refresh}>
           <RefreshCcw className="h-4 w-4" />
-        </Button>
+        </Button> */}
 
         {/* Device switch */}
         <Button

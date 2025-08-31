@@ -218,6 +218,17 @@ export default function HeaderItems() {
               <div
                 className="w-full ml-2 h-28 flex items-center justify-center border-2 border-dashed rounded-lg cursor-pointer"
                 onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const file = e.dataTransfer.files?.[0];
+                  if (file) {
+                    // Create FileList from dropped file
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    handleFileChange(dt.files); // stays consistent with your FileList type
+                  }
+                }}
               >
                 {logoUrls[theme] ? (
                   <img

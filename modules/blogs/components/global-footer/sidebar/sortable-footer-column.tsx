@@ -103,7 +103,7 @@ export function SortableFooterColumn({
     <div
       ref={setNodeRef}
       style={style}
-      className="bg-zinc-50 dark:bg-zinc-800 rounded-md p-2 space-y-2"
+      className="bg-zinc-50 dark:bg-zinc-800 rounded-md p-2 pl-1 space-y-2"
     >
       <div className="flex items-center h-[32px] overflow-hidden">
         <div

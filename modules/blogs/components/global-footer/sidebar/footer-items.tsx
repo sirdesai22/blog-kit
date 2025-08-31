@@ -1,5 +1,6 @@
 "use client";
-import { useContext, useState, useRef, useMemo } from "react";
+
+import { useContext, useState, useRef, useMemo, useEffect } from "react";
 import {
   FooterContext,
   ThemeType,
@@ -7,6 +8,20 @@ import {
   FooterLink,
   SocialLink,
 } from "../context/footer-context";
+import {
+  Mail,
+  Globe,
+  Twitter,
+  Instagram,
+  Facebook,
+  Linkedin,
+  Github,
+  Dribbble,
+  MessageSquare,
+  ExternalLink,
+  ChevronDown,
+} from "lucide-react";
+import { SocialType } from "../context/footer-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Upload, ImageIcon, Trash2, GripVertical } from "lucide-react";
@@ -41,8 +56,15 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { Separator } from "@/components/ui/separator";
+import DescriptionEditor from "@/components/models/description-editor";
+import dynamic from "next/dynamic";
+import {
+  PopoverTrigger,
+  Popover,
+  PopoverContent,
+} from "@radix-ui/react-popover";
 
-export default function FooterItems() {
+function FooterItems() {
   const {
     footerColumns,
     setFooterColumns,
@@ -62,10 +84,35 @@ export default function FooterItems() {
     setTheme,
   } = useContext(FooterContext);
 
-  const [newSocialLink, setNewSocialLink] = useState("");
+  const [isSocialPopoverOpen, setSocialPopoverOpen] = useState(false);
+  const socialInputRefs = useRef<Map<string, HTMLInputElement>>(new Map());
 
   const [isColModalOpen, setColModalOpen] = useState(false);
   const [editingColumn, setEditingColumn] = useState<FooterColumn | null>(null);
+  const socialPlatforms = [
+    { type: "mail" as SocialType, name: "Mail", Icon: Mail },
+    { type: "website" as SocialType, name: "Website", Icon: Globe },
+    { type: "twitter" as SocialType, name: "X / Twitter", Icon: Twitter },
+    { type: "instagram" as SocialType, name: "Instagram", Icon: Instagram },
+    { type: "facebook" as SocialType, name: "Facebook", Icon: Facebook },
+    { type: "linkedin" as SocialType, name: "LinkedIn", Icon: Linkedin },
+    { type: "github" as SocialType, name: "GitHub", Icon: Github },
+    { type: "dribbble" as SocialType, name: "Dribbble", Icon: Dribbble },
+    { type: "whatsapp" as SocialType, name: "WhatsApp", Icon: MessageSquare },
+    {
+      type: "external" as SocialType,
+      name: "External Link",
+      Icon: ExternalLink,
+    },
+  ];
+
+  const SocialIcon = ({ type }: { type: SocialType }) => {
+    const platform = socialPlatforms.find((p) => p.type === type);
+    if (!platform)
+      return <ExternalLink className="h-4 w-4 text-muted-foreground" />;
+    const IconComponent = platform.Icon;
+    return <IconComponent className="h-4 w-4 text-muted-foreground" />;
+  };
 
   const [confirmState, setConfirmState] = useState<{
     isOpen: boolean;
@@ -93,9 +140,20 @@ export default function FooterItems() {
     }
   };
 
-  const handleAddNewSocialLink = () => {
-    addSocialLink(newSocialLink);
-    setNewSocialLink("");
+  useEffect(() => {
+    if (socialLinks.length > 0) {
+      const lastLink = socialLinks[socialLinks.length - 1];
+      // Focus only if it's a new link (which will have an empty value)
+      if (lastLink && lastLink.link === "") {
+        const inputEl = socialInputRefs.current.get(lastLink.id);
+        inputEl?.focus();
+      }
+    }
+  }, [socialLinks.length]); // Reruns only when the number of links changes
+
+  const handleAddSocialLink = (type: SocialType) => {
+    addSocialLink(type);
+    setSocialPopoverOpen(false); // Close the popover after selection
   };
 
   const handleSaveColumn = (colData: { title: string }) => {
@@ -182,14 +240,8 @@ export default function FooterItems() {
       onDragEnd={handleDragEnd}
     >
       <div className="p-4 space-y-4">
-        {/* Left Section */}
         <Card className="bg-transparent border-none shadow-none p-0">
-          <CardHeader className="p-0">
-            <CardTitle className="text-normal font-medium">
-              Left Section
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0 space-y-4 pt-2">
+          <CardContent className="space-y-4 p-0">
             <div className="flex items-center justify-between">
               <div className="space-y-2">
                 <CardTitle className="text-normal">Logo</CardTitle>
@@ -198,7 +250,7 @@ export default function FooterItems() {
                   onValueChange={(v: ThemeType) => setTheme(v)}
                 >
                   <SelectTrigger className="w-fit">
-                    <SelectValue />
+                    <SelectValue placeholder="Select Mode" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="light">Light Mode</SelectItem>
@@ -213,15 +265,27 @@ export default function FooterItems() {
                   <Upload className="mr-1 h-3 w-3" /> Upload
                 </Button>
               </div>
+
               <div
-                className="w-full ml-2 h-20 flex items-center justify-center border-2 border-dashed rounded-lg cursor-pointer"
+                className="w-full ml-2 h-28 flex items-center justify-center border-2 border-dashed rounded-lg cursor-pointer"
                 onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const file = e.dataTransfer.files?.[0];
+                  if (file) {
+                    // Create FileList from dropped file
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    handleFileChange(dt.files); // stays consistent with your FileList type
+                  }
+                }}
               >
                 {logoUrls[theme] ? (
                   <img
                     src={logoUrls[theme]}
                     alt={`${theme} logo`}
-                    className="max-h-16 object-contain"
+                    className="max-h-24 object-contain"
                   />
                 ) : (
                   <div className="flex flex-col items-center text-gray-500 text-small">
@@ -237,6 +301,7 @@ export default function FooterItems() {
                 />
               </div>
             </div>
+
             <div className="flex items-center gap-4">
               <label
                 htmlFor="logoUrl"
@@ -246,60 +311,93 @@ export default function FooterItems() {
               </label>
               <Input
                 id="logoUrl"
-                placeholder="Enter logo URL"
-                value={logoUrl}
-                onChange={(e) => setLogoUrlLink(e.target.value)}
+                placeholder={`Enter ${theme} logo URL`}
+                value={logoUrls[theme]}
+                onChange={(e) => setLogoUrl(theme, e.target.value)}
               />
             </div>
-            <div className="space-y-1">
-              <label className="text-normal font-medium">Description</label>
-              <Textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={4}
-              />
-            </div>
+
             <div className="space-y-2">
-              <label className="text-normal font-medium">Social Icons</label>
-              {socialLinks.map((social) => (
-                <div key={social.id} className="flex items-center gap-2">
-                  <Input
-                    value={social.link}
-                    onChange={(e) =>
-                      updateSocialLink(social.id, e.target.value)
-                    }
-                  />
+              <h1 className="text-normal font-medium">Description</h1>
+              <DescriptionEditor
+                value={description}
+                onChange={setDescription}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Popover
+                open={isSocialPopoverOpen}
+                onOpenChange={setSocialPopoverOpen}
+              >
+                <h1 className="text-normal font-medium">Social Icons</h1>
+
+                <PopoverTrigger asChild>
                   <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => deleteSocialLink(social.id)}
+                    variant="outline"
+                    className="w-full justify-between bg-secondary"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <span className="text-normal font-normal">
+                      Add social link
+                    </span>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   </Button>
-                </div>
-              ))}
-              <div className="flex items-center gap-2">
-                <Input
-                  placeholder="Add new social link..."
-                  value={newSocialLink}
-                  onChange={(e) => setNewSocialLink(e.target.value)}
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleAddNewSocialLink}
-                >
-                  Add
-                </Button>
-              </div>
+                </PopoverTrigger>
+                {socialLinks.map((social) => (
+                  <div key={social.id} className="relative w-full">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      <SocialIcon type={social.type} />
+                    </span>
+
+                    <span className="absolute left-9 top-1/2 -translate-y-1/2 h-5 w-[0.9px] rounded-full bg-gray-300" />
+
+                    <Input
+                      ref={(node) => {
+                        if (node) socialInputRefs.current.set(social.id, node);
+                        else socialInputRefs.current.delete(social.id);
+                      }}
+                      placeholder="Enter URL..."
+                      value={social.link}
+                      onChange={(e) =>
+                        updateSocialLink(social.id, e.target.value)
+                      }
+                      className="pl-12 pr-12"
+                    />
+
+                    <span className="absolute right-9 top-1/2 -translate-y-1/2 h-5 w-[1px] rounded-full bg-gray-300" />
+
+                    <button
+                      type="button"
+                      onClick={() => deleteSocialLink(social.id)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 "
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+                <PopoverContent className="w-[330px] p-1 bg-secondary">
+                  <div className="flex flex-col space-y-1 max-h-[200px] overflow-y-auto">
+                    {socialPlatforms.map((platform) => (
+                      <Button
+                        key={platform.type}
+                        variant="ghost"
+                        className="w-full justify-start font-normal"
+                        onClick={() => handleAddSocialLink(platform.type)}
+                      >
+                        <platform.Icon className="h-4 w-4 mr-2" />
+                        {platform.name}
+                      </Button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </CardContent>
         </Card>
 
         <Separator className="my-4" />
 
-        {/* Footer Items Section */}
-        <Card className="bg-transparent border-none shadow-none p-0">
+        <Card className="bg-transparent border-none shadow-none p-0 gap-2">
           <CardHeader className="flex flex-row items-center justify-between p-0">
             <CardTitle className="text-normal font-medium">
               Footer Items
@@ -339,19 +437,10 @@ export default function FooterItems() {
 
         <Separator className="my-4" />
 
-        {/* Footnote */}
-        <Card className="bg-transparent border-none shadow-none p-0">
-          <CardHeader className="p-0">
-            <CardTitle className="text-normal font-medium">Footnote</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0 pt-2">
-            <Textarea
-              value={footnote}
-              onChange={(e) => setFootnote(e.target.value)}
-              rows={3}
-            />
-          </CardContent>
-        </Card>
+        <div className="space-y-2">
+          <h1 className="text-normal font-medium">Footnote</h1>
+          <DescriptionEditor value={footnote} onChange={setFootnote} />
+        </div>
 
         {isColModalOpen && (
           <AddEditColumnModal
@@ -380,3 +469,7 @@ export default function FooterItems() {
     </DndContext>
   );
 }
+
+export default dynamic(() => Promise.resolve(FooterItems), {
+  ssr: false,
+});

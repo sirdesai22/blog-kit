@@ -85,16 +85,6 @@ export function SortableHeaderItem({
           {item.type}
         </span>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => toggleAlignment(item.id)}
-        >
-          {item.alignment === "left" && <AlignLeft className="h-4 w-4" />}
-          {item.alignment === "center" && <AlignCenter className="h-4 w-4" />}
-          {item.alignment === "right" && <AlignRight className="h-4 w-4" />}
-        </Button>
-
         {item.type === "List" && (
           <Button
             variant="ghost"
@@ -104,6 +94,16 @@ export function SortableHeaderItem({
             <PlusCircle className="h-4 w-4" />
           </Button>
         )}
+
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => toggleAlignment(item.id)}
+        >
+          {item.alignment === "left" && <AlignLeft className="h-4 w-4" />}
+          {item.alignment === "center" && <AlignCenter className="h-4 w-4" />}
+          {item.alignment === "right" && <AlignRight className="h-4 w-4" />}
+        </Button>
 
         <Button variant="ghost" size="icon" onClick={() => onEdit(item)}>
           <Pencil className="h-4 w-4" />

@@ -33,6 +33,24 @@ export interface FooterStyle {
   borderWidth: number;
 }
 
+export type SocialType =
+  | "mail"
+  | "website"
+  | "twitter"
+  | "instagram"
+  | "facebook"
+  | "linkedin"
+  | "github"
+  | "dribbble"
+  | "whatsapp"
+  | "external";
+
+export interface SocialLink {
+  id: string;
+  type: SocialType;
+  link: string;
+}
+
 interface FooterContextType {
   logoUrls: { light: string; dark: string };
   setLogoUrl: (mode: ThemeType, url: string) => void;
@@ -42,7 +60,7 @@ interface FooterContextType {
   setDescription: (desc: string) => void;
   socialLinks: SocialLink[];
   setSocialLinks: (links: SocialLink[]) => void;
-  addSocialLink: (link: string) => void;
+  addSocialLink: (type: SocialType) => void;
   updateSocialLink: (id: string, link: string) => void;
   deleteSocialLink: (id: string) => void;
   footerColumns: FooterColumn[];
@@ -68,10 +86,11 @@ export const FooterProvider = ({ children }: { children: ReactNode }) => {
   const [description, setDescription] = useState(
     "Graphy empowers teams to transform raw data into clear, compelling visuals — making insights easier to share, understand, and act on."
   );
+
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([
-    { id: "1", link: "https://dribbble.com/larocheco" },
-    { id: "2", link: "https://shosho.co" },
-    { id: "3", link: "mailto:eugen@shosho.co" },
+    { id: "1", type: "dribbble", link: "https://dribbble.com/larocheco" },
+    { id: "2", type: "website", link: "https://shosho.co" },
+    { id: "3", type: "mail", link: "mailto:eugen@shosho.co" },
   ]);
   const [footerColumns, setFooterColumns] = useState<FooterColumn[]>([
     {
@@ -162,10 +181,9 @@ export const FooterProvider = ({ children }: { children: ReactNode }) => {
     setLogoUrls((prev) => ({ ...prev, [mode]: url }));
   };
 
-  const addSocialLink = (link: string) => {
-    if (!link) return;
-    const newLink = { id: Date.now().toString(), link };
-    setSocialLinks([...socialLinks, newLink]);
+  const addSocialLink = (type: SocialType) => {
+    const newLink: SocialLink = { id: Date.now().toString(), type, link: "" };
+    setSocialLinks((prev) => [...prev, newLink]);
   };
 
   const updateSocialLink = (id: string, link: string) => {

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useContext, useEffect } from "react";
-import EditorFooter from "./editor-footer";
+import EditorHeader from "./editor-header";
 import FooterItems from "./sidebar/footer-items";
 import FooterStyle from "./sidebar/footer-style";
 import ContentPanel from "./content/content-panel";
@@ -25,7 +25,7 @@ export default function MainLayout() {
 
   return (
     <div className="flex flex-col h-full bg-muted/40">
-      <EditorFooter activeTab={activeTab} setActiveTab={setActiveTab} />
+      <EditorHeader activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="flex flex-1 overflow-hidden">
         <aside className="w-[380px] bg-background border-r p-0 pl-1 flex flex-col h-full">
           <div className="flex-1 overflow-y-auto">

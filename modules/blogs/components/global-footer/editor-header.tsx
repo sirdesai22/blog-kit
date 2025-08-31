@@ -7,15 +7,15 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FooterContext } from "./context/footer-context";
 import { useRouter } from "next/navigation";
 
-interface EditorFooterProps {
+interface EditorHeaderProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
 
-export default function EditorFooter({
+export default function EditorHeader({
   activeTab,
   setActiveTab,
-}: EditorFooterProps) {
+}: EditorHeaderProps) {
   const {
     theme,
     setTheme,
@@ -64,9 +64,9 @@ export default function EditorFooter({
           )}
         </Button>
 
-        <Button variant="ghost" size="icon" onClick={refresh}>
+        {/* <Button variant="ghost" size="icon" onClick={refresh}>
           <RefreshCcw className="h-4 w-4" />
-        </Button>
+        </Button> */}
 
         <Button
           variant="ghost"
