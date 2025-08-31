@@ -1,28 +1,21 @@
 "use client";
 import { useContext } from "react";
-import {
-  Sun,
-  Moon,
-  Monitor,
-  Tablet,
-  Smartphone,
-  ChevronLeft,
-} from "lucide-react";
+import { Sun, Moon, Monitor, Smartphone, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RefreshCcw } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HeaderContext } from "../global-header/context/header-context";
+import { FooterContext } from "./context/footer-context";
 import { useRouter } from "next/navigation";
 
-interface EditorHeaderProps {
+interface EditorFooterProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
 
-export default function EditorHeader({
+export default function EditorFooter({
   activeTab,
   setActiveTab,
-}: EditorHeaderProps) {
+}: EditorFooterProps) {
   const {
     theme,
     setTheme,
@@ -30,9 +23,8 @@ export default function EditorHeader({
     setDevice,
     saveChanges,
     cancelChanges,
-    headerItems,
     refresh,
-  } = useContext(HeaderContext);
+  } = useContext(FooterContext);
 
   const router = useRouter();
 
@@ -50,17 +42,16 @@ export default function EditorHeader({
         >
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="items" className="text-normal font-normal">
-              Header Items
+              Footer Items
             </TabsTrigger>
             <TabsTrigger value="style" className="text-normal font-normal">
-              Header Style
+              Footer Style
             </TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
 
       <div className="flex items-center ">
-        {/* Theme toggle */}
         <Button
           variant="ghost"
           size="icon"
@@ -77,7 +68,6 @@ export default function EditorHeader({
           <RefreshCcw className="h-4 w-4" />
         </Button>
 
-        {/* Device switch */}
         <Button
           variant="ghost"
           size="icon"
@@ -98,7 +88,6 @@ export default function EditorHeader({
           />
         </Button>
 
-        {/* Actions */}
         <Button variant="outline" onClick={cancelChanges} className="mx-2 h-8">
           Cancel
         </Button>
