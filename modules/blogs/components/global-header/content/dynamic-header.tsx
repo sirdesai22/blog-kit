@@ -141,7 +141,7 @@ const MobileNavItem = ({ item }: { item: HeaderItem }) => {
 };
 
 export default function DynamicHeader() {
-  const { logoUrls, headerItems, headerStyle, theme, device } =
+  const { logoUrl, logoUrls, headerItems, headerStyle, theme, device } =
     useContext(HeaderContext);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -217,13 +217,15 @@ export default function DynamicHeader() {
         <div className="flex w-full items-center">
           <div className="flex-1">
             {logoUrls[theme] && (
-              <Image
-                src={logoUrls[theme]}
-                alt="logo"
-                width={40}
-                height={40}
-                className="object-contain h-8"
-              />
+              <a href={logoUrl} target="_blank" rel="noopener noreferrer">
+                <Image
+                  src={logoUrls[theme]}
+                  alt="logo"
+                  width={40}
+                  height={40}
+                  className="object-contain h-8"
+                />
+              </a>
             )}
           </div>
           <div className="flex-shrink-0">
@@ -242,13 +244,15 @@ export default function DynamicHeader() {
           <div className="hidden lg:grid w-full grid-cols-[auto_1fr_auto] items-center gap-x-8">
             <div className="flex items-center gap-8 justify-self-start">
               {logoUrls[theme] && (
-                <Image
-                  src={logoUrls[theme]}
-                  alt="logo"
-                  width={40}
-                  height={40}
-                  className="object-contain h-10 shrink-0"
-                />
+                <a href={logoUrl} target="_blank" rel="noopener noreferrer">
+                  <Image
+                    src={logoUrls[theme]}
+                    alt="logo"
+                    width={40}
+                    height={40}
+                    className="object-contain h-10 shrink-0"
+                  />
+                </a>
               )}
               <nav className="flex items-center gap-4">
                 {itemsByAlignment("left").map((item) => (

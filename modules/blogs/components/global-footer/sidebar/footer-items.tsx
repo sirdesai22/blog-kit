@@ -311,9 +311,9 @@ function FooterItems() {
               </label>
               <Input
                 id="logoUrl"
-                placeholder={`Enter ${theme} logo URL`}
-                value={logoUrls[theme]}
-                onChange={(e) => setLogoUrl(theme, e.target.value)}
+                placeholder="Enter URL for logo link"
+                value={logoUrl}
+                onChange={(e) => setLogoUrlLink(e.target.value)}
               />
             </div>
 

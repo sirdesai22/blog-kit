@@ -72,7 +72,7 @@ export function SortableHeaderItem({
       style={style}
       className="bg-zinc-50 dark:bg-zinc-800 rounded-md "
     >
-      <div className="flex items-center h-[32px] overflow-hidden border rounded-md">
+      <div className="flex items-center h-[34px] overflow-hidden border rounded-md">
         <div
           {...attributes}
           {...listeners}

@@ -45,7 +45,7 @@ export function SortableSubItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center border rounded-md  h-[32px] overflow-hidden bg-white dark:bg-zinc-700"
+      className="flex items-center border rounded-md  h-[34px] overflow-hidden bg-white dark:bg-zinc-700"
     >
       <div
         {...attributes}

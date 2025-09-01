@@ -47,6 +47,8 @@ interface HeaderContextType {
   headerItems: HeaderItem[];
   setHeaderItems: (items: HeaderItem[]) => void;
   headerStyle: HeaderStyle;
+  logoUrl: string;
+  setLogoUrlLink: (url: string) => void;
   setHeaderStyle: (style: HeaderStyle) => void;
   addItem: (item: Omit<HeaderItem, "id" | "order">) => void;
   updateItem: (item: HeaderItem) => void;
@@ -75,6 +77,7 @@ export const HeaderProvider = ({ children }: { children: ReactNode }) => {
       "https://res.cloudinary.com/dcvcw1ju2/image/upload/v1756567608/rankingFocused_jleoty.png",
     dark: "https://res.cloudinary.com/dcvcw1ju2/image/upload/v1756567595/gemini_y5zfnb.png",
   });
+  const [logoUrl, setLogoUrlLink] = useState("https://postcrafts.co");
   const [headerItems, setHeaderItems] = useState<HeaderItem[]>([
     {
       id: "0",
@@ -234,6 +237,8 @@ export const HeaderProvider = ({ children }: { children: ReactNode }) => {
     <HeaderContext.Provider
       value={{
         logoUrls,
+        logoUrl,
+        setLogoUrlLink,
         setLogoUrl,
         headerItems,
         setHeaderItems,
