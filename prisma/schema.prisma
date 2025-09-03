@@ -23,6 +23,7 @@ model User {
   pageAuthorships PageAuthor[]
   sessions        Session[]
   memberships     WorkspaceMember[]
+  sentInvitations WorkspaceInvitation[]
 }
 
 model Account {
@@ -75,6 +76,7 @@ model Workspace {
   members   WorkspaceMember[]
   categories Category[]
   tags       Tag[]
+  invitations WorkspaceInvitation[]
 }
 
 model WorkspaceDomain {
@@ -276,6 +278,26 @@ model ChangelogEntry {
   page        Page         @relation(fields: [pageId], references: [id])
 }
 
+model WorkspaceInvitation {
+  id          String            @id @default(cuid())
+  email       String
+  role        Role
+  status      InvitationStatus  @default(PENDING)
+  token       String            @unique
+  workspaceId String
+  invitedById String
+  expiresAt   DateTime
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invitedBy   User      @relation(fields: [invitedById], references: [id])
+  
+  @@unique([email, workspaceId])
+  @@index([token])
+  @@index([email])
+}
+
 enum DomainType {
   SUBDOMAIN
   APEX
@@ -398,4 +420,11 @@ model Tag {
   blogPosts   BlogPost[] @relation("PostTags")
   
   @@unique([name, pageId])
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
 }

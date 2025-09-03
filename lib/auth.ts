@@ -8,6 +8,7 @@ import { PrismaAdapter } from '@auth/prisma-adapter';
 import bcrypt from 'bcryptjs';
 
 import prisma from '@/lib/db';
+import { sendEmail, generateOTP, createOTPEmailTemplate } from '@/lib/email';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -25,6 +26,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientSecret: process.env.GITHUB_SECRET!,
     }),
     CredentialsProvider({
+      id: 'credentials',
       name: 'credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
@@ -60,6 +62,46 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: user.name,
           image: user.image,
         };
+      },
+    }),
+    // Add OTP Provider
+    CredentialsProvider({
+      id: 'otp',
+      name: 'OTP',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        otp: { label: 'OTP', type: 'text' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.otp) {
+          return null;
+        }
+
+        // Verify OTP via API call
+        try {
+          const response = await fetch(
+            `${process.env.NEXTAUTH_URL}/api/auth/otp/verify`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                email: credentials.email,
+                otp: credentials.otp,
+              }),
+            }
+          );
+
+          if (response.ok) {
+            const { user } = await response.json();
+            return user;
+          }
+        } catch (error) {
+          console.error('OTP verification error:', error);
+        }
+
+        return null;
       },
     }),
   ],
