@@ -1,26 +1,26 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { UserPlus, X } from 'lucide-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+} from "@/components/ui/select";
+import { UserPlus } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface InviteMemberDialogProps {
   workspaceSlug: string;
@@ -28,27 +28,25 @@ interface InviteMemberDialogProps {
 
 export function InviteMemberDialog({ workspaceSlug }: InviteMemberDialogProps) {
   const [open, setOpen] = useState(false);
-  const [email, setEmail] = useState('');
-  const [type, setType] = useState('ADMIN');
-  const [pagesAccess, setPagesAccess] = useState('ALL_PAGES');
+  const [email, setEmail] = useState("");
+  const [type, setType] = useState("ADMIN");
+  const [pagesAccess, setPagesAccess] = useState("ALL_PAGES");
   const queryClient = useQueryClient();
 
-  // Available roles from schema
   const roleTypes = [
-    { value: 'ADMIN', label: 'Admin' },
-    { value: 'EDITOR', label: 'Member' },
-    { value: 'VIEWER', label: 'Viewer' },
+    { value: "ADMIN", label: "Admin" },
+    { value: "EDITOR", label: "Member" },
+    { value: "VIEWER", label: "Viewer" },
   ];
 
-  // Available page types from schema
   const pageTypes = [
-    { value: 'ALL_PAGES', label: 'All Pages' },
-    { value: 'BLOG', label: 'Blog' },
-    { value: 'HELP_DOC', label: 'Help Doc' },
-    { value: 'HELPDESK', label: 'Helpdesk' },
-    { value: 'CHANGELOG', label: 'Changelog' },
-    { value: 'KNOWLEDGE_BASE', label: 'Knowledge Base' },
-    { value: 'FAQ', label: 'FAQ' },
+    { value: "ALL_PAGES", label: "All Pages" },
+    { value: "BLOG", label: "Blog" },
+    { value: "HELP_DOC", label: "Help Doc" },
+    { value: "HELPDESK", label: "Helpdesk" },
+    { value: "CHANGELOG", label: "Changelog" },
+    { value: "KNOWLEDGE_BASE", label: "Knowledge Base" },
+    { value: "FAQ", label: "FAQ" },
   ];
 
   const inviteMutation = useMutation({
@@ -56,41 +54,41 @@ export function InviteMemberDialog({ workspaceSlug }: InviteMemberDialogProps) {
       const response = await fetch(
         `/api/workspaces/${workspaceSlug}/team/invite`,
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, role }),
         }
       );
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to send invitation');
+        throw new Error(error.error || "Failed to send invitation");
       }
 
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['team', workspaceSlug] });
-      toast.success('Invitation sent successfully');
+      queryClient.invalidateQueries({ queryKey: ["team", workspaceSlug] });
+      toast.success("Invitation sent successfully");
       setOpen(false);
-      setEmail('');
-      setType('ADMIN');
-      setPagesAccess('ALL_PAGES');
+      setEmail("");
+      setType("ADMIN");
+      setPagesAccess("ALL_PAGES");
     },
     onError: (error) => {
-      toast.error(error.message || 'Failed to send invitation');
+      toast.error(error.message || "Failed to send invitation");
     },
   });
 
   const handleInvite = () => {
     if (!email.trim()) {
-      toast.error('Please enter an email address');
+      toast.error("Please enter an email address");
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      toast.error('Please enter a valid email address');
+      toast.error("Please enter a valid email address");
       return;
     }
 
@@ -105,11 +103,10 @@ export function InviteMemberDialog({ workspaceSlug }: InviteMemberDialogProps) {
           Add Team Member
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[380px]">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             Add Team Member
-            
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
@@ -122,7 +119,7 @@ export function InviteMemberDialog({ workspaceSlug }: InviteMemberDialogProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   e.preventDefault();
                   handleInvite();
                 }
@@ -132,7 +129,7 @@ export function InviteMemberDialog({ workspaceSlug }: InviteMemberDialogProps) {
           <div className="space-y-2">
             <Label htmlFor="type">Type</Label>
             <Select value={type} onValueChange={setType}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -147,7 +144,7 @@ export function InviteMemberDialog({ workspaceSlug }: InviteMemberDialogProps) {
           <div className="space-y-2">
             <Label htmlFor="pages">Pages with access</Label>
             <Select value={pagesAccess} onValueChange={setPagesAccess}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -160,7 +157,7 @@ export function InviteMemberDialog({ workspaceSlug }: InviteMemberDialogProps) {
             </Select>
           </div>
         </div>
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-between gap-2">
           <Button
             variant="outline"
             onClick={() => setOpen(false)}
@@ -171,9 +168,8 @@ export function InviteMemberDialog({ workspaceSlug }: InviteMemberDialogProps) {
           <Button
             onClick={handleInvite}
             disabled={inviteMutation.isPending || !email.trim()}
-            className="bg-gray-800 hover:bg-gray-900"
           >
-            {inviteMutation.isPending ? 'Sending...' : 'Invite Member'}
+            {inviteMutation.isPending ? "Sending..." : "Invite Member"}
           </Button>
         </div>
       </DialogContent>

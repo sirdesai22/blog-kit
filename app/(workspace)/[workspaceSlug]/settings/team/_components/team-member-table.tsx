@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -8,16 +8,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,19 +27,19 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Edit, X, User } from 'lucide-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+} from "@/components/ui/select";
+import { Edit, X, User, UserMinus, UserX } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface TeamMember {
   id: string;
@@ -85,39 +85,39 @@ export function TeamMembersTable({
   const [invitationToCancel, setInvitationToCancel] =
     useState<Invitation | null>(null);
   const [editForm, setEditForm] = useState({
-    email: '',
-    type: 'ADMIN',
-    pagesAccess: 'ALL_PAGES',
+    email: "",
+    type: "ADMIN",
+    pagesAccess: "ALL_PAGES",
   });
   const queryClient = useQueryClient();
 
-  const canManage = ['OWNER', 'ADMIN'].includes(currentUserRole);
+  const canManage = ["OWNER", "ADMIN"].includes(currentUserRole);
 
   // Role type mapping for display
   const getRoleType = (role: string) => {
-    if (role === 'OWNER' || role === 'ADMIN') {
-      return 'Admin';
+    if (role === "OWNER" || role === "ADMIN") {
+      return "Admin";
     }
-    return 'Member';
+    return "Member";
   };
 
   // Pages access based on role
   const getPagesAccess = (role: string) => {
-    if (role === 'OWNER' || role === 'ADMIN') {
-      return ['All'];
+    if (role === "OWNER" || role === "ADMIN") {
+      return ["All"];
     }
     // For EDITOR and VIEWER, they have access to specific page types
-    return ['Blog', 'Help Center'];
+    return ["Blog", "Help Center"];
   };
 
   // Available page types from schema
   const pageTypes = [
-    { value: 'BLOG', label: 'Blog' },
-    { value: 'HELP_DOC', label: 'Help Doc' },
-    { value: 'HELPDESK', label: 'Helpdesk' },
-    { value: 'CHANGELOG', label: 'Changelog' },
-    { value: 'KNOWLEDGE_BASE', label: 'Knowledge Base' },
-    { value: 'FAQ', label: 'FAQ' },
+    { value: "BLOG", label: "Blog" },
+    { value: "HELP_DOC", label: "Help Doc" },
+    { value: "HELPDESK", label: "Helpdesk" },
+    { value: "CHANGELOG", label: "Changelog" },
+    { value: "KNOWLEDGE_BASE", label: "Knowledge Base" },
+    { value: "FAQ", label: "FAQ" },
   ];
 
   const updateMemberRoleMutation = useMutation({
@@ -131,26 +131,26 @@ export function TeamMembersTable({
       const response = await fetch(
         `/api/workspaces/${workspaceSlug}/team/${memberId}`,
         {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ role: newRole }),
         }
       );
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to update role');
+        throw new Error(error.error || "Failed to update role");
       }
 
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['team', workspaceSlug] });
-      toast.success('Member role updated successfully');
+      queryClient.invalidateQueries({ queryKey: ["team", workspaceSlug] });
+      toast.success("Member role updated successfully");
       setMemberToEdit(null);
     },
     onError: (error) => {
-      toast.error(error.message || 'Failed to update role');
+      toast.error(error.message || "Failed to update role");
     },
   });
 
@@ -159,24 +159,24 @@ export function TeamMembersTable({
       const response = await fetch(
         `/api/workspaces/${workspaceSlug}/team/${memberId}`,
         {
-          method: 'DELETE',
+          method: "DELETE",
         }
       );
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to remove member');
+        throw new Error(error.error || "Failed to remove member");
       }
 
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['team', workspaceSlug] });
-      toast.success('Member removed successfully');
+      queryClient.invalidateQueries({ queryKey: ["team", workspaceSlug] });
+      toast.success("Member removed successfully");
       setMemberToRemove(null);
     },
     onError: (error) => {
-      toast.error(error.message || 'Failed to remove member');
+      toast.error(error.message || "Failed to remove member");
       setMemberToRemove(null);
     },
   });
@@ -186,24 +186,24 @@ export function TeamMembersTable({
       const response = await fetch(
         `/api/workspaces/${workspaceSlug}/team/invitations/${invitationId}`,
         {
-          method: 'DELETE',
+          method: "DELETE",
         }
       );
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to cancel invitation');
+        throw new Error(error.error || "Failed to cancel invitation");
       }
 
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['team', workspaceSlug] });
-      toast.success('Invitation cancelled');
+      queryClient.invalidateQueries({ queryKey: ["team", workspaceSlug] });
+      toast.success("Invitation cancelled");
       setInvitationToCancel(null);
     },
     onError: (error) => {
-      toast.error(error.message || 'Failed to cancel invitation');
+      toast.error(error.message || "Failed to cancel invitation");
       setInvitationToCancel(null);
     },
   });
@@ -213,11 +213,11 @@ export function TeamMembersTable({
     setEditForm({
       email: member.user.email,
       type:
-        member.role === 'OWNER' || member.role === 'ADMIN' ? 'ADMIN' : 'EDITOR',
+        member.role === "OWNER" || member.role === "ADMIN" ? "ADMIN" : "EDITOR",
       pagesAccess:
-        member.role === 'OWNER' || member.role === 'ADMIN'
-          ? 'ALL_PAGES'
-          : 'SELECTED_PAGES',
+        member.role === "OWNER" || member.role === "ADMIN"
+          ? "ALL_PAGES"
+          : "SELECTED_PAGES",
     });
   };
 
@@ -232,14 +232,14 @@ export function TeamMembersTable({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border">
+      <div>
         <Table>
-          <TableHeader>
-            <TableRow className="bg-gray-50">
-              <TableHead className="font-medium">Email</TableHead>
-              <TableHead className="font-medium">Name</TableHead>
-              <TableHead className="font-medium">Type</TableHead>
-              <TableHead className="font-medium">Pages with access</TableHead>
+          <TableHeader className="bg-accent">
+            <TableRow>
+              <TableHead>Email</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Pages with access</TableHead>
               {canManage && <TableHead className="w-[100px]"></TableHead>}
             </TableRow>
           </TableHeader>
@@ -250,7 +250,7 @@ export function TeamMembersTable({
                 <TableCell className="font-medium">
                   {member.user.email}
                 </TableCell>
-                <TableCell>{member.user.name || 'john'}</TableCell>
+                <TableCell>{member.user.name || "john"}</TableCell>
                 <TableCell>
                   <Badge
                     variant="secondary"
@@ -274,22 +274,21 @@ export function TeamMembersTable({
                 </TableCell>
                 {canManage && (
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-end gap-2">
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
                         onClick={() => handleEditMember(member)}
                         className="text-gray-600 hover:text-gray-900"
                       >
-                        <Edit className="h-4 w-4" />
+                        Edit
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setMemberToRemove(member)}
-                        className="text-gray-600 hover:text-gray-900"
                       >
-                        <User className="h-4 w-4" />
+                        <UserX className="h-4 w-4" />
                       </Button>
                     </div>
                   </TableCell>
@@ -335,9 +334,8 @@ export function TeamMembersTable({
                         variant="ghost"
                         size="sm"
                         onClick={() => setInvitationToCancel(invitation)}
-                        className="text-gray-600 hover:text-gray-900"
                       >
-                        <User className="h-4 w-4" />
+                        <UserX className="h-4 w-4" />
                       </Button>
                     </div>
                   </TableCell>
@@ -350,7 +348,7 @@ export function TeamMembersTable({
 
       {/* Edit Team Member Dialog */}
       <Dialog open={!!memberToEdit} onOpenChange={() => setMemberToEdit(null)}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[380px]">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
               Edit Team Member
@@ -376,7 +374,7 @@ export function TeamMembersTable({
                   setEditForm({ ...editForm, type: value })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -394,7 +392,7 @@ export function TeamMembersTable({
                   setEditForm({ ...editForm, pagesAccess: value })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -409,18 +407,17 @@ export function TeamMembersTable({
               </Select>
             </div>
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-between gap-2">
             <Button variant="outline" onClick={() => setMemberToEdit(null)}>
               Cancel
             </Button>
             <Button
               onClick={handleSaveEdit}
               disabled={updateMemberRoleMutation.isPending}
-              className="bg-gray-800 hover:bg-gray-900"
             >
               {updateMemberRoleMutation.isPending
-                ? 'Saving...'
-                : 'Save Changes'}
+                ? "Saving..."
+                : "Save Changes"}
             </Button>
           </div>
         </DialogContent>
@@ -431,7 +428,7 @@ export function TeamMembersTable({
         open={!!memberToRemove}
         onOpenChange={() => setMemberToRemove(null)}
       >
-        <AlertDialogContent className="sm:max-w-[425px]">
+        <AlertDialogContent className="sm:max-w-[380px]">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center justify-between">
               Remove Team Member
@@ -448,7 +445,7 @@ export function TeamMembersTable({
               cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <div className="flex justify-between gap-2 mt-4">
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
@@ -456,11 +453,10 @@ export function TeamMembersTable({
                   removeMemberMutation.mutate(memberToRemove.id);
                 }
               }}
-              className="bg-gray-800 hover:bg-gray-900"
             >
               Remove Member
             </AlertDialogAction>
-          </AlertDialogFooter>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
 
@@ -482,7 +478,7 @@ export function TeamMembersTable({
               </Button>
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to cancel the invitation for{' '}
+              Are you sure you want to cancel the invitation for{" "}
               <strong>{invitationToCancel?.email}</strong>?
             </AlertDialogDescription>
           </AlertDialogHeader>
