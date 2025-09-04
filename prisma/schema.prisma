@@ -24,6 +24,7 @@ model User {
   sessions        Session[]
   memberships     WorkspaceMember[]
   sentInvitations WorkspaceInvitation[]
+  notifications   Notification[]
 }
 
 model Account {
@@ -77,6 +78,7 @@ model Workspace {
   categories Category[]
   tags       Tag[]
   invitations WorkspaceInvitation[]
+  notifications Notification[]
 }
 
 model WorkspaceDomain {
@@ -298,6 +300,25 @@ model WorkspaceInvitation {
   @@index([email])
 }
 
+model Notification {
+  id          String            @id @default(cuid())
+  type        NotificationType
+  title       String
+  message     String
+  data        Json?             // Additional data like workspace info, invitation details, etc.
+  read        Boolean           @default(false)
+  userId      String
+  workspaceId String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace?        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, read])
+  @@index([createdAt])
+}
+
 enum DomainType {
   SUBDOMAIN
   APEX
@@ -427,4 +448,15 @@ enum InvitationStatus {
   ACCEPTED
   DECLINED
   EXPIRED
+}
+
+enum NotificationType {
+  TEAM_INVITATION
+  TEAM_INVITATION_ACCEPTED
+  TEAM_INVITATION_DECLINED
+  TEAM_MEMBER_ADDED
+  TEAM_MEMBER_REMOVED
+  TEAM_ROLE_CHANGED
+  WORKSPACE_CREATED
+  GENERAL
 }

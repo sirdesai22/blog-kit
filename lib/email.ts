@@ -291,7 +291,7 @@ export function createTeamInviteEmailTemplate(
           </div>
           
           <div style="text-align: center;">
-            <a href="${
+            <a  href="${
               process.env.NEXTAUTH_URL
             }/${workspaceSlug}" class="cta-button">
               Open Workspace
@@ -304,8 +304,11 @@ export function createTeamInviteEmailTemplate(
             }/${workspaceSlug}" style="color: #007bff;">${
     process.env.NEXTAUTH_URL
   }/${workspaceSlug}</a>
+
+
+
           </p>
-          
+        
           <hr style="margin: 30px 0; border: none; border-top: 1px solid #dee2e6;">
           
           <p style="color: #6c757d; font-size: 14px; text-align: center;">
