@@ -34,9 +34,9 @@ export const pageManagementSidebarData = [
     label: 'Post Management',
     items: [
       { title: 'Posts', url: '#', icon: FileText },
-      { title: 'Categories', url: 'categories', icon: Hash },
+      { title: 'Categories/tags', url: 'categories', icon: Hash },
       { title: 'Authors', url: 'authors', icon: Users },
-      { title: 'Forms', url: 'forms', icon: ClipboardList },
+      { title: 'Forms/CTA', url: 'forms-cta', icon: ClipboardList },
       { title: 'Leads', url: 'leads', icon: Target },
       { title: 'Widgets', url: 'widgets', icon: Box },
     ],

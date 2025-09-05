@@ -1,6 +1,5 @@
-"use client";
+import MainLayout from "@/modules/blogs/components/forms-cta/form-dashboard/main-layout";
 import React from "react";
-import MainLayout from "@/modules/workspace/settings/global-footer/main-layout";
 
 function page() {
   return <MainLayout />;
