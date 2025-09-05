@@ -67,6 +67,10 @@ interface HeaderContextType {
   saveChanges: () => void;
   cancelChanges: () => void;
   refresh: () => void;
+  customCode: string;
+  setCustomCode: (code: string) => void;
+  isCustomCodeEnabled: boolean;
+  setIsCustomCodeEnabled: (enabled: boolean) => void;
 }
 
 export const HeaderContext = createContext<HeaderContextType>(null!);
@@ -77,6 +81,7 @@ export const HeaderProvider = ({ children }: { children: ReactNode }) => {
       "https://res.cloudinary.com/dcvcw1ju2/image/upload/v1756567608/rankingFocused_jleoty.png",
     dark: "https://res.cloudinary.com/dcvcw1ju2/image/upload/v1756567595/gemini_y5zfnb.png",
   });
+
   const [logoUrl, setLogoUrlLink] = useState("https://postcrafts.co");
   const [headerItems, setHeaderItems] = useState<HeaderItem[]>([
     {
@@ -141,8 +146,21 @@ export const HeaderProvider = ({ children }: { children: ReactNode }) => {
     sticky: true,
     buttonRadius: 8,
   });
+  const defaultNavbarCode = `
+<nav style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background-color: #f8f9fa; border-bottom: 1px solid #dee2e6; font-family: sans-serif;">
+  <div style="font-size: 1.5rem; font-weight: bold;">Logo</div>
+  <div style="display: flex; gap: 1.5rem;">
+    <a href="#" style="text-decoration: none; color: #333;">Home</a>
+    <a href="#" style="text-decoration: none; color: #333;">Features</a>
+    <a href="#" style="text-decoration: none; color: #333;">Pricing</a>
+  </div>
+</nav>
+  `.trim();
   const [theme, setTheme] = useState<ThemeType>("light");
   const [device, setDevice] = useState<DeviceType>("desktop");
+
+  const [customCode, setCustomCode] = useState(defaultNavbarCode);
+  const [isCustomCodeEnabled, setIsCustomCodeEnabled] = useState(false);
 
   const setLogoUrl = (mode: ThemeType, url: string) => {
     setLogoUrls((prev) => ({ ...prev, [mode]: url }));
@@ -229,7 +247,13 @@ export const HeaderProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const saveChanges = () =>
-    console.log("Saved:", { logoUrls, headerItems, headerStyle });
+    console.log("Saved:", {
+      logoUrls,
+      headerItems,
+      headerStyle,
+      customCode,
+      isCustomCodeEnabled,
+    });
   const cancelChanges = () => console.log("Cancelled changes");
   const refresh = () => console.log("Refreshed preview!");
 
@@ -258,6 +282,10 @@ export const HeaderProvider = ({ children }: { children: ReactNode }) => {
         saveChanges,
         cancelChanges,
         refresh,
+        customCode,
+        setCustomCode,
+        isCustomCodeEnabled,
+        setIsCustomCodeEnabled,
       }}
     >
       {children}

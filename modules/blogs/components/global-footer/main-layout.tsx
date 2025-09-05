@@ -3,6 +3,7 @@ import { useState, useContext, useEffect } from "react";
 import EditorHeader from "./editor-header";
 import FooterItems from "./sidebar/footer-items";
 import FooterStyle from "./sidebar/footer-style";
+import CustomCode from "./sidebar/custom-code"; // Import the new component
 import ContentPanel from "./content/content-panel";
 import { FooterContext } from "./context/footer-context";
 import { cn } from "@/lib/utils";
@@ -12,12 +13,11 @@ import { useSidebar } from "@/components/ui/sidebar";
 export default function MainLayout() {
   const [activeTab, setActiveTab] = useState("items");
   const { device } = useContext(FooterContext);
-  const [customDisabled, setCustomDisabled] = useState(false);
+  const [showCustomCodeView, setShowCustomCodeView] = useState(false); // State to toggle view
   const { closeSidebar, openSidebar } = useSidebar();
 
   useEffect(() => {
     closeSidebar();
-
     return () => {
       openSidebar();
     };
@@ -25,25 +25,37 @@ export default function MainLayout() {
 
   return (
     <div className="flex flex-col h-full bg-muted/40">
-      <EditorHeader activeTab={activeTab} setActiveTab={setActiveTab} />
+      <EditorHeader
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        disabled={showCustomCodeView} // Disable tabs when in custom code view
+      />
       <div className="flex flex-1 overflow-hidden">
         <aside className="w-[380px] bg-background border-r p-0 pl-1 flex flex-col h-full">
           <div className="flex-1 overflow-y-auto">
-            {activeTab === "items" ? <FooterItems /> : <FooterStyle />}
+            {showCustomCodeView ? (
+              <CustomCode onBack={() => setShowCustomCodeView(false)} />
+            ) : activeTab === "items" ? (
+              <FooterItems />
+            ) : (
+              <FooterStyle />
+            )}
           </div>
 
-          <div className="mt-auto border-t px-5 py-3">
-            <div className="flex items-center justify-between">
-              <span className="text-normal">Custom Code &lt;/&gt;</span>
-              <div className="flex align-center gap-2">
-                <p className="text-small">Disabled</p>
-                <Switch
-                  checked={customDisabled}
-                  onCheckedChange={setCustomDisabled}
-                />
+          {!showCustomCodeView && (
+            <div className="mt-auto border-t px-5 py-3">
+              <div className="flex items-center justify-between">
+                <span className="text-normal">Custom Code &lt;/&gt;</span>
+                <div className="flex align-center gap-2">
+                  <p className="text-small">Disabled</p>
+                  <Switch
+                    checked={showCustomCodeView}
+                    onCheckedChange={setShowCustomCodeView}
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </aside>
 
         <main className="flex-1 bg-gray-100 dark:bg-zinc-900 overflow-y-auto flex justify-center p-2">

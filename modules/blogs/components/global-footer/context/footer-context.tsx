@@ -76,6 +76,10 @@ interface FooterContextType {
   saveChanges: () => void;
   cancelChanges: () => void;
   refresh: () => void;
+  customCode: string;
+  setCustomCode: (code: string) => void;
+  isCustomCodeEnabled: boolean;
+  setIsCustomCodeEnabled: (enabled: boolean) => void;
 }
 
 export const FooterContext = createContext<FooterContextType>(null!);
@@ -177,6 +181,20 @@ export const FooterProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setTheme] = useState<ThemeType>("light");
   const [device, setDevice] = useState<DeviceType>("desktop");
 
+  const defaultFooterCode = `
+<footer style="padding: 2rem; color: black; text-align: center; border-top: 1px solid black; font-family: sans-serif; background-color: #E5E7EB">
+  <p>© 2025 Your Company. All Rights Reserved.</p>
+  <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 1rem;">
+    <a href="#" style="color: black; text-decoration: none;">Privacy Policy</a>
+    <a href="#" style="color: black; text-decoration: none;">Terms of Service</a>
+  </div>
+</footer>
+  `.trim();
+
+  // Add new state for custom code
+  const [customCode, setCustomCode] = useState(defaultFooterCode);
+  const [isCustomCodeEnabled, setIsCustomCodeEnabled] = useState(false);
+
   const handleSetLogoUrl = (mode: ThemeType, url: string) => {
     setLogoUrls((prev) => ({ ...prev, [mode]: url }));
   };
@@ -205,6 +223,8 @@ export const FooterProvider = ({ children }: { children: ReactNode }) => {
       footerColumns,
       footnote,
       footerStyle,
+      customCode,
+      isCustomCodeEnabled,
     });
   const cancelChanges = () => console.log("Cancelled changes");
   const refresh = () => console.log("Refreshed preview!");
@@ -236,6 +256,10 @@ export const FooterProvider = ({ children }: { children: ReactNode }) => {
         saveChanges,
         cancelChanges,
         refresh,
+        customCode,
+        setCustomCode,
+        isCustomCodeEnabled,
+        setIsCustomCodeEnabled,
       }}
     >
       {children}

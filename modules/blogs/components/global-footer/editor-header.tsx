@@ -10,11 +10,13 @@ import { useRouter } from "next/navigation";
 interface EditorHeaderProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  disabled?: boolean;
 }
 
 export default function EditorHeader({
   activeTab,
   setActiveTab,
+  disabled = false,
 }: EditorHeaderProps) {
   const {
     theme,
@@ -34,21 +36,25 @@ export default function EditorHeader({
         <Button variant="outline" size="icon" onClick={() => router.back()}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
-
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="w-[250px]"
+        <fieldset
+          disabled={disabled}
+          className={disabled ? "cursor-not-allowed" : ""}
         >
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="items" className="text-normal font-normal">
-              Footer Items
-            </TabsTrigger>
-            <TabsTrigger value="style" className="text-normal font-normal">
-              Footer Style
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-[250px]"
+          >
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="items" className="text-normal font-normal">
+                Footer Items
+              </TabsTrigger>
+              <TabsTrigger value="style" className="text-normal font-normal">
+                Footer Style
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </fieldset>
       </div>
 
       <div className="flex items-center ">

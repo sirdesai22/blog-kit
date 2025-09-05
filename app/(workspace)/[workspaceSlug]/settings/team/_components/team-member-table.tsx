@@ -428,7 +428,7 @@ export function TeamMembersTable({
         open={!!memberToRemove}
         onOpenChange={() => setMemberToRemove(null)}
       >
-        <AlertDialogContent className="sm:max-w-[380px]">
+        <AlertDialogContent className="sm:max-w-[380px] ">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center justify-between">
               Remove Team Member

@@ -28,7 +28,7 @@ export default async function TeamPage(props: TeamPageProps) {
 
   return (
     <div className="">
-      <div className="flex items-center justify-between p-6">
+      <div className="flex items-start justify-between p-6">
         <div>
           <h1 className="text-2xl font-semibold mb-2">Team</h1>
           <div className="text-sm text-muted-foreground space-y-1">

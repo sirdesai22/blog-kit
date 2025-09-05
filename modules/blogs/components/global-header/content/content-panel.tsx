@@ -4,9 +4,17 @@ import { HeaderContext } from "../context/header-context";
 import DynamicHeader from "./dynamic-header";
 
 export default function ContentPanel() {
-  const { theme } = useContext(HeaderContext);
+  const { theme, isCustomCodeEnabled, customCode } = useContext(HeaderContext);
 
-  // Theme-based colors for placeholder content
+  if (isCustomCodeEnabled) {
+    return (
+      <div
+        className="h-full w-full"
+        dangerouslySetInnerHTML={{ __html: customCode }}
+      />
+    );
+  }
+
   const bg = theme === "dark" ? "bg-zinc-900" : "bg-gray-50";
   const box = theme === "dark" ? "bg-zinc-700" : "bg-gray-200";
   const card = theme === "dark" ? "bg-zinc-800" : "bg-gray-100";
