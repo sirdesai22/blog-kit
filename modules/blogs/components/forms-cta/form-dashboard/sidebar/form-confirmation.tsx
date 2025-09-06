@@ -35,7 +35,7 @@ export default function FormConfirmation() {
     <div className="space-y-6">
       {/* --- Main Header --- */}
       <div className="flex items-start gap-3">
-        <CheckCircle2 className="h-4 w-4 text-normal mt-1" />
+        {/* <CheckCircle2 className="h-4 w-4 text-normal mt-1" /> */}
         <div>
           <h1 className="text-main">Confirmation Message</h1>
         </div>
@@ -97,7 +97,7 @@ export default function FormConfirmation() {
 
         {/* Conditional fields for 'Link' type */}
         {confirmation.buttonType === "Link" && (
-          <div className="space-y-4 pt-2 border-t mt-4">
+          <div className="space-y-4  mt-4">
             <div className="space-y-2">
               <Label htmlFor="conf-url">Redirect URL</Label>
               <Input

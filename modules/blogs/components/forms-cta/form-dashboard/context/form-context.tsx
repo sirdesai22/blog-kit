@@ -56,7 +56,8 @@ export interface FormState {
     openInNewTab?: boolean;
   };
   embedCode: { isEnabled: boolean; code: string };
-  formValues: { [fieldId: string]: any }; // NEW: To store user input
+  customCode: { isEnabled: boolean; code: string }; // NEW: Custom code state
+  formValues: { [fieldId: string]: any };
 }
 
 interface FormContextType {
@@ -71,6 +72,8 @@ interface FormContextType {
   deleteFormField: (id: string) => void;
   setFields: (fields: FormField[]) => void;
   setEmbedCodeEnabled: (isEnabled: boolean) => void;
+  setCustomCodeEnabled: (isEnabled: boolean) => void; // NEW: Setter for custom code
+  setCustomCode: (code: string) => void; // NEW: Setter for custom code content
   theme: ThemeType;
   setTheme: (t: ThemeType) => void;
   device: DeviceType;
@@ -79,9 +82,9 @@ interface FormContextType {
   cancelChanges: () => void;
   refresh: () => void;
   setActiveTab: (tab: string) => void;
-  updateFieldValue: (fieldId: string, value: any) => void; // NEW: Function to update form values
-  isConfirmationVisible: boolean; // NEW: State for confirmation visibility
-  setIsConfirmationVisible: (visible: boolean) => void; // NEW: Setter for confirmation
+  updateFieldValue: (fieldId: string, value: any) => void;
+  isConfirmationVisible: boolean;
+  setIsConfirmationVisible: (visible: boolean) => void;
 }
 
 export const FormContext = createContext<FormContextType>(null!);
@@ -134,7 +137,8 @@ const initialState: FormState = {
     openInNewTab: true,
   },
   embedCode: { isEnabled: false, code: "" },
-  formValues: {}, // NEW: Initialize form values as an empty object
+  customCode: { isEnabled: false, code: "" }, // NEW: Initialize custom code state
+  formValues: {},
 };
 
 export const FormProvider = ({
@@ -147,7 +151,7 @@ export const FormProvider = ({
   const [formState, setFormState] = useState<FormState>(initialState);
   const [theme, setTheme] = useState<ThemeType>("light");
   const [device, setDevice] = useState<DeviceType>("desktop");
-  const [isConfirmationVisible, setIsConfirmationVisible] = useState(false); // NEW
+  const [isConfirmationVisible, setIsConfirmationVisible] = useState(false);
 
   const updateField = <K extends keyof FormState>(
     field: K,
@@ -200,7 +204,22 @@ export const FormProvider = ({
     );
   };
 
-  // NEW: Function to handle live input changes from the user
+  const setCustomCodeEnabled = (isEnabled: boolean) => {
+    setFormState(
+      produce((draft) => {
+        draft.customCode.isEnabled = isEnabled;
+      })
+    );
+  };
+
+  const setCustomCode = (code: string) => {
+    setFormState(
+      produce((draft) => {
+        draft.customCode.code = code;
+      })
+    );
+  };
+
   const updateFieldValue = (fieldId: string, value: any) => {
     setFormState(
       produce((draft) => {
@@ -225,6 +244,8 @@ export const FormProvider = ({
         deleteFormField,
         setFields,
         setEmbedCodeEnabled,
+        setCustomCodeEnabled, // NEW
+        setCustomCode, // NEW
         theme,
         setTheme,
         device,
@@ -235,7 +256,7 @@ export const FormProvider = ({
         setActiveTab: passedSetActiveTab,
         updateFieldValue,
         isConfirmationVisible,
-        setIsConfirmationVisible, // NEW: Pass new state and functions
+        setIsConfirmationVisible,
       }}
     >
       {children}

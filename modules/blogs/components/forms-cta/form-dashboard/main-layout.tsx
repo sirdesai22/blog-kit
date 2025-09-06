@@ -10,6 +10,7 @@ import { FormProvider, FormContext } from "./context/form-context";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { useSidebar } from "@/components/ui/sidebar";
+import CustomCode from "./sidebar/custom-code";
 
 const SidebarContent = ({ activeTab }: { activeTab: string }) => {
   switch (activeTab) {
@@ -28,7 +29,8 @@ const SidebarContent = ({ activeTab }: { activeTab: string }) => {
 
 // Inner component with access to context
 const FormDashboard = ({ activeTab }: { activeTab: string }) => {
-  const { device, formState, setEmbedCodeEnabled } = useContext(FormContext);
+  const { device, formState, setCustomCodeEnabled } = useContext(FormContext);
+  const isCustomCodeActive = formState.customCode.isEnabled;
   const { closeSidebar, openSidebar } = useSidebar();
 
   useEffect(() => {
@@ -40,16 +42,22 @@ const FormDashboard = ({ activeTab }: { activeTab: string }) => {
     <div className="flex flex-1 overflow-hidden">
       <aside className="w-[380px] bg-background border-r p-0 pl-1 flex flex-col h-full">
         <div className="flex-1 overflow-y-auto p-4">
-          <SidebarContent activeTab={activeTab} />
+          {isCustomCodeActive ? (
+            <CustomCode onBack={() => setCustomCodeEnabled(false)} />
+          ) : (
+            <SidebarContent activeTab={activeTab} />
+          )}
         </div>
         <div className="mt-auto border-t px-5 py-3">
           <div className="flex items-center justify-between">
             <span className="text-normal">Custom Code &lt;/&gt;</span>
-            <div className="flex align-center gap-2">
-              <p className="text-small">Disabled</p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm">
+                {formState.customCode.isEnabled ? "Enabled" : "Disabled"}
+              </p>
               <Switch
-                checked={formState.embedCode.isEnabled}
-                onCheckedChange={setEmbedCodeEnabled}
+                checked={formState.customCode.isEnabled}
+                onCheckedChange={setCustomCodeEnabled}
               />
             </div>
           </div>
@@ -75,16 +83,39 @@ const FormDashboard = ({ activeTab }: { activeTab: string }) => {
   );
 };
 
+// NEW: A wrapper component that can access the context
+const LayoutContent = ({
+  activeTab,
+  setActiveTab,
+}: {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+}) => {
+  // Now we can safely access the context here
+  const { formState } = useContext(FormContext);
+  const isCustomCodeActive = formState.customCode.isEnabled;
+
+  return (
+    <>
+      {/* The disabled prop is now passed correctly from a component that has access to the context state */}
+      <EditorForm
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        disabled={isCustomCodeActive}
+      />
+      <FormDashboard activeTab={activeTab} />
+    </>
+  );
+};
+
 // Main component that manages state
 export default function MainLayout() {
   const [activeTab, setActiveTab] = useState("configure");
 
   return (
     <div className="flex flex-col h-full bg-muted/40">
-      {/* The Provider now wraps everything and receives the state setter */}
       <FormProvider passedSetActiveTab={setActiveTab}>
-        <EditorForm activeTab={activeTab} setActiveTab={setActiveTab} />
-        <FormDashboard activeTab={activeTab} />
+        <LayoutContent activeTab={activeTab} setActiveTab={setActiveTab} />
       </FormProvider>
     </div>
   );

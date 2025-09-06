@@ -95,7 +95,7 @@ export default function AddEditFieldModal({ isOpen, setIsOpen, field }: Props) {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
           <DialogTitle>{field ? "Edit" : "Add"} Field</DialogTitle>
         </DialogHeader>
@@ -110,7 +110,7 @@ export default function AddEditFieldModal({ isOpen, setIsOpen, field }: Props) {
                 setFormState((p) => ({ ...p, type: v }))
               }
             >
-              <SelectTrigger className="col-span-3">
+              <SelectTrigger className="col-span-3 w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -183,7 +183,8 @@ export default function AddEditFieldModal({ isOpen, setIsOpen, field }: Props) {
             </div>
           )}
 
-          <div className="flex items-center justify-end space-x-2 pt-2">
+          <div className="flex items-center  space-x-12 pt-2">
+            <Label htmlFor="required">Required</Label>
             <Checkbox
               id="required"
               checked={formState.isRequired}
@@ -191,7 +192,6 @@ export default function AddEditFieldModal({ isOpen, setIsOpen, field }: Props) {
                 setFormState((p) => ({ ...p, isRequired: !!c }))
               }
             />
-            <Label htmlFor="required">Required</Label>
           </div>
         </div>
         <DialogFooter>

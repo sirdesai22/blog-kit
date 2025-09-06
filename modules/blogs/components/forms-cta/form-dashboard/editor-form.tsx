@@ -10,11 +10,13 @@ import { useRouter } from "next/navigation";
 interface EditorFormProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  disabled?: boolean;
 }
 
 export default function EditorForm({
   activeTab,
   setActiveTab,
+  disabled = false,
 }: EditorFormProps) {
   const {
     theme,
@@ -33,29 +35,37 @@ export default function EditorForm({
         <Button variant="outline" size="icon" onClick={() => router.back()}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="w-[400px]"
+        <fieldset
+          disabled={disabled}
+          className={disabled ? "cursor-not-allowed" : ""}
         >
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="configure" className="text-normal font-normal">
-              Configure
-            </TabsTrigger>
-            <TabsTrigger value="form" className="text-normal font-normal">
-              Form
-            </TabsTrigger>
-            <TabsTrigger
-              value="confirmation"
-              className="text-normal font-normal"
-            >
-              Confirmation
-            </TabsTrigger>
-            <TabsTrigger value="action" className="text-normal font-normal">
-              Action
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-[400px]"
+          >
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger
+                value="configure"
+                className="text-normal font-normal"
+              >
+                Configure
+              </TabsTrigger>
+              <TabsTrigger value="form" className="text-normal font-normal">
+                Form
+              </TabsTrigger>
+              <TabsTrigger
+                value="confirmation"
+                className="text-normal font-normal"
+              >
+                Confirmation
+              </TabsTrigger>
+              <TabsTrigger value="action" className="text-normal font-normal">
+                Action
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </fieldset>
       </div>
 
       <div className="flex items-center">
