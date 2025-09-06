@@ -9,7 +9,6 @@ import { Plus } from "lucide-react";
 import { ConfirmationDialog } from "@/components/models/confirmation-dialog";
 import AddEditFieldModal from "../modals/add-edit-field-modal";
 import { SortableFormField } from "./sortable-form-field";
-
 import {
   DndContext,
   closestCenter,
@@ -25,6 +24,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { Separator } from "@/components/ui/separator";
 
 export default function FormFields() {
   const { formState, updateField, setFields, deleteFormField } =
@@ -32,12 +32,10 @@ export default function FormFields() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingField, setEditingField] = useState<FormField | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<FormField | null>(null);
-
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
-
   const fieldIds = useMemo(
     () => formState.fields.map((f) => f.id),
     [formState.fields]
@@ -47,16 +45,13 @@ export default function FormFields() {
     setEditingField(null);
     setIsModalOpen(true);
   };
-
   const handleEdit = (field: FormField) => {
     setEditingField(field);
     setIsModalOpen(true);
   };
-
   const handleDelete = (field: FormField) => {
     setConfirmDelete(field);
   };
-
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
@@ -74,37 +69,42 @@ export default function FormFields() {
       onDragEnd={handleDragEnd}
     >
       <div className="space-y-6">
-        <div>
-          <Label htmlFor="heading">Heading</Label>
-          <Input
-            id="heading"
-            value={formState.heading}
-            onChange={(e) => updateField("heading", e.target.value)}
-          />
-        </div>
-        <div>
-          <Label htmlFor="description">Description</Label>
-          <Textarea
-            id="description"
-            value={formState.description}
-            onChange={(e) => updateField("description", e.target.value)}
-          />
+        {/* --- Content Section --- */}
+        <div className="space-y-4">
+          <h3 className="text-main">Content</h3>
+          <div className="space-y-2">
+            <Label htmlFor="heading">Heading</Label>
+            <Input
+              id="heading"
+              value={formState.heading}
+              onChange={(e) => updateField("heading", e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={formState.description}
+              onChange={(e) => updateField("description", e.target.value)}
+            />
+          </div>
         </div>
 
-        <div className="space-y-2">
+        {/* --- Fields Section --- */}
+        <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <Label>Fields</Label>
+            <h3 className="text-main ">Fields</h3>
             <Button variant="outline" size="sm" onClick={handleAddNew}>
               <Plus className="h-4 w-4 mr-2" />
               Add Field
             </Button>
           </div>
-          <div className="space-y-2 p-2 border rounded-md bg-muted/50 min-h-[80px]">
+          <div className="space-y-2 p-2 border rounded-md bg-muted/50 min-h-[100px]">
             <SortableContext
               items={fieldIds}
               strategy={verticalListSortingStrategy}
             >
-              {formState.fields
+              {[...formState.fields]
                 .sort((a, b) => a.order - b.order)
                 .map((field) => (
                   <SortableFormField
@@ -118,23 +118,28 @@ export default function FormFields() {
           </div>
         </div>
 
-        <div>
-          <Label htmlFor="button-text">Button</Label>
-          <Input
-            id="button-text"
-            value={formState.buttonText}
-            onChange={(e) => updateField("buttonText", e.target.value)}
-          />
-        </div>
-        <div>
-          <Label htmlFor="footnote">Footnote</Label>
-          <Textarea
-            id="footnote"
-            value={formState.footnote}
-            onChange={(e) => updateField("footnote", e.target.value)}
-          />
+        {/* --- Submission Section --- */}
+        <div className="space-y-4">
+          <h3 className="text-main">Submission</h3>
+          <div className="space-y-2">
+            <Label htmlFor="button-text">Button Text</Label>
+            <Input
+              id="button-text"
+              value={formState.buttonText}
+              onChange={(e) => updateField("buttonText", e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="footnote">Footnote</Label>
+            <Textarea
+              id="footnote"
+              value={formState.footnote}
+              onChange={(e) => updateField("footnote", e.target.value)}
+            />
+          </div>
         </div>
 
+        {/* Modals */}
         {isModalOpen && (
           <AddEditFieldModal
             isOpen={isModalOpen}
@@ -142,7 +147,6 @@ export default function FormFields() {
             field={editingField}
           />
         )}
-
         {confirmDelete && (
           <ConfirmationDialog
             open={!!confirmDelete}

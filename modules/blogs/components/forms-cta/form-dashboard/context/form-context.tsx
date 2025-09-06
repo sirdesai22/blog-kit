@@ -2,10 +2,9 @@
 import { createContext, useState, ReactNode } from "react";
 import { produce } from "immer";
 
-// --- Type Definitions ---
+// --- Type Definitions (Unchanged) ---
 export type DeviceType = "desktop" | "mobile";
 export type ThemeType = "light" | "dark";
-
 export type FormType =
   | "EndOfPost"
   | "Sidebar"
@@ -35,8 +34,8 @@ export interface FormField {
 }
 
 export interface FormState {
-  formName: string; // Internal name for the form
-  heading: string; // The visible title on the form itself
+  formName: string;
+  heading: string;
   description: string;
   formType: FormType;
   category: string;
@@ -57,6 +56,7 @@ export interface FormState {
     openInNewTab?: boolean;
   };
   embedCode: { isEnabled: boolean; code: string };
+  formValues: { [fieldId: string]: any }; // NEW: To store user input
 }
 
 interface FormContextType {
@@ -79,6 +79,9 @@ interface FormContextType {
   cancelChanges: () => void;
   refresh: () => void;
   setActiveTab: (tab: string) => void;
+  updateFieldValue: (fieldId: string, value: any) => void; // NEW: Function to update form values
+  isConfirmationVisible: boolean; // NEW: State for confirmation visibility
+  setIsConfirmationVisible: (visible: boolean) => void; // NEW: Setter for confirmation
 }
 
 export const FormContext = createContext<FormContextType>(null!);
@@ -110,6 +113,14 @@ const initialState: FormState = {
       isRequired: false,
       order: 1,
     },
+    {
+      id: "3",
+      type: "Select",
+      label: "What are you interested in?",
+      isRequired: true,
+      order: 2,
+      options: ["Marketing", "Design", "Development"],
+    },
   ],
   buttonText: "Sign Up Now",
   footnote: "By signing up, you agree to our Terms of Service.",
@@ -123,6 +134,7 @@ const initialState: FormState = {
     openInNewTab: true,
   },
   embedCode: { isEnabled: false, code: "" },
+  formValues: {}, // NEW: Initialize form values as an empty object
 };
 
 export const FormProvider = ({
@@ -135,6 +147,7 @@ export const FormProvider = ({
   const [formState, setFormState] = useState<FormState>(initialState);
   const [theme, setTheme] = useState<ThemeType>("light");
   const [device, setDevice] = useState<DeviceType>("desktop");
+  const [isConfirmationVisible, setIsConfirmationVisible] = useState(false); // NEW
 
   const updateField = <K extends keyof FormState>(
     field: K,
@@ -146,7 +159,6 @@ export const FormProvider = ({
       })
     );
   };
-
   const addField = (field: Omit<FormField, "id" | "order">) => {
     setFormState(
       produce((draft) => {
@@ -158,7 +170,6 @@ export const FormProvider = ({
       })
     );
   };
-
   const updateFormField = (updatedField: FormField) => {
     setFormState(
       produce((draft) => {
@@ -167,7 +178,6 @@ export const FormProvider = ({
       })
     );
   };
-
   const deleteFormField = (id: string) => {
     setFormState(
       produce((draft) => {
@@ -189,7 +199,18 @@ export const FormProvider = ({
       })
     );
   };
-  const saveChanges = () => console.log("Saved:", formState);
+
+  // NEW: Function to handle live input changes from the user
+  const updateFieldValue = (fieldId: string, value: any) => {
+    setFormState(
+      produce((draft) => {
+        draft.formValues[fieldId] = value;
+      })
+    );
+  };
+
+  const saveChanges = () =>
+    console.log("Saved:", { config: formState, values: formState.formValues });
   const cancelChanges = () => console.log("Cancelled changes");
   const refresh = () => console.log("Refreshed preview!");
 
@@ -212,6 +233,9 @@ export const FormProvider = ({
         cancelChanges,
         refresh,
         setActiveTab: passedSetActiveTab,
+        updateFieldValue,
+        isConfirmationVisible,
+        setIsConfirmationVisible, // NEW: Pass new state and functions
       }}
     >
       {children}

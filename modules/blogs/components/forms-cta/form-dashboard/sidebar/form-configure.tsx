@@ -148,10 +148,10 @@ export default function FormConfigure() {
   return (
     <div className="space-y-6">
       <div className="flex items-start gap-3">
-        <Settings className="h-6 w-6 text-gray-600 dark:text-gray-400 mt-1" />
+        <Settings className="h-4 w-4 text-gray-600 dark:text-gray-400 mt-1" />
         <div>
-          <h1 className="text-main font-bold">Configure Form</h1>
-          <p className="text-small text-muted-foreground">
+          <h1 className="text-main">Configure Form</h1>
+          <p className="text-small">
             Set the core behavior and appearance of your form.
           </p>
         </div>

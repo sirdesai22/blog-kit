@@ -1,32 +1,135 @@
 "use client";
-import { useContext } from "react";
+import { useContext, ChangeEvent } from "react";
 import { FormContext, FormField } from "../context/form-context";
 import { cn } from "@/lib/utils";
 
-const renderField = (field: FormField, isDark: boolean) => {
+// --- Fully Interactive renderField function ---
+const renderField = (
+  field: FormField,
+  isDark: boolean,
+  value: any,
+  onChange: (fieldId: string, value: any) => void
+) => {
+  const commonClasses = cn(
+    "w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500",
+    isDark
+      ? "bg-zinc-700 border-zinc-600 text-white"
+      : "bg-white border-gray-300"
+  );
+
+  const handleMultiSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const selectedOptions = Array.from(
+      e.target.selectedOptions,
+      (option) => option.value
+    );
+    onChange(field.id, selectedOptions);
+  };
+
+  const fieldContent = () => {
+    switch (field.type) {
+      case "Email":
+        return (
+          <input
+            type="email"
+            placeholder={field.placeholder}
+            className={commonClasses}
+            value={value || ""}
+            onChange={(e) => onChange(field.id, e.target.value)}
+          />
+        );
+      case "Phone":
+        return (
+          <input
+            type="tel"
+            placeholder={field.placeholder}
+            className={commonClasses}
+            value={value || ""}
+            onChange={(e) => onChange(field.id, e.target.value)}
+          />
+        );
+      case "LongText":
+        return (
+          <textarea
+            placeholder={field.placeholder}
+            className={commonClasses}
+            rows={4}
+            value={value || ""}
+            onChange={(e) => onChange(field.id, e.target.value)}
+          />
+        );
+      case "Select":
+      case "Country":
+        const options =
+          field.type === "Country"
+            ? ["United States", "Canada", "Mexico", "United Kingdom"]
+            : field.options || [];
+        return (
+          <select
+            className={commonClasses}
+            value={value || ""}
+            onChange={(e) => onChange(field.id, e.target.value)}
+          >
+            {field.placeholder && (
+              <option value="" disabled>
+                {field.placeholder}
+              </option>
+            )}
+            {options.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
+        );
+      case "MultiSelect":
+        return (
+          <select
+            className={commonClasses}
+            multiple={true}
+            value={value || []}
+            onChange={handleMultiSelectChange}
+          >
+            {field.options?.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
+        );
+      case "ShortText":
+      default:
+        return (
+          <input
+            type="text"
+            placeholder={field.placeholder}
+            className={commonClasses}
+            value={value || ""}
+            onChange={(e) => onChange(field.id, e.target.value)}
+          />
+        );
+    }
+  };
+
   return (
-    <div key={field.id} className="w-full">
+    <div key={field.id} className="w-full text-left">
       <label className="block text-sm font-medium mb-1">{field.label}</label>
-      <input
-        type="text"
-        placeholder={field.placeholder || ""}
-        className={cn(
-          "w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500",
-          isDark
-            ? "bg-zinc-700 border-zinc-600 text-white"
-            : "bg-white border-gray-300"
-        )}
-        readOnly
-      />
+      {fieldContent()}
     </div>
   );
 };
 
 export default function DynamicForm() {
-  const { formState, theme } = useContext(FormContext);
-  const { heading, description, fields, buttonText, footnote, formType } =
-    formState;
-
+  const { formState, theme, updateFieldValue, setIsConfirmationVisible } =
+    useContext(FormContext);
+  const {
+    heading,
+    description,
+    fields,
+    buttonText,
+    footnote,
+    formType,
+    formValues,
+  } = formState;
   const isDark = theme === "dark";
 
   const formClasses = cn(
@@ -34,11 +137,8 @@ export default function DynamicForm() {
     {
       "bg-white text-gray-800": !isDark,
       "bg-zinc-800 text-gray-200": isDark,
-      // PopUp and Gated no longer position themselves. They are now standard blocks centered by their parent.
       "shadow-2xl": formType === "PopUp" || formType === "Gated",
-      // Floating remains fixed to the viewport, which is correct.
       "fixed bottom-5 right-5 z-20 max-w-[400px]": formType === "Floating",
-      // Embedded forms use relative positioning and borders.
       "border dark:border-zinc-700":
         formType === "InLine" || formType === "EndOfPost",
       "border dark:border-zinc-700 !max-w-full": formType === "Sidebar",
@@ -47,8 +147,14 @@ export default function DynamicForm() {
 
   const sortedFields = [...fields].sort((a, b) => a.order - b.order);
 
+  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault(); // Prevent default form submission
+    console.log("Form Submitted with values:", formValues);
+    setIsConfirmationVisible(true);
+  };
+
   return (
-    <div className={formClasses}>
+    <form className={formClasses}>
       <div className="text-center">
         <h2 className="text-2xl font-bold">{heading}</h2>
         {description && (
@@ -58,9 +164,13 @@ export default function DynamicForm() {
         )}
       </div>
       <div className="w-full space-y-4">
-        {sortedFields.map((field) => renderField(field, isDark))}
+        {sortedFields.map((field) =>
+          renderField(field, isDark, formValues[field.id], updateFieldValue)
+        )}
       </div>
       <button
+        type="submit"
+        onClick={handleSubmit}
         className={cn(
           "w-full py-2 px-4 rounded-md font-semibold hover:opacity-90",
           isDark ? "bg-blue-500 text-white" : "bg-black text-white"
@@ -71,6 +181,6 @@ export default function DynamicForm() {
       {footnote && (
         <p className="text-xs text-center text-muted-foreground">{footnote}</p>
       )}
-    </div>
+    </form>
   );
 }

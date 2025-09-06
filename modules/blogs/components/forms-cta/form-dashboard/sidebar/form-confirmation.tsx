@@ -13,11 +13,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { CheckCircle2 } from "lucide-react";
 
 export default function FormConfirmation() {
   const { formState, setFormState } = useContext(FormContext);
   const { confirmation } = formState;
 
+  // Corrected state update logic for nested objects
   const handleConfirmationChange = (
     field: keyof typeof confirmation,
     value: any
@@ -31,74 +33,95 @@ export default function FormConfirmation() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <Label htmlFor="conf-heading">Heading</Label>
-        <Input
-          id="conf-heading"
-          value={confirmation.heading}
-          onChange={(e) => handleConfirmationChange("heading", e.target.value)}
-        />
-      </div>
-      <div>
-        <Label htmlFor="conf-description">Description</Label>
-        <Textarea
-          id="conf-description"
-          value={confirmation.description}
-          onChange={(e) =>
-            handleConfirmationChange("description", e.target.value)
-          }
-        />
-      </div>
-      <div>
-        <Label htmlFor="conf-button-text">Button Text</Label>
-        <Input
-          id="conf-button-text"
-          value={confirmation.buttonText}
-          onChange={(e) =>
-            handleConfirmationChange("buttonText", e.target.value)
-          }
-        />
-      </div>
-      <div>
-        <Label htmlFor="conf-button-type">Button Type</Label>
-        <Select
-          value={confirmation.buttonType}
-          onValueChange={(v: ConfirmationButtonType) =>
-            handleConfirmationChange("buttonType", v)
-          }
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Close">Close</SelectItem>
-            <SelectItem value="Link">Link</SelectItem>
-          </SelectContent>
-        </Select>
+      {/* --- Main Header --- */}
+      <div className="flex items-start gap-3">
+        <CheckCircle2 className="h-4 w-4 text-normal mt-1" />
+        <div>
+          <h1 className="text-main">Confirmation Message</h1>
+        </div>
       </div>
 
-      {confirmation.buttonType === "Link" && (
-        <>
-          <div>
-            <Label htmlFor="conf-url">URL</Label>
-            <Input
-              id="conf-url"
-              value={confirmation.url}
-              onChange={(e) => handleConfirmationChange("url", e.target.value)}
-            />
+      {/* --- Message Content Section --- */}
+      <div className="space-y-4">
+        <h3 className="text-main">Message Content</h3>
+        <div className="space-y-2">
+          <Label htmlFor="conf-heading">Heading</Label>
+          <Input
+            id="conf-heading"
+            value={confirmation.heading}
+            onChange={(e) =>
+              handleConfirmationChange("heading", e.target.value)
+            }
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="conf-description">Description</Label>
+          <Textarea
+            id="conf-description"
+            value={confirmation.description}
+            onChange={(e) =>
+              handleConfirmationChange("description", e.target.value)
+            }
+          />
+        </div>
+
+        {/* --- Action Button Section --- */}
+        <h3 className="text-main">Action Button</h3>
+        <div className="space-y-2">
+          <Label htmlFor="conf-button-text">Button Text</Label>
+          <Input
+            id="conf-button-text"
+            value={confirmation.buttonText}
+            onChange={(e) =>
+              handleConfirmationChange("buttonText", e.target.value)
+            }
+          />
+        </div>
+        <div className="space-y-2 w-full">
+          <Label htmlFor="conf-button-type">Button Type</Label>
+          <Select
+            value={confirmation.buttonType}
+            onValueChange={(v: ConfirmationButtonType) =>
+              handleConfirmationChange("buttonType", v)
+            }
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Close">Close Message</SelectItem>
+              <SelectItem value="Link">Redirect to URL</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Conditional fields for 'Link' type */}
+        {confirmation.buttonType === "Link" && (
+          <div className="space-y-4 pt-2 border-t mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="conf-url">Redirect URL</Label>
+              <Input
+                id="conf-url"
+                placeholder="https://example.com"
+                value={confirmation.url}
+                onChange={(e) =>
+                  handleConfirmationChange("url", e.target.value)
+                }
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="conf-new-tab"
+                checked={!!confirmation.openInNewTab}
+                onCheckedChange={(c) =>
+                  handleConfirmationChange("openInNewTab", c)
+                }
+              />
+              <Label htmlFor="conf-new-tab">Open in New Tab</Label>
+            </div>
           </div>
-          <div className="flex items-center space-x-2 pt-2">
-            <Switch
-              id="conf-new-tab"
-              checked={confirmation.openInNewTab}
-              onCheckedChange={(c) =>
-                handleConfirmationChange("openInNewTab", c)
-              }
-            />
-            <Label htmlFor="conf-new-tab">Open in New Tab</Label>
-          </div>
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 }

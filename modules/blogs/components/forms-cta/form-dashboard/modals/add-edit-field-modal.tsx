@@ -1,5 +1,5 @@
 "use client";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, KeyboardEvent } from "react";
 import { FormContext, FormField, FieldType } from "../context/form-context";
 import {
   Dialog,
@@ -19,6 +19,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { X, PlusCircle } from "lucide-react";
+import { produce } from "immer";
 
 interface Props {
   isOpen: boolean;
@@ -37,6 +39,7 @@ const defaultState: Omit<FormField, "id" | "order"> = {
 export default function AddEditFieldModal({ isOpen, setIsOpen, field }: Props) {
   const { addField, updateFormField } = useContext(FormContext);
   const [formState, setFormState] = useState(defaultState);
+  const [newOption, setNewOption] = useState("");
 
   useEffect(() => {
     if (field) {
@@ -60,6 +63,35 @@ export default function AddEditFieldModal({ isOpen, setIsOpen, field }: Props) {
     }
     setIsOpen(false);
   };
+
+  const handleAddOption = () => {
+    if (newOption.trim()) {
+      setFormState(
+        produce((draft) => {
+          draft.options = [...(draft.options || []), newOption.trim()];
+        })
+      );
+      setNewOption("");
+    }
+  };
+
+  const handleDeleteOption = (index: number) => {
+    setFormState(
+      produce((draft) => {
+        draft.options?.splice(index, 1);
+      })
+    );
+  };
+
+  const handleOptionKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAddOption();
+    }
+  };
+
+  const showOptionsEditor =
+    formState.type === "Select" || formState.type === "MultiSelect";
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -118,6 +150,39 @@ export default function AddEditFieldModal({ isOpen, setIsOpen, field }: Props) {
               className="col-span-3"
             />
           </div>
+
+          {showOptionsEditor && (
+            <div className="col-span-4 space-y-3 p-3 border rounded-md bg-muted/50">
+              <Label>Options</Label>
+              <div className="space-y-2">
+                {formState.options?.map((opt, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <Input value={opt} readOnly className="flex-1" />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDeleteOption(index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 pt-2">
+                <Input
+                  placeholder="Add new option"
+                  value={newOption}
+                  onChange={(e) => setNewOption(e.target.value)}
+                  onKeyDown={handleOptionKeyDown}
+                />
+                <Button onClick={handleAddOption}>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center justify-end space-x-2 pt-2">
             <Checkbox
               id="required"
