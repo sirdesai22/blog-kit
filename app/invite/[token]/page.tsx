@@ -1,9 +1,10 @@
-import React from 'react';
-import { redirect } from 'next/navigation';
-import { auth } from '@/lib/auth';
+import React from "react";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 
-import db from '@/lib/db';
-import { InvitationAcceptance } from './_components/invitation-acceptance';
+import db from "@/lib/db";
+import { InvitationAcceptance } from "./_components/invitation-acceptance";
+import Link from "next/link";
 
 interface InvitePageProps {
   params: Promise<{
@@ -19,7 +20,7 @@ export default async function InvitePage(props: InvitePageProps) {
   const invitation = await db.workspaceInvitation.findFirst({
     where: {
       token: params.token,
-      status: 'PENDING',
+      status: "PENDING",
       expiresAt: {
         gt: new Date(),
       },
@@ -50,9 +51,9 @@ export default async function InvitePage(props: InvitePageProps) {
           <p className="text-muted-foreground mb-4">
             This invitation link is invalid or has expired.
           </p>
-          <a href="/auth/signin" className="text-primary hover:underline">
+          <Link href="/auth/signin" className="text-primary hover:underline">
             Go to Sign In
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -68,7 +69,7 @@ export default async function InvitePage(props: InvitePageProps) {
     if (user?.email !== invitation.email) {
       return (
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center max-w-md">
+          <div className="text-center max-w-[400px]">
             <h1 className="text-2xl font-bold mb-2">Email Mismatch</h1>
             <p className="text-muted-foreground mb-4">
               This invitation is for <strong>{invitation.email}</strong>, but
@@ -77,12 +78,12 @@ export default async function InvitePage(props: InvitePageProps) {
             <p className="text-sm text-muted-foreground mb-4">
               Please sign out and sign in with the correct email address.
             </p>
-            <a
+            <Link
               href="/auth/signin"
               className="inline-block px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
             >
               Sign In with {invitation.email}
-            </a>
+            </Link>
           </div>
         </div>
       );
