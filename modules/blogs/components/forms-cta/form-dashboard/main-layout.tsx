@@ -1,6 +1,6 @@
 "use client";
 import { useState, useContext, useEffect } from "react";
-import EditorForm from "./editor-form";
+import EditorHeader from "./editor-header";
 import FormConfigure from "./sidebar/form-configure";
 import FormFields from "./sidebar/form-fields";
 import FormConfirmation from "./sidebar/form-confirmation";
@@ -98,7 +98,7 @@ const LayoutContent = ({
   return (
     <>
       {/* The disabled prop is now passed correctly from a component that has access to the context state */}
-      <EditorForm
+      <EditorHeader
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         disabled={isCustomCodeActive}

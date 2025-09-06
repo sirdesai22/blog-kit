@@ -2,31 +2,23 @@
 import { useContext } from "react";
 import { Sun, Moon, Monitor, Smartphone, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { RefreshCcw } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FormContext } from "./context/form-context";
+import { CtaContext } from "./context/cta-context";
 import { useRouter } from "next/navigation";
 
-interface EditorFormProps {
+interface EditorHeaderProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   disabled?: boolean;
 }
 
-export default function EditorForm({
+export default function EditorHeader({
   activeTab,
   setActiveTab,
-  disabled = false,
-}: EditorFormProps) {
-  const {
-    theme,
-    setTheme,
-    device,
-    setDevice,
-    saveChanges,
-    cancelChanges,
-    refresh,
-  } = useContext(FormContext);
+  disabled,
+}: EditorHeaderProps) {
+  const { theme, setTheme, device, setDevice, saveChanges, cancelChanges } =
+    useContext(CtaContext);
   const router = useRouter();
 
   return (
@@ -35,39 +27,29 @@ export default function EditorForm({
         <Button variant="outline" size="icon" onClick={() => router.back()}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <fieldset
-          disabled={disabled}
-          className={disabled ? "cursor-not-allowed" : ""}
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="w-[250px]"
         >
-          <Tabs
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="w-[400px]"
-          >
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger
-                value="configure"
-                className="text-normal font-normal"
-              >
-                Configure
-              </TabsTrigger>
-              <TabsTrigger value="form" className="text-normal font-normal">
-                Form
-              </TabsTrigger>
-              <TabsTrigger
-                value="confirmation"
-                className="text-normal font-normal"
-              >
-                Confirmation
-              </TabsTrigger>
-              <TabsTrigger value="action" className="text-normal font-normal">
-                Action
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </fieldset>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger
+              value="configure"
+              disabled={disabled}
+              className="text-normal font-normal"
+            >
+              Configure
+            </TabsTrigger>
+            <TabsTrigger
+              value="cta"
+              disabled={disabled}
+              className="text-normal font-normal"
+            >
+              CTA
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
-
       <div className="flex items-center">
         <Button
           variant="ghost"
@@ -80,9 +62,6 @@ export default function EditorForm({
             <Moon className="h-4 w-4" />
           )}
         </Button>
-        {/* <Button variant="ghost" size="icon" onClick={refresh}>
-          <RefreshCcw className="h-4 w-4" />
-        </Button> */}
         <Button
           variant="ghost"
           size="icon"
