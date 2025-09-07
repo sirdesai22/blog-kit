@@ -5,6 +5,7 @@ import db from '@/lib/db';
 import { redirect } from 'next/navigation';
 import { sendEmail, createTeamInviteEmailTemplate } from '@/lib/email';
 import crypto from 'crypto';
+import { Role } from '@prisma/client';
 
 export async function getWorkspaceTeam(slug: string) {
   const session = await auth();
@@ -200,7 +201,7 @@ export async function inviteTeamMember(
   const invitation = await db.workspaceInvitation.create({
     data: {
       email: email,
-      role: role,
+      role: role as Role,
       token: token,
       workspaceId: workspace.id,
       invitedById: session.user.id,
@@ -421,7 +422,7 @@ export async function updateMemberRole(
         id: memberId,
       },
       data: {
-        role: newRole,
+        role: newRole as Role,
       },
     });
   }

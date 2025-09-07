@@ -35,29 +35,19 @@ export async function PUT(
         },
       },
       include: {
-        members: [
-          {
-            where: {
-              userId: session.user.id,
-            },
-            select: {
-              role: true,
-            },
+        members: {
+          where: {
+            OR: [{ userId: session.user.id }, { id: params.memberId }],
           },
-          {
-            where: {
-              id: params.memberId,
-            },
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  email: true,
-                },
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
               },
             },
           },
-        ],
+        },
       },
     });
 

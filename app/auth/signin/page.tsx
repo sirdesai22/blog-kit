@@ -345,7 +345,7 @@ export default function SignInPage() {
             </Button>
             <Button
               type="button"
-              variant="outline"
+              // variant="outline"
               onClick={() => handleOTPRequest()}
               disabled={loading}
             >
