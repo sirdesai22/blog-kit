@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     // Check if user exists
     let user = await prisma.user.findUnique({
       where: { email },
-      select: { id: true, email: true, name: true, image: true },
+      select: { id: true, email: true, name: true, image: true, emailVerified: true },
     });
 
     // If user doesn't exist, create them
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
           name: defaultName,
           emailVerified: new Date(), // Mark as verified since they verified via OTP
         },
-        select: { id: true, email: true, name: true, image: true },
+        select: { id: true, email: true, name: true, image: true, emailVerified: true },
       });
     }
 
