@@ -1,13 +1,13 @@
-import Link from "next/link";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import Link from 'next/link';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
-export default function Page({
+export default async function Page({
   params,
 }: {
-  params: { workspaceSlug: string; blogId: string };
+  params: Promise<{ workspaceSlug: string; blogId: string }>;
 }) {
-  const { workspaceSlug, blogId } = params;
+  const { workspaceSlug, blogId } = await params;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
