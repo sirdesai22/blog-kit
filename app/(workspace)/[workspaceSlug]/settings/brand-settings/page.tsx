@@ -22,14 +22,14 @@ function ColorSwatch({
   return (
     <div
       className={`flex flex-col items-start gap-y-1  ${
-        disabled ? "opacity-50  cursor-not-allowed " : ""
+        disabled ? "hidden" : ""
       }`}
     >
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <button
             disabled={disabled}
-            className="h-18 w-18  border cursor-pointer disabled:cursor-not-allowed"
+            className="h-18 w-18  border cursor-pointer "
             style={{ backgroundColor: hex }}
           />
         </DialogTrigger>
@@ -68,7 +68,7 @@ const ImageUploadPlaceholder = ({
   return (
     <div
       className={`flex flex-col items-start gap-y-2 ${
-        disabled ? "opacity-50 cursor-not-allowed" : ""
+        disabled ? "hidden" : ""
       }`}
     >
       {label && <p className="text-normal">{label}</p>}
@@ -118,7 +118,9 @@ const SettingsSection = ({
       <h3 className="text-main">{title}</h3>
       <p className="text-small max-w-[220px]">{description}</p>
       {showRestore && (
-        <p className="text-small underline mt-0.5">Restore default</p>
+        <p className="text-small underline mt-0.5 cursor-pointer">
+          Restore default
+        </p>
       )}
     </div>
     <div className="flex items-start mt-1">{children}</div>
@@ -199,13 +201,15 @@ function BrandColors({ darkModeDisabled }: { darkModeDisabled: boolean }) {
           <div className="grid grid-cols-[350px_100px_100px] items-center justify-start gap-x-4">
             <div className="flex flex-col">
               <h3 className="text-main">Brand Colors</h3>
-              <p className="text-small underline mt-0.5">Restore default</p>
+              <p className="text-small underline mt-0.5 cursor-pointer">
+                Restore default
+              </p>
             </div>
 
             <p className="text-normal text-center  mt-1 ml-2">Light Mode</p>
             <p
               className={`text-normal text-center mt-1 ml-2 ${
-                !darkModeDisabled ? "text-muted-foreground" : "text-foreground"
+                !darkModeDisabled ? "hidden" : "text-foreground"
               }`}
             >
               Dark Mode
@@ -265,7 +269,7 @@ export default function BrandSettings() {
               onCheckedChange={setDarkModeDisabled}
             />
             <label htmlFor="dark-mode" className="text-normal ">
-              Disabled
+              {darkModeDisabled ? "Enabled" : "Disabled"}
             </label>
           </div>
         </SettingsSection>

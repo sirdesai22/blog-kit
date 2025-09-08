@@ -112,7 +112,6 @@ function SortableTableRow({
           onClick={(e) => e.stopPropagation()}
         >
           <span className="text-normal">{tag.name}</span>
-          <ExternalLink className="h-4 w-4 text-muted-foreground" />
         </Link>
       </TableCell>
       <TableCell>{tag.posts}</TableCell>

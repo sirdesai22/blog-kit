@@ -258,7 +258,7 @@ export default class FontPicker extends PureComponent<Props, State> {
 
     return (
       <div className="relative w-[150px]">
-        {/* Input lives here */}
+        {/* Input for displaying the active font */}
         <div className="relative w-full">
           <Input
             readOnly
@@ -268,25 +268,33 @@ export default class FontPicker extends PureComponent<Props, State> {
             className="cursor-pointer pr-8"
           />
           <ChevronDown
-            className={`absolute right-2 top-1/2 w-4 h-4 -translate-y-1/2 pointer-events-none transition-transform ${
-              this.state.expanded ? "rotate-180" : ""
+            className={`absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 pointer-events-none transition-transform ${
+              expanded ? "rotate-180" : ""
             }`}
           />
         </div>
 
-        {/* FontSearchModal */}
-        {loadingStatus === "finished" && (
-          <FontSearchModal
-            fonts={fonts}
-            activeFontFamily={activeFontFamily}
-            onSelect={this.onFontSelect}
-            open={expanded}
-            setOpen={(val) => this.setState({ expanded: val })}
-          />
-        )}
+        {/* FontSearchModal with a new transition wrapper */}
+        <div
+          className={`absolute z-10 mt-2 w-full transition-all duration-200 ease-in-out ${
+            expanded
+              ? "translate-y-0 opacity-100"
+              : "-translate-y-2 opacity-0 pointer-events-none"
+          }`}
+        >
+          {loadingStatus === "finished" && (
+            <FontSearchModal
+              fonts={fonts}
+              activeFontFamily={activeFontFamily}
+              onSelect={this.onFontSelect}
+              open={expanded}
+              setOpen={(val) => this.setState({ expanded: val })}
+            />
+          )}
+        </div>
 
-        {/* Loading / Error */}
-        {loadingStatus === "loading" && <div>Loading fonts...</div>}
+        {/* Loading / Error states */}
+        {loadingStatus === "loading" && <div></div>}
         {loadingStatus === "error" && <div>Failed to load fonts</div>}
       </div>
     );
