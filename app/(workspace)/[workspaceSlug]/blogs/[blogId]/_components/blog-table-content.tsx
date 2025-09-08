@@ -47,6 +47,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CategorySelectionView } from "@/modules/blogs/components/table/blogs/category-selection-dialog";
 import { TagSelectionView } from "@/modules/blogs/components/table/blogs/tag-selection-dialog";
 import { AuthorSelectionView } from "@/modules/blogs/components/table/blogs/author-selection-dialog";
+import { StatusSelectionView } from "@/modules/blogs/components/table/blogs/status-selection-dialog";
 
 interface BlogTableContentProps {
   posts: BlogPost[];
@@ -112,7 +113,7 @@ function LoadingRow() {
   );
 }
 
-type BulkActionView = "main" | "category" | "tag" | "author";
+type BulkActionView = "main" | "category" | "tag" | "author" | "status";
 
 function BulkActions({
   selectedCount,
@@ -250,18 +251,10 @@ function BulkActions({
       <Button
         variant="ghost"
         className="w-full text-normal justify-start h-8 px-2"
-        onClick={handlePublish}
+        onClick={() => setView("status")}
       >
         <Eye className="mr-2 h-4 w-4" />
-        Publish
-      </Button>
-      <Button
-        variant="ghost"
-        className="w-full text-normal justify-start h-8 px-2"
-        onClick={handleUnpublish}
-      >
-        <EyeOff className="mr-2 h-4 w-4" />
-        Unpublish
+        Change Status
       </Button>
       <Button
         variant="ghost"
@@ -312,10 +305,10 @@ function BulkActions({
 
   return (
     <>
-      <div className="relative">
+      <div className="relative ml-[15vw]">
         <div
           className={cn(
-            "absolute bottom-full w-72 origin-bottom rounded-xl bg-white shadow-xl ring-[1px] ring-black/10 z-10 mb-2 overflow-hidden transition-all duration-300 ease-in-out",
+            "absolute bottom-full w-full origin-bottom rounded-xl bg-white shadow-xl ring-[1px] ring-black/10 z-10 mb-2 overflow-hidden transition-all duration-300 ease-in-out",
             isMenuOpen
               ? "opacity-100 translate-y-0"
               : "opacity-0 translate-y-4 pointer-events-none"
@@ -331,6 +324,21 @@ function BulkActions({
               }}
             >
               {mainView}
+            </div>
+            {/* Status View */}
+            <div
+              className="absolute top-0 left-0 w-full transition-transform duration-300 ease-in-out"
+              style={{
+                transform:
+                  view === "status" ? "translateX(0)" : "translateX(100%)",
+              }}
+            >
+              {/* Update the props passed to StatusSelectionView */}
+              <StatusSelectionView
+                onPublish={handlePublish}
+                onUnpublish={handleUnpublish}
+                onBack={handleBack}
+              />
             </div>
 
             {/* Category View */}
@@ -391,7 +399,7 @@ function BulkActions({
         <Button
           size="sm"
           variant="outline"
-          className="h-10 px-4 bg-white shadow-xl rounded-full flex items-center gap-3"
+          className="h-10 !px-6 bg-white shadow-xl rounded-full flex items-center gap-3"
           onClick={() => setIsMenuOpen((prev) => !prev)}
           disabled={isLoading}
         >
