@@ -86,95 +86,86 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <SiteHeader />
-      <div className="h-full pt-12 flex align-center justify-center">
-        {/* Navigation Bar */}
-        {/* Main Content */}
-        <div className="flex items-center justify-center px-4 py-8">
-          <div className=" w-full">
-            <Card className="border-none shadow-none">
-              <CardHeader className="">
-                <h1 className="text-2xl font-bold text-primary">
-                  Create Workspace
-                </h1>
-              </CardHeader>
 
-              <CardContent className="space-y-3">
-                {/* Workspace Name */}
-                <label
-                  htmlFor="workspaceName"
-                  className="text-normal  text-gray-800"
-                >
-                  Workspace Name*
-                </label>
-                <Input
-                  id="workspaceName"
-                  type="text"
-                  className="w-[400px]"
-                  value={workspaceName}
-                  onChange={(e) => setWorkspaceName(e.target.value)}
-                />
+      {/* Main Section */}
+      <div className="flex-1 flex items-center justify-center px-4">
+        <Card className="border-none shadow-none w-full max-w-[450px]">
+          <CardHeader>
+            <h1 className="text-2xl font-bold text-primary">
+              Create Workspace
+            </h1>
+          </CardHeader>
 
-                {/* Workspace Address */}
-                <label
-                  htmlFor="workspaceAddress"
-                  className="text-normal  text-gray-800"
-                >
-                  Workspace Address*
-                </label>
-                <InputWithSuffix
-                  id="workspaceAddress"
-                  type="text"
-                  value={workspaceAddress}
-                  onChange={(e) => handleWorkspaceAddressChange(e.target.value)}
-                  suffix=".blogkit.test"
-                />
-                {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
+          <CardContent className="space-y-3">
+            {/* Workspace Name */}
+            <label
+              htmlFor="workspaceName"
+              className="text-normal text-gray-800"
+            >
+              Workspace Name*
+            </label>
+            <Input
+              id="workspaceName"
+              type="text"
+              className="w-full"
+              value={workspaceName}
+              onChange={(e) => setWorkspaceName(e.target.value)}
+            />
 
-                {/* Description */}
-                <div className="flex flex-col gap-2">
-                  <div className="flex gap-2 items-baseline">
-                    <label
-                      htmlFor="description"
-                      className="text-normal  text-gray-800"
-                    >
-                      Description
-                    </label>
-                    {/* <a href="#" className="text-xs text-muted-foreground underline">
-      Auto-generate from my website
-    </a> */}
-                  </div>
-                  <Textarea
-                    id="description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  />
-                </div>
+            {/* Workspace Address */}
+            <label
+              htmlFor="workspaceAddress"
+              className="text-normal text-gray-800"
+            >
+              Workspace Address*
+            </label>
+            <InputWithSuffix
+              id="workspaceAddress"
+              type="text"
+              value={workspaceAddress}
+              onChange={(e) => handleWorkspaceAddressChange(e.target.value)}
+              suffix=".blogkit.test"
+            />
+            {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
 
-                {/* Create Button */}
-                <div className="flex justify-end ">
-                  <Button
-                    onClick={handleCreateWorkspace}
-                    disabled={
-                      !workspaceName || !workspaceAddress || loading || !!error
-                    }
-                    className="bg-black text-white rounded-md hover:bg-gray-800 flex items-center w-fit px-8"
-                  >
-                    {loading ? (
-                      "Creating..."
-                    ) : (
-                      <>
-                        Create Workspace
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+            {/* Description */}
+            <div className="flex flex-col gap-2">
+              <label
+                htmlFor="description"
+                className="text-normal text-gray-800"
+              >
+                Description
+              </label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+
+            {/* Create Button */}
+            <div className="flex justify-end">
+              <Button
+                onClick={handleCreateWorkspace}
+                disabled={
+                  !workspaceName || !workspaceAddress || loading || !!error
+                }
+                className="bg-black text-white rounded-md hover:bg-gray-800 flex items-center w-fit px-8"
+              >
+                {loading ? (
+                  "Creating..."
+                ) : (
+                  <>
+                    Create Workspace
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

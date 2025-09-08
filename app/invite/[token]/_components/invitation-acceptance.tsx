@@ -23,6 +23,7 @@ interface Invitation {
   email: string;
   role: string;
   expiresAt: Date;
+  token?: string;
   workspace: {
     id: string;
     name: string;

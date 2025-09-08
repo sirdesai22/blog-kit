@@ -79,6 +79,9 @@ model Workspace {
   tags       Tag[]
   invitations WorkspaceInvitation[]
   notifications Notification[]
+  
+  // ✅ ADD THIS LINE - Missing opposite relation field
+  formSubmissions FormSubmission[]
 }
 
 model WorkspaceDomain {
@@ -151,7 +154,14 @@ model Page {
   updatedById     String?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
- blogPosts       BlogPost[] 
+  
+  // ✅ FORMS CONFIGURATION
+  formsConfig     Json?            // Array of all forms for this page
+  categoryFormMapping Json?        // { "Tech": "form-123", "Marketing": "form-456" }
+  globalDefaultFormId String?      // Fallback form ID if no category match
+  
+  // ... existing relations ...
+  blogPosts       BlogPost[] 
   changelogEntry  ChangelogEntry?
   helpdeskArticle HelpdeskArticle?
   createdBy       User             @relation("CreatedPages", fields: [createdById], references: [id])
@@ -159,10 +169,11 @@ model Page {
   workspace       Workspace        @relation(fields: [workspaceId], references: [id])
   authors         PageAuthor[]
   pageAuthors     Author[]         @relation("AuthorToPage")
-
-
-  categories     Category[]
-  tags          Tag[]
+  categories      Category[]
+  tags            Tag[]
+  
+  // ✅ ADD THIS LINE - Missing opposite relation field
+  formSubmissions FormSubmission[]
   
   @@unique([slug, workspaceId])
 }
@@ -224,7 +235,7 @@ model BlogPost {
   
   // Page
   featuredInCategories String[] 
-    featuredOrder     Int?     
+  featuredOrder     Int?     
  
   featuredCategoryOrders Json? 
   featured          Boolean  @default(false)
@@ -251,8 +262,13 @@ model BlogPost {
   categories        Category[] @relation("PostCategories")
   tags              Tag[]      @relation("PostTags")
   
- 
-
+  // ✅ ADD THIS LINE - Missing opposite relation field
+  formSubmissions   FormSubmission[]
+  
+  // ✅ FORM CONFIGURATION - Keep only selectedFormId
+  selectedFormId    String?          // Override: use specific form ID
+  formEnabled       Boolean  @default(true) // Enable/disable form for this post
+  
   @@unique([slug, workspaceId]) 
   @@index([status, publishedAt])
   @@index([workspaceId, status])
@@ -460,3 +476,44 @@ enum NotificationType {
   WORKSPACE_CREATED
   GENERAL
 }
+
+// Add this model
+model FormSubmission {
+  id              String   @id @default(cuid())
+  formId          String   // Form identifier from JSON config
+  pageId          String
+  postId          String?
+  workspaceId     String
+  
+  // Submission data
+  data            Json     // Form data
+  metadata        Json?    // Browser info, etc.
+  
+  // Status
+  status          SubmissionStatus @default(PENDING)
+  processedAt     DateTime?
+  errorMessage    String?
+  
+  // Relations
+  page            Page      @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  blogPost        BlogPost? @relation(fields: [postId], references: [id], onDelete: SetNull)
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([formId, pageId, createdAt])
+  @@index([pageId, status])
+  @@index([workspaceId, createdAt])
+}
+
+// Add this enum
+enum SubmissionStatus {
+  PENDING
+  PROCESSED
+  FAILED
+  SPAM
+}
+
+
+

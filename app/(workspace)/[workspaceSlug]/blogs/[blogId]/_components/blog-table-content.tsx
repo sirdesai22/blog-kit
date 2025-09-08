@@ -11,9 +11,6 @@ import { BlogTableRow } from "./blog-table-row";
 import { Button } from "@/components/ui/button";
 import {
   Plus,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
   Trash2,
   Archive,
   Eye,
@@ -22,7 +19,6 @@ import {
   Tag,
   User,
   ChevronDown,
-  X,
 } from "lucide-react";
 import { Heading } from "@/components/ui/heading";
 import { useRouter } from "next/navigation";
@@ -32,23 +28,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useBlogTable } from "@/modules/blogs/contexts/BlogTableContext";
 import { cn } from "@/lib/utils";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useEffect, useState } from "react";
-import { CategorySelectionDialog } from "@/modules/blogs/components/table/blogs/category-selection-dialog";
-import { TagSelectionDialog } from "@/modules/blogs/components/table/blogs/tag-selection-dialog";
-import { AuthorSelectionDialog } from "@/modules/blogs/components/table/blogs/author-selection-dialog";
 import {
   bulkPublishPosts,
   bulkUnpublishPosts,
   bulkUpdateCategories,
   bulkUpdateTags,
-  bulkUpdateAuthors, // Updated import
+  bulkUpdateAuthors,
   bulkDeletePosts,
   bulkArchivePosts,
 } from "@/modules/blogs/actions/post-bulk-actions";
@@ -56,6 +42,11 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { ConfirmationDialog } from "@/components/models/confirmation-dialog";
 import { Separator } from "@/components/ui/separator";
+import { useBlogFilterOptions } from "@/modules/blogs/hooks/use-blog-filter-options";
+import { motion, AnimatePresence } from "framer-motion";
+import { CategorySelectionView } from "@/modules/blogs/components/table/blogs/category-selection-dialog";
+import { TagSelectionView } from "@/modules/blogs/components/table/blogs/tag-selection-dialog";
+import { AuthorSelectionView } from "@/modules/blogs/components/table/blogs/author-selection-dialog";
 
 interface BlogTableContentProps {
   posts: BlogPost[];
@@ -69,37 +60,22 @@ interface BlogTableContentProps {
 function SortableHeader({
   children,
   field,
-  onSort,
   sortConfig,
   className = "",
 }: {
   children: React.ReactNode;
   field: BlogPostSort["field"];
-  onSort?: (field: BlogPostSort["field"]) => void;
   sortConfig?: BlogPostSort;
   className?: string;
 }) {
-  const isActive = sortConfig?.field === field;
-  const direction = isActive ? sortConfig.direction : null;
-
   return (
     <TableHead className={className}>
       <Button
         variant="ghost"
         size="sm"
-        // onClick={() => onSort?.(field)}
         className="h-auto p-0 font-medium hover:bg-transparent !px-0"
       >
         <span>{children}</span>
-        {/* {isActive ? (
-          direction === "asc" ? (
-            <ArrowUp className="ml-1 h-3 w-3" />
-          ) : (
-            <ArrowDown className="ml-1 h-3 w-3" />
-          )
-        ) : (
-          <ArrowUpDown className="ml-1 h-3 w-3 opacity-50" />
-        )} */}
       </Button>
     </TableHead>
   );
@@ -136,6 +112,8 @@ function LoadingRow() {
   );
 }
 
+type BulkActionView = "main" | "category" | "tag" | "author";
+
 function BulkActions({
   selectedCount,
   selectedIds,
@@ -149,21 +127,36 @@ function BulkActions({
   workspaceSlug: string;
   currentPageId: string;
 }) {
-  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
-  const [showTagDialog, setShowTagDialog] = useState(false);
-  const [showAuthorDialog, setShowAuthorDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  // New state for the delete confirmation modal
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [view, setView] = useState<BulkActionView>("main");
+
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [selectedAuthorIds, setSelectedAuthorIds] = useState<string[]>([]);
+
+  const {
+    categories: categoryOptions,
+    tags: tagOptions,
+    authors: authorOptions,
+    isLoading: dataLoading,
+  } = useBlogFilterOptions(workspaceSlug, currentPageId);
 
   const queryClient = useQueryClient();
   const selectedPostIds = Array.from(selectedIds);
 
+  useEffect(() => {
+    if (!isMenuOpen) {
+      setTimeout(() => {
+        setView("main");
+      }, 300); // Reset view after closing animation
+    }
+  }, [isMenuOpen]);
+
   const refreshTable = () => {
     queryClient.invalidateQueries({
-      queryKey: ["blog-posts-base", workspaceSlug, currentPageId], // Updated to match enhanced hook
+      queryKey: ["blog-posts-base", workspaceSlug, currentPageId],
     });
     queryClient.invalidateQueries({
       queryKey: ["workspace-categories", workspaceSlug, currentPageId],
@@ -177,11 +170,7 @@ function BulkActions({
   };
 
   const handleBulkAction = async (
-    action: () => Promise<{
-      success: boolean;
-      message?: string;
-      error?: string;
-    }>,
+    action: () => Promise<any>,
     loadingMessage: string
   ) => {
     setIsMenuOpen(false);
@@ -200,11 +189,10 @@ function BulkActions({
         toast.error(result.error || "Action failed", { id: toastId });
       }
     } catch (error) {
-      console.error("Bulk action error:", error);
       toast.error("An unexpected error occurred", { id: toastId });
     } finally {
       setIsLoading(false);
-      setShowDeleteConfirm(false); // Ensure modal is closed on completion
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -223,125 +211,183 @@ function BulkActions({
       () => bulkArchivePosts(workspaceSlug, selectedPostIds),
       "Archiving posts..."
     );
-
-  // This function is now called by the modal on confirmation
-  const confirmDelete = () => {
+  const confirmDelete = () =>
     handleBulkAction(
       () => bulkDeletePosts(workspaceSlug, selectedPostIds),
       "Deleting posts..."
     );
-  };
-
-  const handleCategoryUpdate = (categoryIds: string[]) =>
+  const handleCategoryUpdate = () =>
     handleBulkAction(
-      () => bulkUpdateCategories(workspaceSlug, selectedPostIds, categoryIds),
+      () =>
+        bulkUpdateCategories(
+          workspaceSlug,
+          selectedPostIds,
+          selectedCategoryIds
+        ),
       "Updating categories..."
     );
-  const handleTagUpdate = (tagIds: string[]) =>
+  const handleTagUpdate = () =>
     handleBulkAction(
-      () => bulkUpdateTags(workspaceSlug, selectedPostIds, tagIds),
+      () => bulkUpdateTags(workspaceSlug, selectedPostIds, selectedTagIds),
       "Updating tags..."
     );
-  const handleAuthorUpdate = (
-    authorIds: string[] // Changed parameter name and type
-  ) =>
+  const handleAuthorUpdate = () =>
     handleBulkAction(
-      () => bulkUpdateAuthors(workspaceSlug, selectedPostIds, authorIds), // Updated function call
+      () =>
+        bulkUpdateAuthors(workspaceSlug, selectedPostIds, selectedAuthorIds),
       "Updating authors..."
     );
-  const handleCancel = () => {
-    onClearSelection();
-    setIsMenuOpen(false);
+
+  const handleBack = () => {
+    setView("main");
   };
+
+  const mainView = (
+    <div className="p-1">
+      <p className="px-3 py-1.5 text-sm font-semibold text-muted-foreground">
+        Actions
+      </p>
+      <Button
+        variant="ghost"
+        className="w-full text-normal justify-start h-8 px-2"
+        onClick={handlePublish}
+      >
+        <Eye className="mr-2 h-4 w-4" />
+        Publish
+      </Button>
+      <Button
+        variant="ghost"
+        className="w-full text-normal justify-start h-8 px-2"
+        onClick={handleUnpublish}
+      >
+        <EyeOff className="mr-2 h-4 w-4" />
+        Unpublish
+      </Button>
+      <Button
+        variant="ghost"
+        className="w-full text-normal justify-start h-8 px-2"
+        onClick={() => setView("category")}
+      >
+        <Hash className="mr-2 h-4 w-4" />
+        Change Category
+      </Button>
+      <Button
+        variant="ghost"
+        className="w-full text-normal justify-start h-8 px-2"
+        onClick={() => setView("tag")}
+      >
+        <Tag className="mr-2 h-4 w-4" />
+        Change Tag
+      </Button>
+      <Button
+        variant="ghost"
+        className="w-full text-normal justify-start h-8 px-2"
+        onClick={() => setView("author")}
+      >
+        <User className="mr-2 h-4 w-4" />
+        Change Author
+      </Button>
+      <Separator className="my-1" />
+      <Button
+        variant="ghost"
+        className="w-full text-normal justify-start h-8 px-2"
+        onClick={handleArchive}
+      >
+        <Archive className="mr-2 h-4 w-4" />
+        Archive Posts
+      </Button>
+      <Button
+        variant="ghost"
+        className="w-full text-normal justify-start h-8 px-2 text-red-600 hover:text-red-700 focus:text-red-700"
+        onClick={() => {
+          setIsMenuOpen(false);
+          setShowDeleteConfirm(true);
+        }}
+      >
+        <Trash2 className="mr-2 h-4 w-4" />
+        Delete Posts
+      </Button>
+    </div>
+  );
 
   return (
     <>
-      <div className="relative left-30 ">
-        {isMenuOpen && (
-          <div className="absolute bottom-full w-[98%] origin-bottom rounded-xl bg-white shadow-xl ring-[1px] ring-black/10 focus:outline-none z-10 mb-2">
-            <div className="p-1" role="menu" aria-orientation="vertical">
-              <p className="px-3 py-1.5 text-small">Edit</p>
-              <Button
-                variant="ghost"
-                className="w-full text-normal justify-start h-8 px-2"
-                onClick={handlePublish}
-                disabled={isLoading}
-              >
-                <Eye className="mr-2 h-4 w-4" />
-                Publish
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full text-normal justify-start h-8 px-2"
-                onClick={handleUnpublish}
-                disabled={isLoading}
-              >
-                <EyeOff className="mr-2 h-4 w-4" />
-                Unpublish
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full text-normal justify-start h-8 px-2"
-                onClick={() => setShowCategoryDialog(true)}
-                disabled={isLoading}
-              >
-                <Hash className="mr-2 h-4 w-4" />
-                Change Category
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full text-normal justify-start h-8 px-2"
-                onClick={() => setShowTagDialog(true)}
-                disabled={isLoading}
-              >
-                <Tag className="mr-2 h-4 w-4" />
-                Change Tag
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full text-normal justify-start h-8 px-2"
-                onClick={() => setShowAuthorDialog(true)}
-                disabled={isLoading}
-              >
-                <User className="mr-2 h-4 w-4" />
-                Change Author
-              </Button>
+      <div className="relative">
+        <div
+          className={cn(
+            "absolute bottom-full w-72 origin-bottom rounded-xl bg-white shadow-xl ring-[1px] ring-black/10 z-10 mb-2 overflow-hidden transition-all duration-300 ease-in-out",
+            isMenuOpen
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-4 pointer-events-none"
+          )}
+        >
+          <div className="relative">
+            {/* Main View */}
+            <div
+              className="transition-transform duration-300 ease-in-out"
+              style={{
+                transform:
+                  view === "main" ? "translateX(0%)" : "translateX(-100%)",
+              }}
+            >
+              {mainView}
+            </div>
 
-              <p className="px-3 py-1.5 text-small">Actions</p>
-              <Button
-                variant="ghost"
-                className="w-full text-normal justify-start h-8 px-2"
-                onClick={handleArchive}
-                disabled={isLoading}
-              >
-                <Archive className="mr-2 h-4 w-4" />
-                Archive
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full text-normal justify-start h-8 px-2 text-red-600 hover:text-red-700 focus:text-red-700"
-                onClick={() => setShowDeleteConfirm(true)}
-                disabled={isLoading}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </Button>
+            {/* Category View */}
+            <div
+              className="absolute top-0 left-0 w-full transition-transform duration-300 ease-in-out"
+              style={{
+                transform:
+                  view === "category" ? "translateX(0)" : "translateX(100%)",
+              }}
+            >
+              <CategorySelectionView
+                options={categoryOptions}
+                loading={dataLoading}
+                selectedIds={selectedCategoryIds}
+                setSelectedIds={setSelectedCategoryIds}
+                onSave={handleCategoryUpdate}
+                onBack={handleBack}
+              />
+            </div>
 
-              <Separator />
+            {/* Tag View */}
+            <div
+              className="absolute top-0 left-0 w-full transition-transform duration-300 ease-in-out"
+              style={{
+                transform:
+                  view === "tag" ? "translateX(0)" : "translateX(100%)",
+              }}
+            >
+              <TagSelectionView
+                options={tagOptions}
+                loading={dataLoading}
+                selectedIds={selectedTagIds}
+                setSelectedIds={setSelectedTagIds}
+                onSave={handleTagUpdate}
+                onBack={handleBack}
+              />
+            </div>
 
-              <Button
-                variant="ghost"
-                className="w-full text-normal justify-start h-8 px-2"
-                onClick={handleCancel}
-                disabled={isLoading}
-              >
-                <X className="mr-2 h-4 w-4" />
-                Cancel
-              </Button>
+            {/* Author View */}
+            <div
+              className="absolute top-0 left-0 w-full transition-transform duration-300 ease-in-out"
+              style={{
+                transform:
+                  view === "author" ? "translateX(0)" : "translateX(100%)",
+              }}
+            >
+              <AuthorSelectionView
+                options={authorOptions}
+                loading={dataLoading}
+                selectedIds={selectedAuthorIds}
+                setSelectedIds={setSelectedAuthorIds}
+                onSave={handleAuthorUpdate}
+                onBack={handleBack}
+              />
             </div>
           </div>
-        )}
-
+        </div>
         <Button
           size="sm"
           variant="outline"
@@ -349,14 +395,16 @@ function BulkActions({
           onClick={() => setIsMenuOpen((prev) => !prev)}
           disabled={isLoading}
         >
-          <span className="font-semibold text-blue-800">
+          <span className="font-semibold text-primary">
             {selectedCount} post{selectedCount > 1 ? "s" : ""} selected
           </span>
           <div className="h-5 border-l border-gray-300"></div>
-          <span className="font-medium">Bulk Actions</span>
+          <span className="font-medium">Actions</span>
           <ChevronDown
-            className="ml-1 h-4 w-4 transition-transform"
-            style={{ transform: !isMenuOpen ? "rotate(180deg)" : "none" }}
+            className={cn(
+              "ml-1 h-4 w-4 transition-transform",
+              isMenuOpen && "rotate-180"
+            )}
           />
         </Button>
       </div>
@@ -370,28 +418,6 @@ function BulkActions({
         confirmButtonLabel="Delete"
         theme="danger"
         isConfirming={isLoading}
-      />
-
-      <CategorySelectionDialog
-        open={showCategoryDialog}
-        onOpenChange={setShowCategoryDialog}
-        onSave={handleCategoryUpdate}
-        workspaceSlug={workspaceSlug}
-        pageId={currentPageId}
-      />
-      <TagSelectionDialog
-        open={showTagDialog}
-        onOpenChange={setShowTagDialog}
-        onSave={handleTagUpdate}
-        workspaceSlug={workspaceSlug}
-        pageId={currentPageId}
-      />
-      <AuthorSelectionDialog
-        open={showAuthorDialog}
-        onOpenChange={setShowAuthorDialog}
-        onSave={handleAuthorUpdate} // This now receives string[] instead of string
-        workspaceSlug={workspaceSlug}
-        pageId={currentPageId}
       />
     </>
   );
@@ -421,7 +447,6 @@ export function BlogTableContent({
   const allPostIds = posts.map((post) => post.id);
   const selectedCount = selectedIds.size;
 
-  // --- ANIMATION STATE MANAGEMENT START ---
   const [isAnimating, setIsAnimating] = useState(false);
   const [isRendered, setIsRendered] = useState(false);
 
@@ -429,13 +454,12 @@ export function BlogTableContent({
     const show = selectedCount > 0;
     if (show) {
       setIsRendered(true);
-      setTimeout(() => setIsAnimating(true), 10); // Animate in
+      setTimeout(() => setIsAnimating(true), 10);
     } else {
       setIsAnimating(false);
-      setTimeout(() => setIsRendered(false), 300); // Wait for animation to finish before unmounting
+      setTimeout(() => setIsRendered(false), 300);
     }
   }, [selectedCount]);
-  // --- ANIMATION STATE MANAGEMENT END ---
 
   if (!loading && posts.length === 0) {
     return (
@@ -477,17 +501,12 @@ export function BlogTableContent({
               </TableHead>
               <SortableHeader
                 field="title"
-                onSort={onSort}
                 sortConfig={sortConfig}
                 className="min-w-[300px] w-[20%]"
               >
                 Posts
               </SortableHeader>
-              <SortableHeader
-                field="status"
-                onSort={onSort}
-                sortConfig={sortConfig}
-              >
+              <SortableHeader field="status" sortConfig={sortConfig}>
                 Status
               </SortableHeader>
               <TableHead>Category</TableHead>

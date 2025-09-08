@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
           name: user.name,
           image: user.image,
         },
-        isNewUser: !user.emailVerified, // Indicates if account was just created
+        isNewUser: !user.emailVerified, // Now this will work correctly
       },
       { status: 200 }
     );

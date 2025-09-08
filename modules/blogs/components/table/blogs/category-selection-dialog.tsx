@@ -1,144 +1,122 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useBlogFilterOptions } from "@/modules/blogs/hooks/use-blog-filter-options";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowLeft } from "lucide-react";
 
-interface CategorySelectionDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSave: (selectedCategoryIds: string[]) => void;
-  workspaceSlug: string;
-  pageId: string;
+interface SelectionViewProps {
+  title: string;
+  onBack: () => void;
 }
 
-export function CategorySelectionDialog({
-  open,
-  onOpenChange,
+const SelectionViewHeader = ({ title, onBack }: SelectionViewProps) => (
+  <div className="flex items-center gap-2 p-2 border-b sticky top-0 bg-white z-10">
+    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onBack}>
+      <ArrowLeft className="h-4 w-4" />
+    </Button>
+    <h3 className="text-base font-medium">{title}</h3>
+  </div>
+);
+
+interface SelectionFooterProps {
+  selectedCount: number;
+  onBack: () => void;
+  onSave: () => void;
+}
+
+const SelectionViewFooter = ({
+  selectedCount,
+  onBack,
   onSave,
-  workspaceSlug,
-  pageId,
-}: CategorySelectionDialogProps) {
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+}: SelectionFooterProps) => (
+  <div className="flex justify-between items-center p-2 border-t sticky bottom-0 bg-white z-10">
+    <div className="text-xs text-muted-foreground">
+      {selectedCount} selected
+    </div>
+    <div className="flex gap-2">
+      <Button variant="outline" size="sm" onClick={onBack}>
+        Cancel
+      </Button>
+      <Button size="sm" onClick={onSave} disabled={selectedCount === 0}>
+        Save
+      </Button>
+    </div>
+  </div>
+);
 
-  const { categories: categoryOptions, isLoading: loading } =
-    useBlogFilterOptions(workspaceSlug, pageId);
+interface Category {
+  id: string;
+  name: string;
+}
 
-  const handleToggleCategory = (categoryId: string) => {
-    setSelectedCategoryIds((prev) =>
-      prev.includes(categoryId)
-        ? prev.filter((id) => id !== categoryId)
-        : [...prev, categoryId]
+interface CategorySelectionViewProps {
+  options: Category[];
+  loading: boolean;
+  selectedIds: string[];
+  setSelectedIds: React.Dispatch<React.SetStateAction<string[]>>;
+  onSave: () => void;
+  onBack: () => void;
+}
+
+export function CategorySelectionView({
+  options,
+  loading,
+  selectedIds,
+  setSelectedIds,
+  onSave,
+  onBack,
+}: CategorySelectionViewProps) {
+  const handleToggle = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
   };
 
-  const handleSelectAll = () => {
-    if (selectedCategoryIds.length === categoryOptions.length) {
-      setSelectedCategoryIds([]);
-    } else {
-      setSelectedCategoryIds(categoryOptions.map((c) => c.id));
-    }
-  };
-
-  const handleSave = () => {
-    onSave(selectedCategoryIds);
-    onOpenChange(false);
-    setSelectedCategoryIds([]);
-  };
-
-  const handleCancel = () => {
-    onOpenChange(false);
-    setSelectedCategoryIds([]);
-  };
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className=" w-fit p-4">
-        <DialogHeader className="flex flex-row items-center justify-between pb-2">
-          <DialogTitle className="text-base font-medium">
-            Select Categories
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-2 py-2">
-          {loading ? (
-            <div className="text-sm text-muted-foreground">
-              Loading categories...
+    <div className="flex flex-col">
+      <SelectionViewHeader title="Change Category" onBack={onBack} />
+      <div className="h-48 overflow-y-auto p-2">
+        {loading ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-4" />
+              <Skeleton className="h-4 w-32" />
             </div>
-          ) : categoryOptions.length === 0 ? (
-            <div className="text-sm text-muted-foreground">
-              No categories available
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-4" />
+              <Skeleton className="h-4 w-40" />
             </div>
-          ) : (
-            <>
-              {/* Select All */}
-              <div className="flex items-center gap-1.5 pb-2 border-b">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-4" />
+              <Skeleton className="h-4 w-36" />
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {options.map((category) => (
+              <div key={category.id} className="flex items-center gap-1.5">
                 <Checkbox
-                  id="select-all-categories"
-                  checked={
-                    selectedCategoryIds.length === categoryOptions.length
-                  }
-                  ref={(el: any) => {
-                    if (el) {
-                      el.indeterminate =
-                        selectedCategoryIds.length > 0 &&
-                        selectedCategoryIds.length < categoryOptions.length;
-                    }
-                  }}
-                  onCheckedChange={handleSelectAll}
+                  id={`cat-${category.id}`}
+                  checked={selectedIds.includes(category.id)}
+                  onCheckedChange={() => handleToggle(category.id)}
                 />
                 <label
-                  htmlFor="select-all-categories"
+                  htmlFor={`cat-${category.id}`}
                   className="text-sm cursor-pointer"
                 >
-                  Select All
+                  {category.name}
                 </label>
               </div>
-
-              {/* Category list */}
-              <div className="max-h-48 overflow-y-auto space-y-2">
-                {categoryOptions.map((category) => (
-                  <div key={category.id} className="flex items-center gap-1.5">
-                    <Checkbox
-                      id={category.id}
-                      checked={selectedCategoryIds.includes(category.id)}
-                      onCheckedChange={() => handleToggleCategory(category.id)}
-                    />
-                    <label
-                      htmlFor={category.id}
-                      className="text-sm cursor-pointer"
-                    >
-                      {category.name}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-
-        <DialogFooter className="flex justify-between items-center">
-          <div className="text-xs text-muted-foreground">
-            {selectedCategoryIds.length} selected
+            ))}
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button size="sm" onClick={handleSave}>
-              Save
-            </Button>
-          </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        )}
+      </div>
+      <SelectionViewFooter
+        selectedCount={selectedIds.length}
+        onBack={onBack}
+        onSave={onSave}
+      />
+    </div>
   );
 }
