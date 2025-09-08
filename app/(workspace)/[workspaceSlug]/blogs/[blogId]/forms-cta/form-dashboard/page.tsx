@@ -1,8 +1,14 @@
-import MainLayout from "@/modules/blogs/components/forms-cta/form-dashboard/main-layout";
-import React from "react";
+import MainLayout from '@/modules/blogs/components/forms-cta/form-dashboard/main-layout';
 
-function page() {
-  return <MainLayout />;
+interface PageProps {
+  params: Promise<{
+    workspaceSlug: string;
+    blogId: string;
+  }>;
 }
 
-export default page;
+export default async function FormDashboardPage({ params }: PageProps) {
+  const { workspaceSlug, blogId } = await params;
+
+  return <MainLayout pageId={blogId} />;
+}
