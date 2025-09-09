@@ -1,21 +1,21 @@
-'use client';
-import { useState, useContext, useEffect } from 'react';
-import EditorHeader from './editor-header';
-import CtaConfigure from './sidebar/cta-configure';
-import CtaEditor from './sidebar/cta-editor';
-import CustomCode from './sidebar/custom-code';
-import ContentPanel from './content/content-panel';
-import { CtaProvider, CtaContext } from './context/cta-context';
-import { cn } from '@/lib/utils';
-import { Switch } from '@/components/ui/switch';
-import { useSidebar } from '@/components/ui/sidebar';
-import { useSearchParams } from 'next/navigation';
+"use client";
+import { useState, useContext, useEffect } from "react";
+import CtaConfigure from "./sidebar/cta-configure";
+import CtaEditor from "./sidebar/cta-editor";
+import CustomCode from "./sidebar/custom-code";
+import ContentPanel from "./content/content-panel";
+import { CtaProvider, CtaContext } from "./context/cta-context";
+import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
+import { useSidebar } from "@/components/ui/sidebar";
+import { useSearchParams } from "next/navigation";
+import EditorHeader from "@/components/common/editor-header";
 
 const SidebarContent = ({ activeTab }: { activeTab: string }) => {
   switch (activeTab) {
-    case 'configure':
+    case "configure":
       return <CtaConfigure />;
-    case 'cta':
+    case "cta":
       return <CtaEditor />;
     default:
       return <CtaConfigure />;
@@ -23,7 +23,16 @@ const SidebarContent = ({ activeTab }: { activeTab: string }) => {
 };
 
 const CtaDashboard = ({ activeTab }: { activeTab: string }) => {
-  const { device, ctaState, setCustomCodeEnabled } = useContext(CtaContext);
+  const {
+    ctaState,
+    setCustomCodeEnabled,
+    theme,
+    setTheme,
+    device,
+    setDevice,
+    saveChanges,
+    cancelChanges,
+  } = useContext(CtaContext);
   const isCustomCodeActive = ctaState.customCode.isEnabled;
   const { closeSidebar, openSidebar } = useSidebar();
 
@@ -47,7 +56,7 @@ const CtaDashboard = ({ activeTab }: { activeTab: string }) => {
             <span className="text-normal">Custom Code &lt;/&gt;</span>
             <div className="flex items-center gap-2">
               <p className="text-sm">
-                {isCustomCodeActive ? 'Enabled' : 'Disabled'}
+                {isCustomCodeActive ? "Enabled" : "Disabled"}
               </p>
               <Switch
                 checked={isCustomCodeActive}
@@ -60,8 +69,8 @@ const CtaDashboard = ({ activeTab }: { activeTab: string }) => {
       <main className="flex-1 bg-gray-100 dark:bg-zinc-900 overflow-y-auto flex justify-center p-2">
         <div
           className={cn(
-            'relative h-full overflow-hidden rounded-xl shadow-lg ring-1 ring-black/5',
-            device === 'mobile' ? 'w-full max-w-[420px]' : 'w-full max-w-none'
+            "relative h-full overflow-hidden rounded-xl shadow-lg ring-1 ring-black/5",
+            device === "mobile" ? "w-full max-w-[420px]" : "w-full max-w-none"
           )}
         >
           <div
@@ -83,13 +92,31 @@ const LayoutContent = ({
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }) => {
-  const { ctaState } = useContext(CtaContext);
+  const {
+    ctaTabs,
+    setCustomCodeEnabled,
+    onBack,
+    theme,
+    setTheme,
+    device,
+    setDevice,
+    saveChanges,
+    cancelChanges,
+  } = useContext(CtaContext);
   return (
     <>
       <EditorHeader
+        title="CTA"
+        tabs={ctaTabs}
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        disabled={ctaState.customCode.isEnabled}
+        onTabChange={setActiveTab}
+        theme={theme}
+        onThemeChange={() => setTheme(theme === "light" ? "dark" : "light")}
+        device={device}
+        onDeviceChange={setDevice}
+        onSaveChanges={saveChanges}
+        onCancelChanges={cancelChanges}
+        onBack={onBack}
       />
       <CtaDashboard activeTab={activeTab} />
     </>
@@ -97,9 +124,9 @@ const LayoutContent = ({
 };
 
 export default function MainLayout({ pageId }: { pageId: string }) {
-  const [activeTab, setActiveTab] = useState('configure');
+  const [activeTab, setActiveTab] = useState("configure");
   const searchParams = useSearchParams();
-  const ctaId = searchParams.get('ctaId');
+  const ctaId = searchParams.get("ctaId");
   return (
     <div className="flex flex-col h-full bg-muted/40">
       <CtaProvider

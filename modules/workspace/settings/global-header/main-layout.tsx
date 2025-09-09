@@ -1,6 +1,5 @@
 "use client";
 import { useState, useContext, useEffect } from "react";
-import EditorHeader from "./editor-header";
 import HeaderItems from "./sidebar/header-items";
 import HeaderStyle from "./sidebar/header-style";
 import CustomCode from "./sidebar/custom-code"; // Import new component
@@ -9,11 +8,27 @@ import { HeaderContext } from "./context/header-context";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { useSidebar } from "@/components/ui/sidebar";
+import EditorHeader from "@/components/common/editor-header";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function MainLayout() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const slug = pathname?.split("/")?.[1];
+  const backUrl = `/${slug}`;
   const [activeTab, setActiveTab] = useState("items");
-  const { device } = useContext(HeaderContext);
-  const [showCustomCodeView, setShowCustomCodeView] = useState(false); // New state to toggle view
+  const {
+    theme,
+    setTheme,
+    device,
+    setDevice,
+    saveChanges,
+    cancelChanges,
+    headerTabs,
+    onBack,
+  } = useContext(HeaderContext);
+
+  const [showCustomCodeView, setShowCustomCodeView] = useState(false);
   const { closeSidebar, openSidebar } = useSidebar();
 
   useEffect(() => {
@@ -26,9 +41,17 @@ export default function MainLayout() {
   return (
     <div className="flex flex-col h-full bg-muted/40">
       <EditorHeader
+        title="Header"
+        tabs={headerTabs}
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        disabled={showCustomCodeView} // Disable tabs when in custom code view
+        onTabChange={setActiveTab}
+        theme={theme}
+        onThemeChange={() => setTheme(theme === "light" ? "dark" : "light")}
+        device={device}
+        onDeviceChange={setDevice}
+        onSaveChanges={saveChanges}
+        onCancelChanges={cancelChanges}
+        onBack={onBack}
       />
       <div className="flex flex-1 overflow-hidden">
         <aside className="w-[380px] bg-background border-r p-0 pl-1 flex flex-col h-full">

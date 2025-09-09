@@ -1,5 +1,6 @@
 "use client";
 import { BrandContext } from "@/providers/brand-provider";
+import { usePathname, useRouter } from "next/navigation";
 import { createContext, useState, ReactNode, useContext } from "react";
 
 export type DeviceType = "desktop" | "mobile";
@@ -50,6 +51,7 @@ interface HeaderContextType {
   headerStyle: HeaderStyle;
   logoUrl: string;
   faviconUrl: string;
+  headerTabs: { value: string; label: string }[];
   setFaviconUrl: (url: string) => void;
   setLogoUrlLink: (url: string) => void;
   setHeaderStyle: (style: HeaderStyle) => void;
@@ -70,6 +72,7 @@ interface HeaderContextType {
   saveChanges: () => void;
   cancelChanges: () => void;
   refresh: () => void;
+  onBack: () => void;
   customCode: string;
   setCustomCode: (code: string) => void;
   isCustomCodeEnabled: boolean;
@@ -79,9 +82,17 @@ interface HeaderContextType {
 export const HeaderContext = createContext<HeaderContextType>(null!);
 
 export const HeaderProvider = ({ children }: { children: ReactNode }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const slug = pathname?.split("/")?.[1];
+  const backUrl = `/${slug}`;
   const { logoUrls, setLogoUrl, faviconUrl, setFaviconUrl } =
     useContext(BrandContext);
   const [logoUrl, setLogoUrlLink] = useState("https://postcrafts.co");
+  const [headerTabs, setHeaderTabs] = useState([
+    { value: "items", label: "Header Items" },
+    { value: "style", label: "Header Style" },
+  ]);
   const [headerItems, setHeaderItems] = useState<HeaderItem[]>([
     {
       id: "0",
@@ -249,14 +260,16 @@ export const HeaderProvider = ({ children }: { children: ReactNode }) => {
       customCode,
       isCustomCodeEnabled,
     });
-  const cancelChanges = () => console.log("Cancelled changes");
+  const cancelChanges = () => router.push(backUrl);
   const refresh = () => console.log("Refreshed preview!");
+  const onBack = () => router.push(backUrl);
 
   return (
     <HeaderContext.Provider
       value={{
         logoUrls,
         logoUrl,
+        onBack,
         setLogoUrlLink,
         setLogoUrl,
         headerItems,
@@ -275,6 +288,7 @@ export const HeaderProvider = ({ children }: { children: ReactNode }) => {
         theme,
         setTheme,
         device,
+        headerTabs,
         setDevice,
         saveChanges,
         cancelChanges,

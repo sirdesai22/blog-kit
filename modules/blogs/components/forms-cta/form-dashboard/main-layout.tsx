@@ -1,27 +1,27 @@
-'use client';
-import { useState, useContext, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import EditorHeader from './editor-header';
-import FormConfigure from './sidebar/form-configure';
-import FormFields from './sidebar/form-fields';
-import FormConfirmation from './sidebar/form-confirmation';
-import FormAction from './sidebar/form-action';
-import ContentPanel from './content/content-panel';
-import { FormProvider, FormContext } from './context/form-context';
-import { cn } from '@/lib/utils';
-import { Switch } from '@/components/ui/switch';
-import { useSidebar } from '@/components/ui/sidebar';
-import CustomCode from './sidebar/custom-code';
+"use client";
+import { useState, useContext, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import FormConfigure from "./sidebar/form-configure";
+import FormFields from "./sidebar/form-fields";
+import FormConfirmation from "./sidebar/form-confirmation";
+import FormAction from "./sidebar/form-action";
+import ContentPanel from "./content/content-panel";
+import { FormProvider, FormContext } from "./context/form-context";
+import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
+import { useSidebar } from "@/components/ui/sidebar";
+import CustomCode from "./sidebar/custom-code";
+import EditorHeader from "@/components/common/editor-header";
 
 const SidebarContent = ({ activeTab }: { activeTab: string }) => {
   switch (activeTab) {
-    case 'configure':
+    case "configure":
       return <FormConfigure />;
-    case 'form':
+    case "form":
       return <FormFields />;
-    case 'confirmation':
+    case "confirmation":
       return <FormConfirmation />;
-    case 'action':
+    case "action":
       return <FormAction />;
     default:
       return <FormConfigure />;
@@ -54,7 +54,7 @@ const FormDashboard = ({ activeTab }: { activeTab: string }) => {
             <span className="text-normal">Custom Code &lt;/&gt;</span>
             <div className="flex items-center gap-2">
               <p className="text-sm">
-                {formState.customCode.isEnabled ? 'Enabled' : 'Disabled'}
+                {formState.customCode.isEnabled ? "Enabled" : "Disabled"}
               </p>
               <Switch
                 checked={formState.customCode.isEnabled}
@@ -68,8 +68,8 @@ const FormDashboard = ({ activeTab }: { activeTab: string }) => {
       <main className="flex-1 bg-gray-100 dark:bg-zinc-900 overflow-y-auto flex justify-center p-2">
         <div
           className={cn(
-            'relative h-full overflow-hidden rounded-xl shadow-lg ring-1 ring-black/5 transition-all duration-500 ease-in-out',
-            device === 'mobile' ? 'w-full max-w-[420px]' : 'w-full max-w-none'
+            "relative h-full overflow-hidden rounded-xl shadow-lg ring-1 ring-black/5 transition-all duration-500 ease-in-out",
+            device === "mobile" ? "w-full max-w-[420px]" : "w-full max-w-none"
           )}
         >
           <div
@@ -93,16 +93,40 @@ const LayoutContent = ({
   setActiveTab: (tab: string) => void;
 }) => {
   // Now we can safely access the context here
-  const { formState } = useContext(FormContext);
+  const {
+    theme,
+    setTheme,
+    device,
+    setDevice,
+    saveChanges,
+    cancelChanges,
+    isSaving,
+    saveMessage,
+    saveError,
+    formTabs,
+    onBack,
+    formState,
+  } = useContext(FormContext);
   const isCustomCodeActive = formState.customCode.isEnabled;
 
   return (
     <>
       {/* The disabled prop is now passed correctly from a component that has access to the context state */}
       <EditorHeader
+        title="Form"
+        tabs={formTabs}
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        disabled={isCustomCodeActive}
+        onTabChange={setActiveTab}
+        theme={theme}
+        onThemeChange={() => setTheme(theme === "light" ? "dark" : "light")}
+        device={device}
+        onDeviceChange={setDevice}
+        onSaveChanges={saveChanges}
+        onCancelChanges={cancelChanges}
+        onBack={onBack}
+        isSaving={isSaving}
+        saveMessage={saveMessage}
+        saveError={saveError}
       />
       <FormDashboard activeTab={activeTab} />
     </>
@@ -111,9 +135,9 @@ const LayoutContent = ({
 
 // Main component that manages state
 export default function MainLayout({ pageId }: { pageId: string }) {
-  const [activeTab, setActiveTab] = useState('configure');
+  const [activeTab, setActiveTab] = useState("configure");
   const searchParams = useSearchParams();
-  const formId = searchParams.get('formId');
+  const formId = searchParams.get("formId");
 
   return (
     <div className="flex flex-col h-full bg-muted/40">

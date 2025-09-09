@@ -1,34 +1,34 @@
-'use client';
+"use client";
 import {
   createContext,
   useState,
   ReactNode,
   useEffect,
   useCallback,
-} from 'react';
-import { produce } from 'immer';
-import { useRouter } from 'next/navigation';
+} from "react";
+import { produce } from "immer";
+import { usePathname, useRouter } from "next/navigation";
 
 // --- Type Definitions ---
-export type DeviceType = 'desktop' | 'mobile';
-export type ThemeType = 'light' | 'dark';
+export type DeviceType = "desktop" | "mobile";
+export type ThemeType = "light" | "dark";
 export type FormType =
-  | 'EndOfPost'
-  | 'Sidebar'
-  | 'InLine'
-  | 'PopUp'
-  | 'Floating'
-  | 'Gated';
-export type FormTrigger = 'TimeDelay' | 'Scroll' | 'ExitIntent';
+  | "EndOfPost"
+  | "Sidebar"
+  | "InLine"
+  | "PopUp"
+  | "Floating"
+  | "Gated";
+export type FormTrigger = "TimeDelay" | "Scroll" | "ExitIntent";
 export type FieldType =
-  | 'Email'
-  | 'ShortText'
-  | 'LongText'
-  | 'Phone'
-  | 'Country'
-  | 'Select'
-  | 'MultiSelect';
-export type ConfirmationButtonType = 'Close' | 'Link';
+  | "Email"
+  | "ShortText"
+  | "LongText"
+  | "Phone"
+  | "Country"
+  | "Select"
+  | "MultiSelect";
+export type ConfirmationButtonType = "Close" | "Link";
 
 export interface FormField {
   id: string;
@@ -90,7 +90,7 @@ interface FormContextType {
   ) => void;
 
   // Form fields management
-  addField: (field: Omit<FormField, 'id' | 'order'>) => void;
+  addField: (field: Omit<FormField, "id" | "order">) => void;
   updateFormField: (field: FormField) => void;
   deleteFormField: (id: string) => void;
   setFields: (fields: FormField[]) => void;
@@ -100,6 +100,9 @@ interface FormContextType {
   setEmbedCodeEnabled: (isEnabled: boolean) => void;
   setCustomCodeEnabled: (isEnabled: boolean) => void;
   setCustomCode: (code: string) => void;
+
+  formTabs: { value: string; label: string }[];
+  onBack: () => void;
 
   // UI state
   theme: ThemeType;
@@ -135,55 +138,55 @@ interface FormContextType {
 export const FormContext = createContext<FormContextType>(null!);
 
 const initialState: FormState = {
-  formName: 'Newsletter form',
-  heading: 'Subscribe to Our Newsletter',
-  description: 'Get the latest news and updates.\nNo spam, we promise.',
-  formType: 'PopUp',
+  formName: "Newsletter form",
+  heading: "Subscribe to Our Newsletter",
+  description: "Get the latest news and updates.\nNo spam, we promise.",
+  formType: "PopUp",
   categories: [], // Changed to empty array
   tags: [], // Added empty tags array
-  formTrigger: 'TimeDelay',
+  formTrigger: "TimeDelay",
   timeDelay: 0,
   scrollTrigger: 50,
   isMandatory: true,
   fields: [
     {
-      id: '1',
-      type: 'Email',
-      label: 'Email*',
-      placeholder: 'you@example.com',
+      id: "1",
+      type: "Email",
+      label: "Email*",
+      placeholder: "you@example.com",
       isRequired: true,
       order: 0,
     },
     {
-      id: '2',
-      type: 'ShortText',
-      label: 'First Name',
-      placeholder: 'Jane',
+      id: "2",
+      type: "ShortText",
+      label: "First Name",
+      placeholder: "Jane",
       isRequired: false,
       order: 1,
     },
     {
-      id: '3',
-      type: 'Select',
-      label: 'What are you interested in?',
+      id: "3",
+      type: "Select",
+      label: "What are you interested in?",
       isRequired: true,
       order: 2,
-      options: ['Marketing', 'Design', 'Development'],
+      options: ["Marketing", "Design", "Development"],
     },
   ],
-  buttonText: 'Sign Up Now',
-  footnote: 'By signing up, you agree to our Terms of Service.',
+  buttonText: "Sign Up Now",
+  footnote: "By signing up, you agree to our Terms of Service.",
   isMultiStep: false,
   confirmation: {
-    heading: 'Thank You!',
-    description: 'Your submission has been received.',
-    buttonText: 'Close',
-    buttonType: 'Close',
-    url: '',
+    heading: "Thank You!",
+    description: "Your submission has been received.",
+    buttonText: "Close",
+    buttonType: "Close",
+    url: "",
     openInNewTab: true,
   },
-  embedCode: { isEnabled: false, code: '' },
-  customCode: { isEnabled: false, code: '' },
+  embedCode: { isEnabled: false, code: "" },
+  customCode: { isEnabled: false, code: "" },
   formValues: {},
 };
 
@@ -200,9 +203,21 @@ export const FormProvider = ({
 }) => {
   // Form state
   const [formState, setFormState] = useState<FormState>(initialState);
-  const [theme, setTheme] = useState<ThemeType>('light');
-  const [device, setDevice] = useState<DeviceType>('desktop');
+  const [theme, setTheme] = useState<ThemeType>("light");
+  const [device, setDevice] = useState<DeviceType>("desktop");
   const [isConfirmationVisible, setIsConfirmationVisible] = useState(false);
+
+  const [formTabs, setFormTabs] = useState([
+    { value: "configure", label: "Configure" },
+    { value: "form", label: "Form" },
+    { value: "confirmation", label: "Confirmation" },
+    { value: "action", label: "Action" },
+  ]);
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const segments = pathname?.split("/").filter(Boolean);
+  const backUrl = "/" + segments.slice(0, -1).join("/");
 
   // API state
   const [isSaving, setIsSaving] = useState(false);
@@ -216,8 +231,6 @@ export const FormProvider = ({
   const [loadingTags, setLoadingTags] = useState(true);
   const [categoriesError, setCategoriesError] = useState<string | null>(null);
   const [tagsError, setTagsError] = useState<string | null>(null);
-
-  const router = useRouter();
 
   // Categories management
   const loadCategories = useCallback(async () => {
@@ -233,12 +246,12 @@ export const FormProvider = ({
       if (result.success) {
         setCategories(result.data.availableCategories || []);
       } else {
-        setCategoriesError('Failed to load categories');
-        console.error('Failed to load categories:', result.error);
+        setCategoriesError("Failed to load categories");
+        console.error("Failed to load categories:", result.error);
       }
     } catch (error) {
-      console.error('Error loading categories:', error);
-      setCategoriesError('Error loading categories');
+      console.error("Error loading categories:", error);
+      setCategoriesError("Error loading categories");
     } finally {
       setLoadingCategories(false);
     }
@@ -257,12 +270,12 @@ export const FormProvider = ({
       if (result.success) {
         setTags(result.data.availableTags || []);
       } else {
-        setTagsError('Failed to load tags');
-        console.error('Failed to load tags:', result.error);
+        setTagsError("Failed to load tags");
+        console.error("Failed to load tags:", result.error);
       }
     } catch (error) {
-      console.error('Error loading tags:', error);
-      setTagsError('Error loading tags');
+      console.error("Error loading tags:", error);
+      setTagsError("Error loading tags");
     } finally {
       setLoadingTags(false);
     }
@@ -288,11 +301,11 @@ export const FormProvider = ({
         if (result.success) {
           setFormState(result.data.form.config);
         } else {
-          setSaveError('Failed to load form data');
+          setSaveError("Failed to load form data");
         }
       } catch (error) {
-        console.error('Error loading form data:', error);
-        setSaveError('Error loading form data');
+        console.error("Error loading form data:", error);
+        setSaveError("Error loading form data");
       }
     },
     [pageId]
@@ -310,7 +323,7 @@ export const FormProvider = ({
     );
   };
 
-  const addField = (field: Omit<FormField, 'id' | 'order'>) => {
+  const addField = (field: Omit<FormField, "id" | "order">) => {
     setFormState(
       produce((draft) => {
         draft.fields.push({
@@ -396,9 +409,9 @@ export const FormProvider = ({
       if (formId) {
         // Update existing form
         response = await fetch(`/api/blogs/${pageId}/forms`, {
-          method: 'PUT',
+          method: "PUT",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             formId: formId,
@@ -408,9 +421,9 @@ export const FormProvider = ({
       } else {
         // Create new form
         response = await fetch(`/api/blogs/${pageId}/forms`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(payload),
         });
@@ -419,7 +432,7 @@ export const FormProvider = ({
       const result = await response.json();
 
       if (result.success) {
-        setSaveMessage(result.data.message || 'Form saved successfully!');
+        setSaveMessage(result.data.message || "Form saved successfully!");
 
         // If creating new form, redirect to edit mode
         if (!formId && result.data.form?.id) {
@@ -430,14 +443,14 @@ export const FormProvider = ({
           }, 1000);
         }
       } else {
-        setSaveError(result.error || 'Failed to save form');
+        setSaveError(result.error || "Failed to save form");
         if (result.details) {
-          console.error('Validation errors:', result.details);
+          console.error("Validation errors:", result.details);
         }
       }
     } catch (error) {
-      console.error('Error saving form:', error);
-      setSaveError('Network error. Please try again.');
+      console.error("Error saving form:", error);
+      setSaveError("Network error. Please try again.");
     } finally {
       setIsSaving(false);
 
@@ -453,8 +466,10 @@ export const FormProvider = ({
     setFormState(initialState);
     setSaveMessage(null);
     setSaveError(null);
-    router.back();
+    router.push(backUrl);
   };
+
+  const onBack = () => router.push(backUrl);
 
   const refresh = () => {
     if (formId) {
@@ -512,6 +527,8 @@ export const FormProvider = ({
         saveMessage,
         saveError,
         formId,
+        formTabs,
+        onBack,
 
         // Categories and Tags state
         categories,

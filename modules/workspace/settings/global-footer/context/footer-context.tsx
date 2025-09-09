@@ -1,6 +1,7 @@
 "use client";
 import { createContext, useState, ReactNode, useContext } from "react";
 import { BrandContext } from "@/providers/brand-provider";
+import { usePathname, useRouter } from "next/navigation";
 
 export type DeviceType = "desktop" | "mobile";
 export type ThemeType = "light" | "dark";
@@ -77,21 +78,31 @@ interface FooterContextType {
   saveChanges: () => void;
   cancelChanges: () => void;
   refresh: () => void;
+  onBack: () => void;
   customCode: string;
   setCustomCode: (code: string) => void;
   isCustomCodeEnabled: boolean;
+  footerTabs: { value: string; label: string }[];
   setIsCustomCodeEnabled: (enabled: boolean) => void;
 }
 
 export const FooterContext = createContext<FooterContextType>(null!);
 
 export const FooterProvider = ({ children }: { children: ReactNode }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const slug = pathname?.split("/")?.[1];
+  const backUrl = `/${slug}`;
   const { logoUrls, setLogoUrl, faviconUrl, setFaviconUrl } =
     useContext(BrandContext);
   const [logoUrl, setLogoUrlLink] = useState("https://postcrafts.co");
   const [description, setDescription] = useState(
     "Graphy empowers teams to transform raw data into clear, compelling visuals — making insights easier to share, understand, and act on."
   );
+  const [footerTabs, setFooterTabs] = useState([
+    { value: "items", label: "Footer Items" },
+    { value: "style", label: "Footer Style" },
+  ]);
 
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([
     { id: "1", type: "dribbble", link: "https://dribbble.com/larocheco" },
@@ -224,15 +235,18 @@ export const FooterProvider = ({ children }: { children: ReactNode }) => {
       customCode,
       isCustomCodeEnabled,
     });
-  const cancelChanges = () => console.log("Cancelled changes");
+  const cancelChanges = () => router.push(backUrl);
   const refresh = () => console.log("Refreshed preview!");
+  const onBack = () => router.push(backUrl);
 
   return (
     <FooterContext.Provider
       value={{
         logoUrls,
         setLogoUrl,
+        onBack,
         logoUrl,
+        footerTabs,
         setLogoUrlLink,
         description,
         setDescription,

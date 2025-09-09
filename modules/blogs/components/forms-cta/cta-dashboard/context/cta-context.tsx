@@ -1,19 +1,19 @@
-'use client';
+"use client";
 import {
   createContext,
   useState,
   ReactNode,
   useEffect,
   useCallback,
-} from 'react';
-import { produce } from 'immer';
-import { useRouter } from 'next/navigation';
+} from "react";
+import { produce } from "immer";
+import { usePathname, useRouter } from "next/navigation";
 
 // --- Type Definitions ---
-export type DeviceType = 'desktop' | 'mobile';
-export type ThemeType = 'light' | 'dark';
-export type CtaType = 'EndOfPost' | 'Sidebar' | 'InLine' | 'PopUp' | 'Floating';
-export type CtaTrigger = 'TimeDelay' | 'Scroll' | 'ExitIntent';
+export type DeviceType = "desktop" | "mobile";
+export type ThemeType = "light" | "dark";
+export type CtaType = "EndOfPost" | "Sidebar" | "InLine" | "PopUp" | "Floating";
+export type CtaTrigger = "TimeDelay" | "Scroll" | "ExitIntent";
 
 export interface Category {
   id: string;
@@ -50,9 +50,9 @@ interface CtaContextType {
   ctaState: CtaState;
   setCtaState: (state: CtaState) => void;
   updateField: <K extends keyof CtaState>(field: K, value: CtaState[K]) => void;
-  updateContentField: <K extends keyof CtaState['content']>(
+  updateContentField: <K extends keyof CtaState["content"]>(
     field: K,
-    value: CtaState['content'][K]
+    value: CtaState["content"][K]
   ) => void;
   setCustomCode: (code: string) => void;
   setCustomCodeEnabled: (isEnabled: boolean) => void;
@@ -61,6 +61,9 @@ interface CtaContextType {
   theme: ThemeType;
   setTheme: (t: ThemeType) => void;
   device: DeviceType;
+  ctaTabs: { value: string; label: string }[];
+  onBack: () => void;
+
   setDevice: (d: DeviceType) => void;
   setActiveTab: (tab: string) => void;
 
@@ -89,21 +92,21 @@ interface CtaContextType {
 export const CtaContext = createContext<CtaContextType>(null!);
 
 const initialState: CtaState = {
-  ctaName: 'Homepage Welcome CTA',
-  type: 'PopUp',
+  ctaName: "Homepage Welcome CTA",
+  type: "PopUp",
   categories: [], // Changed to empty array
   tags: [], // Added empty tags array
-  trigger: 'TimeDelay',
+  trigger: "TimeDelay",
   timeDelay: 5,
   scrollTrigger: 50,
   content: {
-    heading: 'This is a big heading for the callout section of the page',
-    description: 'This is a subheading for the callout section',
-    primaryButton: { text: 'Main Button', url: '#' },
-    secondaryButton: { text: 'Secondary', url: '#' },
-    footnote: 'This is a small footnote.',
+    heading: "This is a big heading for the callout section of the page",
+    description: "This is a subheading for the callout section",
+    primaryButton: { text: "Main Button", url: "#" },
+    secondaryButton: { text: "Secondary", url: "#" },
+    footnote: "This is a small footnote.",
   },
-  customCode: { isEnabled: false, code: '' },
+  customCode: { isEnabled: false, code: "" },
 };
 
 export const CtaProvider = ({
@@ -119,8 +122,17 @@ export const CtaProvider = ({
 }) => {
   // CTA state
   const [ctaState, setCtaState] = useState<CtaState>(initialState);
-  const [theme, setTheme] = useState<ThemeType>('light');
-  const [device, setDevice] = useState<DeviceType>('desktop');
+  const [theme, setTheme] = useState<ThemeType>("light");
+  const [device, setDevice] = useState<DeviceType>("desktop");
+  const [ctaTabs, setCtaTabs] = useState([
+    { value: "configure", label: "Configure" },
+    { value: "cta", label: "CTA" },
+  ]);
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const segments = pathname?.split("/").filter(Boolean);
+  const backUrl = "/" + segments.slice(0, -1).join("/");
 
   // API state
   const [isSaving, setIsSaving] = useState(false);
@@ -134,8 +146,6 @@ export const CtaProvider = ({
   const [loadingTags, setLoadingTags] = useState(true);
   const [categoriesError, setCategoriesError] = useState<string | null>(null);
   const [tagsError, setTagsError] = useState<string | null>(null);
-
-  const router = useRouter();
 
   // Categories management
   const loadCategories = useCallback(async () => {
@@ -152,12 +162,12 @@ export const CtaProvider = ({
       if (result.success) {
         setCategories(result.data.availableCategories || []);
       } else {
-        setCategoriesError('Failed to load categories');
-        console.error('Failed to load categories:', result.error);
+        setCategoriesError("Failed to load categories");
+        console.error("Failed to load categories:", result.error);
       }
     } catch (error) {
-      console.error('Error loading categories:', error);
-      setCategoriesError('Error loading categories');
+      console.error("Error loading categories:", error);
+      setCategoriesError("Error loading categories");
     } finally {
       setLoadingCategories(false);
     }
@@ -177,12 +187,12 @@ export const CtaProvider = ({
       if (result.success) {
         setTags(result.data.availableTags || []);
       } else {
-        setTagsError('Failed to load tags');
-        console.error('Failed to load tags:', result.error);
+        setTagsError("Failed to load tags");
+        console.error("Failed to load tags:", result.error);
       }
     } catch (error) {
-      console.error('Error loading tags:', error);
-      setTagsError('Error loading tags');
+      console.error("Error loading tags:", error);
+      setTagsError("Error loading tags");
     } finally {
       setLoadingTags(false);
     }
@@ -208,11 +218,11 @@ export const CtaProvider = ({
         if (result.success) {
           setCtaState(result.data.cta.config);
         } else {
-          setSaveError('Failed to load CTA data');
+          setSaveError("Failed to load CTA data");
         }
       } catch (error) {
-        console.error('Error loading CTA data:', error);
-        setSaveError('Error loading CTA data');
+        console.error("Error loading CTA data:", error);
+        setSaveError("Error loading CTA data");
       }
     },
     [pageId]
@@ -229,9 +239,9 @@ export const CtaProvider = ({
     );
   };
 
-  const updateContentField = <K extends keyof CtaState['content']>(
+  const updateContentField = <K extends keyof CtaState["content"]>(
     field: K,
-    value: CtaState['content'][K]
+    value: CtaState["content"][K]
   ) => {
     setCtaState(
       produce((draft) => {
@@ -272,9 +282,9 @@ export const CtaProvider = ({
       if (ctaId) {
         // Update existing CTA
         response = await fetch(`/api/blogs/${pageId}/ctas`, {
-          method: 'PUT',
+          method: "PUT",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             ctaId: ctaId,
@@ -284,9 +294,9 @@ export const CtaProvider = ({
       } else {
         // Create new CTA
         response = await fetch(`/api/blogs/${pageId}/ctas`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(payload),
         });
@@ -295,7 +305,7 @@ export const CtaProvider = ({
       const result = await response.json();
 
       if (result.success) {
-        setSaveMessage(result.data.message || 'CTA saved successfully!');
+        setSaveMessage(result.data.message || "CTA saved successfully!");
 
         // If creating new CTA, redirect to edit mode
         if (!ctaId && result.data.cta?.id) {
@@ -306,14 +316,14 @@ export const CtaProvider = ({
           }, 1000);
         }
       } else {
-        setSaveError(result.error || 'Failed to save CTA');
+        setSaveError(result.error || "Failed to save CTA");
         if (result.details) {
-          console.error('Validation errors:', result.details);
+          console.error("Validation errors:", result.details);
         }
       }
     } catch (error) {
-      console.error('Error saving CTA:', error);
-      setSaveError('Network error. Please try again.');
+      console.error("Error saving CTA:", error);
+      setSaveError("Network error. Please try again.");
     } finally {
       setIsSaving(false);
 
@@ -329,8 +339,10 @@ export const CtaProvider = ({
     setCtaState(initialState);
     setSaveMessage(null);
     setSaveError(null);
-    router.back();
+    router.push(backUrl);
   };
+
+  const onBack = () => router.push(backUrl);
 
   const refresh = () => {
     if (ctaId) {
@@ -372,6 +384,8 @@ export const CtaProvider = ({
         cancelChanges,
         refresh,
 
+        onBack,
+        ctaTabs,
         // API state
         isSaving,
         saveMessage,

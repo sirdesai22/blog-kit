@@ -1,6 +1,5 @@
 "use client";
 import { useState, useContext, useEffect } from "react";
-import EditorHeader from "./editor-header";
 import FooterItems from "./sidebar/footer-items";
 import FooterStyle from "./sidebar/footer-style";
 import CustomCode from "./sidebar/custom-code"; // Import the new component
@@ -9,12 +8,22 @@ import { FooterContext } from "./context/footer-context";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { useSidebar } from "@/components/ui/sidebar";
+import EditorHeader from "@/components/common/editor-header";
 
 export default function MainLayout() {
-  const [activeTab, setActiveTab] = useState("items");
-  const { device } = useContext(FooterContext);
   const [showCustomCodeView, setShowCustomCodeView] = useState(false); // State to toggle view
   const { closeSidebar, openSidebar } = useSidebar();
+  const [activeTab, setActiveTab] = useState("items");
+  const {
+    theme,
+    setTheme,
+    device,
+    setDevice,
+    saveChanges,
+    cancelChanges,
+    onBack,
+    footerTabs,
+  } = useContext(FooterContext);
 
   useEffect(() => {
     closeSidebar();
@@ -26,9 +35,17 @@ export default function MainLayout() {
   return (
     <div className="flex flex-col h-full bg-muted/40">
       <EditorHeader
+        title="Footer"
+        tabs={footerTabs}
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        disabled={showCustomCodeView} // Disable tabs when in custom code view
+        onTabChange={setActiveTab}
+        theme={theme}
+        onThemeChange={() => setTheme(theme === "light" ? "dark" : "light")}
+        device={device}
+        onDeviceChange={setDevice}
+        onSaveChanges={saveChanges}
+        onCancelChanges={cancelChanges}
+        onBack={onBack}
       />
       <div className="flex flex-1 overflow-hidden">
         <aside className="w-[380px] bg-background border-r p-0 pl-1 flex flex-col h-full">
