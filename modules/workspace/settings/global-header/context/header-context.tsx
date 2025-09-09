@@ -1,5 +1,6 @@
 "use client";
-import { createContext, useState, ReactNode } from "react";
+import { BrandContext } from "@/providers/brand-provider";
+import { createContext, useState, ReactNode, useContext } from "react";
 
 export type DeviceType = "desktop" | "mobile";
 export type ThemeType = "light" | "dark";
@@ -48,6 +49,8 @@ interface HeaderContextType {
   setHeaderItems: (items: HeaderItem[]) => void;
   headerStyle: HeaderStyle;
   logoUrl: string;
+  faviconUrl: string;
+  setFaviconUrl: (url: string) => void;
   setLogoUrlLink: (url: string) => void;
   setHeaderStyle: (style: HeaderStyle) => void;
   addItem: (item: Omit<HeaderItem, "id" | "order">) => void;
@@ -76,12 +79,8 @@ interface HeaderContextType {
 export const HeaderContext = createContext<HeaderContextType>(null!);
 
 export const HeaderProvider = ({ children }: { children: ReactNode }) => {
-  const [logoUrls, setLogoUrls] = useState({
-    light:
-      "https://res.cloudinary.com/dcvcw1ju2/image/upload/v1756567608/rankingFocused_jleoty.png",
-    dark: "https://res.cloudinary.com/dcvcw1ju2/image/upload/v1756567595/gemini_y5zfnb.png",
-  });
-
+  const { logoUrls, setLogoUrl, faviconUrl, setFaviconUrl } =
+    useContext(BrandContext);
   const [logoUrl, setLogoUrlLink] = useState("https://postcrafts.co");
   const [headerItems, setHeaderItems] = useState<HeaderItem[]>([
     {
@@ -161,10 +160,6 @@ export const HeaderProvider = ({ children }: { children: ReactNode }) => {
 
   const [customCode, setCustomCode] = useState(defaultNavbarCode);
   const [isCustomCodeEnabled, setIsCustomCodeEnabled] = useState(false);
-
-  const setLogoUrl = (mode: ThemeType, url: string) => {
-    setLogoUrls((prev) => ({ ...prev, [mode]: url }));
-  };
 
   const addItem = (item: Omit<HeaderItem, "id" | "order">) => {
     const newItem = {
@@ -266,6 +261,8 @@ export const HeaderProvider = ({ children }: { children: ReactNode }) => {
         setLogoUrl,
         headerItems,
         setHeaderItems,
+        faviconUrl,
+        setFaviconUrl,
         headerStyle,
         setHeaderStyle,
         addItem,

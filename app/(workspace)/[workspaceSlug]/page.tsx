@@ -1,8 +1,8 @@
-import { Suspense } from 'react';
-import { notFound } from 'next/navigation';
-import { getWorkspaceWithPages } from '@/modules/workspace/actions/workspace-actions';
-import { PageCard } from '../_components/page-card';
-import { NewPageButton } from '../_components/new-page-button';
+import { Suspense } from "react";
+import { notFound } from "next/navigation";
+import { getWorkspaceWithPages } from "@/modules/workspace/actions/workspace-actions";
+import { PageCard } from "../_components/page-card";
+import { NewPageButton } from "../_components/new-page-button";
 
 // Loading component
 function PagesLoading() {
@@ -32,7 +32,7 @@ async function PagesContent({ workspaceSlug }: { workspaceSlug: string }) {
   }
 
   return (
-    <div className="px-4 py-6 sm:px-md lg:px-lg">
+    <div className="p-lg">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <p className="text-header">My Pages</p>

@@ -59,6 +59,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { toast } from "sonner";
+import { CategoryTableSkeleton } from "@/components/skeleton/table-skeleton";
 
 // ✅ Updated interface to match new rich data
 interface CategoryWithStats {
@@ -291,7 +292,7 @@ export function BlogCategoriesView({
 
   return (
     <>
-      <CardTitle className="text-normal ml-4 ">
+      <CardTitle className="text-normal ml-lg mb-sm">
         {categories.length} <span className="text-small">Categories</span>
       </CardTitle>
       <div className="overflow-hidden">
@@ -324,6 +325,8 @@ export function BlogCategoriesView({
                       your blog posts.
                     </TableCell>
                   </TableRow>
+                ) : isLoading ? (
+                  <CategoryTableSkeleton row={5} />
                 ) : (
                   <SortableContext
                     items={categories.map((cat) => cat.id)}
@@ -359,7 +362,7 @@ export function BlogCategoriesView({
           <DialogHeader>
             <DialogTitle>Edit Category</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-4 py-lg">
             <div className="space-y-2">
               <Label htmlFor="edit-category-name">Category Name</Label>
               <Input

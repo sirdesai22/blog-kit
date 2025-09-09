@@ -1,62 +1,84 @@
-import { notFound } from 'next/navigation';
-import { getPageById } from '@/modules/workspace/actions/workspace-actions';
-import { CategoriesAndTagsView } from './_components/categories-and-tags-view';
-import { getWorkspaceCategoriesWithStats } from '@/modules/blogs/actions/category-actions';
-import { getWorkspaceTagsWithStats } from '@/modules/blogs/actions/tag-actions-new';
-import { Suspense } from 'react';
+import { Suspense } from "react";
+import { notFound } from "next/navigation";
+import { getPageById } from "@/modules/workspace/actions/workspace-actions";
+import { CategoriesAndTagsView } from "./_components/categories-and-tags-view";
+import {
+  CategoryTableSkeleton,
+  TagTableSkeleton,
+} from "@/components/skeleton/table-skeleton";
+import { getWorkspaceCategoriesWithStats } from "@/modules/blogs/actions/category-actions";
+import { getWorkspaceTagsWithStats } from "@/modules/blogs/actions/tag-actions-new";
+import { BlogCategoriesView } from "./_components/blog-categories-view";
+import { BlogTagsView } from "./_components/tags-view";
 
 interface PageProps {
-  params: Promise<{
+  params: {
     workspaceSlug: string;
     blogId: string;
-  }>;
+  };
 }
 
-
-function CategoriesLoading() {
+// Data fetching component for Categories
+async function CategoriesData({
+  workspaceSlug,
+  blogId,
+}: {
+  workspaceSlug: string;
+  blogId: string;
+}) {
+  const categoriesData = await getWorkspaceCategoriesWithStats(
+    workspaceSlug,
+    blogId
+  );
+  if (!categoriesData) notFound();
   return (
-    <div className="p-6 animate-pulse">
-      <div className="h-8 bg-gray-200 rounded w-48 mb-4"></div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="h-24 bg-gray-200 rounded"></div>
-        ))}
-      </div>
-    </div>
+    <BlogCategoriesView
+      workspaceSlug={workspaceSlug}
+      blogId={blogId}
+      categories={categoriesData.categories}
+    />
+  );
+}
+
+// Data fetching component for Tags
+async function TagsData({
+  workspaceSlug,
+  blogId,
+}: {
+  workspaceSlug: string;
+  blogId: string;
+}) {
+  const tagsData = await getWorkspaceTagsWithStats(workspaceSlug, blogId);
+  if (!tagsData) notFound();
+  return (
+    <BlogTagsView
+      workspaceSlug={workspaceSlug}
+      blogId={blogId}
+      tags={tagsData.tags}
+    />
   );
 }
 
 export default async function CategoriesPage({ params }: PageProps) {
-  return (
-    <Suspense fallback={<CategoriesLoading />}>
-      <CategoriesContent params={params} />
-    </Suspense>
-  );
-}
+  const { workspaceSlug, blogId } = params;
 
-async function CategoriesContent({
-  params,
-}: {
-  params: Promise<{ workspaceSlug: string; blogId: string }>;
-}) {
-  const { workspaceSlug, blogId } = await params;
-
-  const [page, categoriesData, tagsData] = await Promise.all([
-    getPageById(workspaceSlug, blogId),
-    getWorkspaceCategoriesWithStats(workspaceSlug, blogId),
-    getWorkspaceTagsWithStats(workspaceSlug, blogId),
-  ]);
-
-  if (!page || !categoriesData || !tagsData || !workspaceSlug) {
-    notFound();
-  }
+  const page = await getPageById(workspaceSlug, blogId);
+  if (!page) notFound();
 
   return (
     <CategoriesAndTagsView
       workspaceSlug={workspaceSlug}
       blogId={blogId}
-      categories={categoriesData.categories}
-      tags={tagsData.tags}
+      categoriesView={
+        <Suspense fallback={<CategoryTableSkeleton row={5} />}>
+          <CategoriesData workspaceSlug={workspaceSlug} blogId={blogId} />
+        </Suspense>
+      }
+      tagsView={
+        <Suspense fallback={<TagTableSkeleton row={5} />}>
+          <TagsData workspaceSlug={workspaceSlug} blogId={blogId} />
+        </Suspense>
+      }
     />
   );
 }

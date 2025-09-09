@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
 import { MoreHorizontal, Plus, Trash2, ExternalLink } from "lucide-react";
 import {
   DropdownMenu,
@@ -35,6 +36,7 @@ import {
   deleteAuthor,
 } from "@/modules/workspace/actions/workspace-actions";
 import { AuthorDialog } from "./_components/author-dialog";
+import { AuthorTableSkeleton } from "@/components/skeleton/table-skeleton";
 
 interface Author {
   id: string;
@@ -181,31 +183,10 @@ export default function AuthorsPage(props: AuthorsPageProps) {
       }
     : undefined;
 
-  if (isInitialLoading) {
-    return (
-      <div className="px-4">
-        <div className="max-w-7xl mx-auto py-6">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-48 mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded w-96 mb-6"></div>
-            <div className="bg-white border rounded-lg p-6">
-              <div className="h-6 bg-gray-200 rounded w-32 mb-4"></div>
-              <div className="space-y-3">
-                <div className="h-12 bg-gray-200 rounded"></div>
-                <div className="h-12 bg-gray-200 rounded"></div>
-                <div className="h-12 bg-gray-200 rounded"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="bg-background">
       {/* Header */}
-      <div className="px-4 py-6 sm:px-md lg:px-lg">
+      <div className="p-lg">
         <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-start">
           <div>
             <Heading
@@ -236,7 +217,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
 
       {/* Authors Table */}
       <div>
-        <CardTitle className="flex items-center justify-between ml-4 mb-4">
+        <CardTitle className="flex items-center justify-between ml-lg mb-sm">
           <span className="text-normal">
             {authors.length} <span className="text-small">Authors</span>
           </span>
@@ -246,84 +227,81 @@ export default function AuthorsPage(props: AuthorsPageProps) {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted">
-                  <TableHead className="pl-4">Author</TableHead>
+                  <TableHead className="pl-lg">Author</TableHead>
                   <TableHead>Posts</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {authors.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={2}
-                      className="text-center py-8 text-gray-500"
-                    >
-                      No authors yet. Create your first author to start
-                      attributing blog posts.
-                    </TableCell>
-                  </TableRow>
+                {isInitialLoading ? (
+                  <AuthorTableSkeleton row={5} />
                 ) : (
-                  authors.map((author) => (
-                    <TableRow key={author.id}>
-                      <TableCell className="pl-4">
-                        <div className="flex items-center space-x-3">
-                          <Avatar className="w-8 h-8">
-                            <AvatarImage src={author.image || ""} />
-                            <AvatarFallback className="text-sm">
-                              {author.name[0].toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex items-center space-x-2">
-                            <span className="font-medium">{author.name}</span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
-                            >
-                              <ExternalLink className="h-3 w-3 text-normal" />
-                            </Button>
+                  <>
+                    {authors.map((author) => (
+                      <TableRow key={author.id}>
+                        <TableCell className="pl-lg">
+                          <div className="flex items-center space-x-3">
+                            <Avatar className="w-8 h-8">
+                              <AvatarImage src={author.image || ""} />
+                              <AvatarFallback className="text-sm">
+                                {author.name[0].toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex items-center space-x-2">
+                              <span className="font-medium">{author.name}</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+                              >
+                                <ExternalLink className="h-3 w-3 text-normal" />
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium">{author.posts}</span>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-normal-muted"
-                            >
-                              View Posts
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleEditClick(author)}
-                              className="text-normal-muted"
-                            >
-                              Edit
-                            </Button>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                  <MoreHorizontal className="h-4 w-4 text-normal-muted" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  className="text-destructive"
-                                  onClick={() => handleDeleteClick(author)}
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium">{author.posts}</span>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-normal-muted"
+                              >
+                                View Posts
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEditClick(author)}
+                                className="text-normal-muted"
+                              >
+                                Edit
+                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4 text-normal-muted" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    className="text-destructive"
+                                    onClick={() => handleDeleteClick(author)}
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </>
                 )}
               </TableBody>
             </Table>

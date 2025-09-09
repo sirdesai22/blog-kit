@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Plus, Star } from 'lucide-react';
-import { Heading } from '@/components/ui/heading';
-import { useRouter } from 'next/navigation';
-import { ManageFeaturedPostsDialog } from '@/modules/blogs/components/manage-featured-posts-dialog';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Plus, Star } from "lucide-react";
+import { Heading } from "@/components/ui/heading";
+import { useRouter } from "next/navigation";
+import { ManageFeaturedPostsDialog } from "@/modules/blogs/components/manage-featured-posts-dialog";
 
 interface BlogTableHeaderProps {
   workspaceSlug: string;
@@ -26,7 +26,7 @@ export function BlogTableHeader({
   return (
     <>
       <div className="bg-background">
-        <div className="px-4 py-6 sm:px-md lg:px-lg">
+        <div className="p-lg">
           <div className="flex flex-col items-start justify-between gap-4 md:flex-row ">
             <div>
               <Heading

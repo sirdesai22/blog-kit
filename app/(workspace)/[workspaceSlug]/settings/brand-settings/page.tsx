@@ -1,12 +1,13 @@
 "use client";
 import { Switch } from "@/components/ui/switch";
 import { ImageIcon } from "lucide-react";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { ChromePicker } from "react-color";
 import { Dialog } from "@/components/ui/dialog";
 import { DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import FontSettings from "./components/font-setting-row";
 import Image from "next/image";
+import { HeaderContext } from "@/modules/workspace/settings/global-header/context/header-context";
 
 function ColorSwatch({
   hex,
@@ -51,17 +52,20 @@ const ImageUploadPlaceholder = ({
   label,
   className = "w-24 h-16",
   disabled = false,
+  imageUrl,
+  onImageChange,
 }: {
   label?: string;
   className?: string;
   disabled?: boolean;
+  imageUrl: string;
+  onImageChange: (url: string) => void;
 }) => {
-  const [preview, setPreview] = useState<string | null>(null);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setPreview(URL.createObjectURL(file));
+      const newImageUrl = URL.createObjectURL(file);
+      onImageChange(newImageUrl);
     }
   };
 
@@ -78,9 +82,9 @@ const ImageUploadPlaceholder = ({
           disabled ? "pointer-events-none" : ""
         }`}
       >
-        {preview ? (
+        {imageUrl ? (
           <Image
-            src={preview}
+            src={imageUrl}
             alt="Uploaded"
             width={400}
             height={400}
@@ -248,6 +252,9 @@ function BrandColors({ darkModeDisabled }: { darkModeDisabled: boolean }) {
 }
 
 export default function BrandSettings() {
+  const { logoUrls, setLogoUrl, faviconUrl, setFaviconUrl } =
+    useContext(HeaderContext);
+
   const [darkModeDisabled, setDarkModeDisabled] = useState(true);
   return (
     <div className="h-full p-4 sm:p-6">
@@ -279,11 +286,18 @@ export default function BrandSettings() {
           description="Supported formats (JPG, PNG, WebP) Minimum size: 100px"
         >
           <div className="flex gap-x-4">
-            <ImageUploadPlaceholder className="w-28 h-16" label="Light Mode" />
+            <ImageUploadPlaceholder
+              className="w-28 h-16"
+              label="Light Mode"
+              imageUrl={logoUrls.light}
+              onImageChange={(url) => setLogoUrl("light", url)}
+            />
             <ImageUploadPlaceholder
               disabled={!darkModeDisabled}
               className="w-28 h-16"
               label="Dark Mode"
+              imageUrl={logoUrls.dark}
+              onImageChange={(url) => setLogoUrl("dark", url)}
             />
           </div>
         </SettingsSection>
@@ -292,7 +306,11 @@ export default function BrandSettings() {
           title="Favicon"
           description="Supported formats (JPG, PNG, WebP) Recommended size: 100px x 100px"
         >
-          <ImageUploadPlaceholder className="w-18 h-18" />
+          <ImageUploadPlaceholder
+            className="w-18 h-18"
+            imageUrl={faviconUrl}
+            onImageChange={setFaviconUrl}
+          />
         </SettingsSection>
 
         <BrandColors darkModeDisabled={darkModeDisabled} />

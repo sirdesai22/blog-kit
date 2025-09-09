@@ -89,7 +89,7 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
         isSelected && "bg-blue-50 hover:bg-blue-50"
       )}
     >
-      <TableCell className="pl-4">
+      <TableCell className="pl-lg">
         <Checkbox
           checked={isSelected}
           onCheckedChange={() => toggleSelection(post.id)}
@@ -235,7 +235,7 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
         </div>
       </TableCell>
 
-      <TableCell className="text-center group-hover:bg-muted">
+      <TableCell className="text-center ">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-6 w-6 p-0">

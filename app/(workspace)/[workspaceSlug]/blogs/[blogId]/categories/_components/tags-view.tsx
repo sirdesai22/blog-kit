@@ -57,6 +57,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { TagTableSkeleton } from "@/components/skeleton/table-skeleton";
 
 interface TagType {
   name: string;
@@ -104,7 +105,7 @@ function SortableTableRow({
       className="group cursor-grab"
       {...attributes}
     >
-      <TableCell className="font-medium pl-4" {...listeners}>
+      <TableCell className="font-medium pl-lg" {...listeners}>
         <Link
           href={`/blog/tags/${tag.name}`}
           passHref
@@ -230,7 +231,7 @@ export function BlogTagsView({
 
   return (
     <>
-      <CardTitle className="text-sm ml-4 text-normal">
+      <CardTitle className="text-sm ml-lg mb-sm text-normal">
         {tags.length} <span className="text-small">Tags</span>
       </CardTitle>
       <div className="overflow-hidden">
@@ -243,8 +244,8 @@ export function BlogTagsView({
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50 hover:bg-muted/50">
-                  <TableHead className="pl-4">Tag</TableHead>
-                  <TableHead>Posts</TableHead>
+                  <TableHead className="pl-lg w-full">Tag</TableHead>
+                  <TableHead className="min-w-[200px]">Posts</TableHead>
                   {/* <TableHead>Traffic</TableHead>
                   <TableHead>Leads</TableHead> */}
                   <TableHead className="sticky right-0 w-12  text-center"></TableHead>
@@ -261,6 +262,8 @@ export function BlogTagsView({
                       posts.
                     </TableCell>
                   </TableRow>
+                ) : isLoading ? (
+                  <TagTableSkeleton row={5} />
                 ) : (
                   <SortableContext
                     items={tags.map((tag) => tag.name)}

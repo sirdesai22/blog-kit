@@ -9,6 +9,7 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import { HeaderProvider } from "@/modules/workspace/settings/global-header/context/header-context";
 import { FooterProvider } from "@/modules/workspace/settings/global-footer/context/footer-context";
+import { BrandProvider } from "@/providers/brand-provider";
 
 export const metadata: Metadata = {
   title: "BlogKit",
@@ -34,11 +35,13 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
-            <HeaderProvider>
-              <FooterProvider>
-                <SessionProvider>{children}</SessionProvider>
-              </FooterProvider>
-            </HeaderProvider>
+            <BrandProvider>
+              <HeaderProvider>
+                <FooterProvider>
+                  <SessionProvider>{children}</SessionProvider>
+                </FooterProvider>
+              </HeaderProvider>
+            </BrandProvider>
           </QueryProvider>
         </ThemeProvider>
       </body>

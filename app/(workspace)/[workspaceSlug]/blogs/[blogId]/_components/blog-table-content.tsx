@@ -24,7 +24,6 @@ import { Heading } from "@/components/ui/heading";
 import { useRouter } from "next/navigation";
 import { BlogPost } from "@/types/blog";
 import { BlogPostSort } from "@/modules/blogs/actions/blog-table-actions";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useBlogTable } from "@/modules/blogs/contexts/BlogTableContext";
 import { cn } from "@/lib/utils";
@@ -48,6 +47,7 @@ import { CategorySelectionView } from "@/modules/blogs/components/table/blogs/ca
 import { TagSelectionView } from "@/modules/blogs/components/table/blogs/tag-selection-dialog";
 import { AuthorSelectionView } from "@/modules/blogs/components/table/blogs/author-selection-dialog";
 import { StatusSelectionView } from "@/modules/blogs/components/table/blogs/status-selection-dialog";
+import { PostTableSkeleton } from "@/components/skeleton/table-skeleton";
 
 interface BlogTableContentProps {
   posts: BlogPost[];
@@ -79,37 +79,6 @@ function SortableHeader({
         <span>{children}</span>
       </Button>
     </TableHead>
-  );
-}
-
-function LoadingRow() {
-  return (
-    <TableRow>
-      <TableHead className="w-12">
-        <Skeleton className="h-4 w-4 rounded" />
-      </TableHead>
-      <TableHead>
-        <Skeleton className="h-4 w-32" />
-      </TableHead>
-      <TableHead>
-        <Skeleton className="h-4 w-16" />
-      </TableHead>
-      <TableHead>
-        <Skeleton className="h-4 w-20" />
-      </TableHead>
-      <TableHead>
-        <Skeleton className="h-4 w-24" />
-      </TableHead>
-      <TableHead>
-        <Skeleton className="h-4 w-20" />
-      </TableHead>
-      <TableHead>
-        <Skeleton className="h-4 w-28" />
-      </TableHead>
-      <TableHead className="sticky right-0 w-12 bg-muted/50">
-        <Skeleton className="h-4 w-4" />
-      </TableHead>
-    </TableRow>
   );
 }
 
@@ -496,7 +465,7 @@ export function BlogTableContent({
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
-              <TableHead className="w-12 pl-4">
+              <TableHead className="w-12 pl-lg">
                 <Checkbox
                   checked={isAllSelected(allPostIds)}
                   ref={(el: any) => {
@@ -522,21 +491,21 @@ export function BlogTableContent({
               <TableHead>Author</TableHead>
               <TableHead>Published</TableHead>
               <TableHead>Modified</TableHead>
-              <TableHead className="sticky right-0 w-12 bg-muted/50 text-center"></TableHead>
+              <TableHead className="sticky right-0 w-12  text-center"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading
-              ? Array.from({ length: 5 }).map((_, index) => (
-                  <LoadingRow key={`loading-${index}`} />
-                ))
-              : posts.map((post) => (
-                  <BlogTableRow
-                    key={post.id}
-                    post={post}
-                    workspaceSlug={workspaceSlug}
-                  />
-                ))}
+            {loading ? (
+              <PostTableSkeleton row={5} />
+            ) : (
+              posts.map((post) => (
+                <BlogTableRow
+                  key={post.id}
+                  post={post}
+                  workspaceSlug={workspaceSlug}
+                />
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

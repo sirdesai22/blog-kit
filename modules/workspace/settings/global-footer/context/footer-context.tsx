@@ -1,5 +1,6 @@
 "use client";
-import { createContext, useState, ReactNode } from "react";
+import { createContext, useState, ReactNode, useContext } from "react";
+import { BrandContext } from "@/providers/brand-provider";
 
 export type DeviceType = "desktop" | "mobile";
 export type ThemeType = "light" | "dark";
@@ -85,7 +86,8 @@ interface FooterContextType {
 export const FooterContext = createContext<FooterContextType>(null!);
 
 export const FooterProvider = ({ children }: { children: ReactNode }) => {
-  const [logoUrls, setLogoUrls] = useState({ light: "", dark: "" });
+  const { logoUrls, setLogoUrl, faviconUrl, setFaviconUrl } =
+    useContext(BrandContext);
   const [logoUrl, setLogoUrlLink] = useState("https://postcrafts.co");
   const [description, setDescription] = useState(
     "Graphy empowers teams to transform raw data into clear, compelling visuals — making insights easier to share, understand, and act on."
@@ -195,10 +197,6 @@ export const FooterProvider = ({ children }: { children: ReactNode }) => {
   const [customCode, setCustomCode] = useState(defaultFooterCode);
   const [isCustomCodeEnabled, setIsCustomCodeEnabled] = useState(false);
 
-  const handleSetLogoUrl = (mode: ThemeType, url: string) => {
-    setLogoUrls((prev) => ({ ...prev, [mode]: url }));
-  };
-
   const addSocialLink = (type: SocialType) => {
     const newLink: SocialLink = { id: Date.now().toString(), type, link: "" };
     setSocialLinks((prev) => [...prev, newLink]);
@@ -233,7 +231,7 @@ export const FooterProvider = ({ children }: { children: ReactNode }) => {
     <FooterContext.Provider
       value={{
         logoUrls,
-        setLogoUrl: handleSetLogoUrl,
+        setLogoUrl,
         logoUrl,
         setLogoUrlLink,
         description,
