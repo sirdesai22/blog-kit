@@ -39,7 +39,8 @@ const FormConfigSchema = z.object({
     'Floating',
     'Gated',
   ]),
-  category: z.string().min(1, 'Category is required'),
+  categories: z.array(z.string()).min(1, 'At least one category is required'),
+  tags: z.array(z.string()).default([]),
   formTrigger: z.enum(['TimeDelay', 'Scroll', 'ExitIntent']),
   timeDelay: z.number().min(0),
   scrollTrigger: z.number().min(0).max(100),
@@ -96,6 +97,7 @@ export async function GET(
       },
       include: {
         categories: true,
+        tags: true,
       },
     });
 
@@ -128,6 +130,11 @@ export async function GET(
           id: cat.id,
           name: cat.name,
           slug: cat.slug,
+        })),
+        availableTags: page.tags.map((tag) => ({
+          id: tag.id,
+          name: tag.name,
+          slug: tag.slug,
         })),
       },
     });
@@ -184,6 +191,7 @@ export async function POST(
       },
       include: {
         categories: true,
+        tags: true,
       },
     });
 
@@ -194,13 +202,25 @@ export async function POST(
       );
     }
 
-    // Validate category exists
-    const categoryExists = page.categories.some(
-      (cat) => cat.id === config.category
+    // Validate categories exist
+    const invalidCategories = config.categories.filter(
+      (catId) =>
+        catId !== 'global' && !page.categories.some((cat) => cat.id === catId)
     );
-    if (!categoryExists && config.category !== 'global') {
+    if (invalidCategories.length > 0) {
       return NextResponse.json(
-        { error: 'Invalid category ID' },
+        { error: 'Invalid category IDs', details: invalidCategories },
+        { status: 400 }
+      );
+    }
+
+    // Validate tags exist
+    const invalidTags = config.tags.filter(
+      (tagId) => !page.tags.some((tag) => tag.id === tagId)
+    );
+    if (invalidTags.length > 0) {
+      return NextResponse.json(
+        { error: 'Invalid tag IDs', details: invalidTags },
         { status: 400 }
       );
     }
@@ -215,7 +235,8 @@ export async function POST(
     const newForm: StoredFormConfig = {
       id: `form_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       name: config.formName,
-      categoryId: config.category,
+      categoryIds: config.categories, // Changed to array
+      tagIds: config.tags, // Added tags array
       config,
       enabled: true,
       createdAt: new Date().toISOString(),
@@ -329,7 +350,8 @@ export async function PUT(
       updatedFormsConfig.forms[formIndex] = {
         ...updatedFormsConfig.forms[formIndex],
         name: updatedConfig.formName,
-        categoryId: updatedConfig.category,
+        categoryIds: updatedConfig.categories,
+        tagIds: updatedConfig.tags,
         config: updatedConfig,
         updatedAt: new Date().toISOString(),
         version: updatedFormsConfig.forms[formIndex].version + 1,

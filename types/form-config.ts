@@ -29,7 +29,8 @@ export interface FormConfig {
   heading: string;
   description: string;
   formType: 'EndOfPost' | 'Sidebar' | 'InLine' | 'PopUp' | 'Floating' | 'Gated';
-  category: string; // Will be category ID
+  categories: string[];
+  tags: string[];
   formTrigger: 'TimeDelay' | 'Scroll' | 'ExitIntent';
   timeDelay: number;
   scrollTrigger: number;
@@ -54,7 +55,8 @@ export interface FormConfig {
 export interface StoredFormConfig {
   id: string; // Generated form ID
   name: string; // formName from frontend
-  categoryId: string; // category ID
+  categoryIds: string[]; // Array of category IDs
+  tagIds: string[]; // Array of tag IDs
   config: FormConfig; // Full config from frontend
   enabled: boolean;
   createdAt: string;

@@ -27,6 +27,7 @@ export async function GET(
       },
       include: {
         categories: true,
+        tags: true,
       },
     });
 
@@ -34,7 +35,7 @@ export async function GET(
       return NextResponse.json({ error: 'Page not found' }, { status: 404 });
     }
 
-    const formsConfig = page.formsConfig as PageFormsConfig | null;
+    const formsConfig = page.formsConfig as unknown as PageFormsConfig | null;
     const form = formsConfig?.forms.find((f) => f.id === params.formId);
 
     if (!form) {
@@ -49,19 +50,32 @@ export async function GET(
       },
     });
 
-    // Get category name
-    const category = page.categories.find((cat) => cat.id === form.categoryId);
+    // Get category and tag names
+    const categoryNames =
+      form.categoryIds?.map((catId) => {
+        const category = page.categories.find((cat) => cat.id === catId);
+        return category?.name || 'Unknown';
+      }) || [];
+
+    const tagNames =
+      form.tagIds?.map((tagId) => {
+        const tag = page.tags.find((tag) => tag.id === tagId);
+        return tag?.name || 'Unknown';
+      }) || [];
 
     return NextResponse.json({
       success: true,
       data: {
         form: {
           ...form,
-          categoryName: category?.name || 'Unknown',
+          categoryNames,
+          tagNames,
         },
         submissionCount,
         isDefaultForCategory:
-          formsConfig?.categoryFormMapping[form.categoryId] === form.id,
+          form.categoryIds?.some(
+            (catId) => formsConfig?.categoryFormMapping[catId] === form.id
+          ) || false,
         isGlobalDefault: formsConfig?.globalDefaultFormId === form.id,
       },
     });
@@ -108,10 +122,11 @@ export async function DELETE(
       );
     }
 
-    const currentFormsConfig = (page.formsConfig as PageFormsConfig) || {
-      forms: [],
-      categoryFormMapping: {},
-    };
+    const currentFormsConfig =
+      (page.formsConfig as unknown as PageFormsConfig) || {
+        forms: [],
+        categoryFormMapping: {},
+      };
 
     const formIndex = currentFormsConfig.forms.findIndex(
       (f) => f.id === params.formId
@@ -143,7 +158,7 @@ export async function DELETE(
 
     await db.page.update({
       where: { id: params.pageId },
-      data: { formsConfig: currentFormsConfig },
+      data: { formsConfig: currentFormsConfig as any },
     });
 
     return NextResponse.json({

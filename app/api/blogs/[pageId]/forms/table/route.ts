@@ -7,12 +7,18 @@ interface FormTableData {
   id: string;
   name: string;
   type: 'EndOfPost' | 'Sidebar' | 'InLine' | 'PopUp' | 'Floating' | 'Gated';
-  category?: {
+  categories: Array<{
     id: string;
     name: string;
     slug: string;
-  };
-  categoryId?: string;
+  }>;
+  tags: Array<{
+    id: string;
+    name: string;
+    slug: string;
+  }>;
+  categoryIds: string[];
+  tagIds: string[];
   isGlobal: boolean;
   enabled: boolean;
   submissionCount: number;
@@ -59,7 +65,7 @@ export async function GET(
     const category = searchParams.get('category');
     const isGlobal = searchParams.get('isGlobal');
 
-    // Get the page with forms config
+    // Get the page with forms config - INCLUDE TAGS
     const pageData = await db.page.findFirst({
       where: {
         id: params.pageId,
@@ -71,6 +77,7 @@ export async function GET(
       },
       include: {
         categories: true,
+        tags: true, // Add tags here
       },
     });
 
@@ -78,7 +85,7 @@ export async function GET(
       return NextResponse.json({ error: 'Page not found' }, { status: 404 });
     }
 
-    const formsConfig = pageData.formsConfig as PageFormsConfig | null;
+    const formsConfig = pageData.formsConfig as any | null;
     if (!formsConfig?.forms || formsConfig.forms.length === 0) {
       return NextResponse.json({
         forms: [],
@@ -90,24 +97,64 @@ export async function GET(
       });
     }
 
-    // Transform forms to table format
+    // Transform forms to table format - UPDATED TO USE ARRAYS
     let forms: FormTableData[] = formsConfig.forms.map(
-      (form: StoredFormConfig) => ({
-        id: form.id,
-        name: form.name,
-        type: form.config.formType,
-        categoryId: form.categoryId,
-        isGlobal: form.categoryId === 'global',
-        enabled: form.enabled !== false,
-        submissionCount: 0, // Will be populated below
-        lastModified: form.updatedAt,
-        createdAt: form.createdAt,
-        version: form.version,
-        category: undefined, // Will be populated below
-      })
+      (form: StoredFormConfig) => {
+        const categoryIds =
+          form.categoryIds ||
+          ((form as any).categoryId ? [(form as any).categoryId] : []);
+        const tagIds = form.tagIds || [];
+
+        // Get category information
+        const categories = categoryIds
+          .filter((catId) => catId !== 'global')
+          .map((catId) => {
+            const categoryData = pageData.categories.find(
+              (cat) => cat.id === catId
+            );
+            return categoryData
+              ? {
+                  id: categoryData.id,
+                  name: categoryData.name,
+                  slug: categoryData.slug,
+                }
+              : null;
+          })
+          .filter(Boolean) as Array<{ id: string; name: string; slug: string }>;
+
+        // Get tag information
+        const tags = tagIds
+          .map((tagId) => {
+            const tagData = pageData.tags?.find((tag) => tag.id === tagId);
+            return tagData
+              ? {
+                  id: tagData.id,
+                  name: tagData.name,
+                  slug: tagData.slug,
+                }
+              : null;
+          })
+          .filter(Boolean) as Array<{ id: string; name: string; slug: string }>;
+
+        return {
+          id: form.id,
+          name: form.name,
+          type: form.config.formType,
+          categoryIds,
+          tagIds,
+          categories,
+          tags,
+          isGlobal: categoryIds.includes('global'),
+          enabled: form.enabled !== false,
+          submissionCount: 0, // Will be populated below
+          lastModified: form.updatedAt,
+          createdAt: form.createdAt,
+          version: form.version,
+        };
+      }
     );
 
-    // Apply filters
+    // Apply filters - UPDATED TO USE ARRAYS
     if (search) {
       forms = forms.filter((form) =>
         form.name.toLowerCase().includes(search.toLowerCase())
@@ -122,7 +169,7 @@ export async function GET(
       if (category === 'global') {
         forms = forms.filter((form) => form.isGlobal);
       } else {
-        forms = forms.filter((form) => form.categoryId === category);
+        forms = forms.filter((form) => form.categoryIds.includes(category));
       }
     }
 
@@ -153,29 +200,11 @@ export async function GET(
       return acc;
     }, {} as Record<string, number>);
 
-    // Enhance forms with category information and submission counts
-    forms = forms.map((form) => {
-      // Add category information
-      let category = null;
-      if (form.categoryId && form.categoryId !== 'global') {
-        const categoryData = pageData.categories.find(
-          (cat) => cat.id === form.categoryId
-        );
-        if (categoryData) {
-          category = {
-            id: categoryData.id,
-            name: categoryData.name,
-            slug: categoryData.slug,
-          };
-        }
-      }
-
-      return {
-        ...form,
-        category,
-        submissionCount: submissionCountMap[form.id] || 0,
-      };
-    });
+    // Update submission counts
+    forms = forms.map((form) => ({
+      ...form,
+      submissionCount: submissionCountMap[form.id] || 0,
+    }));
 
     // Apply sorting
     forms.sort((a, b) => {

@@ -113,7 +113,7 @@ const LayoutContent = ({
 export default function MainLayout({ pageId }: { pageId: string }) {
   const [activeTab, setActiveTab] = useState('configure');
   const searchParams = useSearchParams();
-  const formId = searchParams.get('formId'); // Get formId from URL params
+  const formId = searchParams.get('formId');
 
   return (
     <div className="flex flex-col h-full bg-muted/40">

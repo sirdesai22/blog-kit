@@ -155,10 +155,15 @@ model Page {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   
-  // ✅ FORMS CONFIGURATION
+  //  FORMS CONFIGURATION
   formsConfig     Json?            // Array of all forms for this page
   categoryFormMapping Json?        // { "Tech": "form-123", "Marketing": "form-456" }
   globalDefaultFormId String?      // Fallback form ID if no category match
+  
+  //  CTA CONFIGURATION 
+  ctasConfig      Json?            // Array of all CTAs for this page
+  categoryCtaMapping Json?         // { "Tech": "cta-123", "Marketing": "cta-456" }
+  globalDefaultCtaId String?       // Fallback CTA ID if no category match
   
   // ... existing relations ...
   blogPosts       BlogPost[] 
@@ -172,7 +177,7 @@ model Page {
   categories      Category[]
   tags            Tag[]
   
-  // ✅ ADD THIS LINE - Missing opposite relation field
+  //  ADD THIS LINE - Missing opposite relation field
   formSubmissions FormSubmission[]
   
   @@unique([slug, workspaceId])
@@ -262,12 +267,16 @@ model BlogPost {
   categories        Category[] @relation("PostCategories")
   tags              Tag[]      @relation("PostTags")
   
-  // ✅ ADD THIS LINE - Missing opposite relation field
+  //  ADD THIS LINE - Missing opposite relation field
   formSubmissions   FormSubmission[]
   
-  // ✅ FORM CONFIGURATION - Keep only selectedFormId
+  //FORM CONFIGURATION - Keep only selectedFormId
   selectedFormId    String?          // Override: use specific form ID
   formEnabled       Boolean  @default(true) // Enable/disable form for this post
+  
+  // CTA CONFIGURATION 
+  selectedCtaId     String?          // Override: use specific CTA ID
+  ctaEnabled        Boolean  @default(true) // Enable/disable CTA for this post
   
   @@unique([slug, workspaceId]) 
   @@index([status, publishedAt])

@@ -100,7 +100,6 @@ export default function FormsManagementPage() {
   const params = useParams();
   const { workspaceSlug, blogId } = params;
 
-  // State management
   const [activeTab, setActiveTab] = useState('forms');
   const [filters, setFilters] = useState<FormsFilters>({});
   const [sort, setSort] = useState<FormsSort>({
@@ -112,30 +111,26 @@ export default function FormsManagementPage() {
     pageSize: 10,
   });
 
-  // Data fetching - separate APIs for different purposes
   const {
     data: tableData,
     isLoading,
     error,
     refetch,
   } = useFormsTable(blogId as string, filters, sort, pagination);
-  const { data: formsData } = useForms(blogId as string); // For global forms
+  const { data: formsData } = useForms(blogId as string);
   const { categories } = useBlogFilterOptions(
     workspaceSlug as string,
     blogId as string
   );
 
-  // Mutations
   const toggleFormMutation = useToggleForm(blogId as string);
   const deleteFormMutation = useDeleteForm(blogId as string);
 
-  // Get global forms from basic forms data
   const globalForms = useMemo(
     () => formsData?.forms?.filter((f: any) => f.categoryId === 'global') || [],
     [formsData?.forms]
   );
 
-  // Handlers
   const handleSearchChange = (search: string) => {
     setFilters((prev) => ({ ...prev, search: search || undefined }));
     setPagination((prev) => ({ ...prev, page: 1 }));
@@ -422,14 +417,19 @@ export default function FormsManagementPage() {
                               <div className="flex items-center gap-2">
                                 {form.isGlobal ? (
                                   <Badge variant="secondary">Global</Badge>
-                                ) : form.category ? (
+                                ) : form.categories && form.categories.length > 0 ? (
                                   <>
                                     <Badge variant="outline">
-                                      {form.category.slug}
+                                      {form.categories[0].slug}
                                     </Badge>
                                     <span className="text-sm text-muted-foreground">
-                                      {form.category.name}
+                                      {form.categories[0].name}
                                     </span>
+                                    {form.categories.length > 1 && (
+                                      <Badge variant="outline" className="text-xs">
+                                        +{form.categories.length - 1} more
+                                      </Badge>
+                                    )}
                                   </>
                                 ) : (
                                   <span className="text-sm text-muted-foreground">
