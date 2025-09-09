@@ -1,5 +1,11 @@
 'use client';
-import { createContext, useState, ReactNode, useEffect } from 'react';
+import {
+  createContext,
+  useState,
+  ReactNode,
+  useEffect,
+  useCallback,
+} from 'react';
 import { produce } from 'immer';
 import { useRouter } from 'next/navigation';
 
@@ -40,12 +46,19 @@ export interface Category {
   slug: string;
 }
 
+export interface Tag {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 export interface FormState {
   formName: string;
   heading: string;
   description: string;
   formType: FormType;
-  category: string;
+  categories: string[];
+  tags: string[];
   formTrigger: FormTrigger;
   timeDelay: number;
   scrollTrigger: number;
@@ -108,11 +121,15 @@ interface FormContextType {
   saveError: string | null;
   formId: string | null;
 
-  // Categories state
+  // Categories and Tags state
   categories: Category[];
+  tags: Tag[];
   loadingCategories: boolean;
+  loadingTags: boolean;
   categoriesError: string | null;
+  tagsError: string | null;
   refreshCategories: () => void;
+  refreshTags: () => void;
 }
 
 export const FormContext = createContext<FormContextType>(null!);
@@ -122,7 +139,8 @@ const initialState: FormState = {
   heading: 'Subscribe to Our Newsletter',
   description: 'Get the latest news and updates.\nNo spam, we promise.',
   formType: 'PopUp',
-  category: 'global', // Start with global as default
+  categories: [], // Changed to empty array
+  tags: [], // Added empty tags array
   formTrigger: 'TimeDelay',
   timeDelay: 0,
   scrollTrigger: 50,
@@ -191,23 +209,18 @@ export const FormProvider = ({
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // Categories state
+  // Categories and Tags state
   const [categories, setCategories] = useState<Category[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [loadingTags, setLoadingTags] = useState(true);
   const [categoriesError, setCategoriesError] = useState<string | null>(null);
+  const [tagsError, setTagsError] = useState<string | null>(null);
 
   const router = useRouter();
 
-  // Load categories and form data on mount
-  useEffect(() => {
-    loadCategories();
-    if (formId) {
-      loadFormData(formId);
-    }
-  }, [pageId, formId]);
-
   // Categories management
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     if (!pageId) return;
 
     try {
@@ -229,30 +242,61 @@ export const FormProvider = ({
     } finally {
       setLoadingCategories(false);
     }
-  };
+  }, [pageId]);
+
+  const loadTags = useCallback(async () => {
+    if (!pageId) return;
+
+    try {
+      setLoadingTags(true);
+      setTagsError(null);
+
+      const response = await fetch(`/api/blogs/${pageId}/forms`);
+      const result = await response.json();
+
+      if (result.success) {
+        setTags(result.data.availableTags || []);
+      } else {
+        setTagsError('Failed to load tags');
+        console.error('Failed to load tags:', result.error);
+      }
+    } catch (error) {
+      console.error('Error loading tags:', error);
+      setTagsError('Error loading tags');
+    } finally {
+      setLoadingTags(false);
+    }
+  }, [pageId]);
 
   const refreshCategories = () => {
     loadCategories();
   };
 
-  // Form data management
-  const loadFormData = async (formIdToLoad: string) => {
-    try {
-      const response = await fetch(
-        `/api/blogs/${pageId}/forms/${formIdToLoad}`
-      );
-      const result = await response.json();
-
-      if (result.success) {
-        setFormState(result.data.form.config);
-      } else {
-        setSaveError('Failed to load form data');
-      }
-    } catch (error) {
-      console.error('Error loading form data:', error);
-      setSaveError('Error loading form data');
-    }
+  const refreshTags = () => {
+    loadTags();
   };
+
+  // Form data management
+  const loadFormData = useCallback(
+    async (formIdToLoad: string) => {
+      try {
+        const response = await fetch(
+          `/api/blogs/${pageId}/forms/${formIdToLoad}`
+        );
+        const result = await response.json();
+
+        if (result.success) {
+          setFormState(result.data.form.config);
+        } else {
+          setSaveError('Failed to load form data');
+        }
+      } catch (error) {
+        console.error('Error loading form data:', error);
+        setSaveError('Error loading form data');
+      }
+    },
+    [pageId]
+  );
 
   // Form state management functions
   const updateField = <K extends keyof FormState>(
@@ -417,7 +461,17 @@ export const FormProvider = ({
       loadFormData(formId);
     }
     loadCategories();
+    loadTags();
   };
+
+  // Load categories, tags and form data on mount
+  useEffect(() => {
+    loadCategories();
+    loadTags();
+    if (formId) {
+      loadFormData(formId);
+    }
+  }, [pageId, formId, loadCategories, loadTags, loadFormData]);
 
   return (
     <FormContext.Provider
@@ -459,11 +513,15 @@ export const FormProvider = ({
         saveError,
         formId,
 
-        // Categories state
+        // Categories and Tags state
         categories,
+        tags,
         loadingCategories,
+        loadingTags,
         categoriesError,
+        tagsError,
         refreshCategories,
+        refreshTags,
       }}
     >
       {children}

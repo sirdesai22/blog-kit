@@ -38,6 +38,8 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
+  Folder,
+  Tag,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -93,11 +95,34 @@ const SORT_OPTIONS = [
   { value: 'name-desc', label: 'Name Z-A' },
 ];
 
+interface FormTableData {
+  id: string;
+  name: string;
+  type: 'EndOfPost' | 'Sidebar' | 'InLine' | 'PopUp' | 'Floating' | 'Gated';
+  categories: Array<{
+    id: string;
+    name: string;
+    slug: string;
+  }>;
+  tags: Array<{
+    id: string;
+    name: string;
+    slug: string;
+  }>;
+  categoryIds: string[];
+  tagIds: string[];
+  isGlobal: boolean;
+  enabled: boolean;
+  submissionCount: number;
+  lastModified: string;
+  createdAt: string;
+  version: number;
+}
+
 export default function FormManagement() {
   const params = useParams();
   const { workspaceSlug, blogId } = params;
 
-  // State management
   const [filters, setFilters] = useState<FormsFilters>({});
   const [sort, setSort] = useState<FormsSort>({
     field: 'lastModified',
@@ -114,23 +139,24 @@ export default function FormManagement() {
     error,
     refetch,
   } = useFormsTable(blogId as string, filters, sort, pagination);
-  const { data: formsData } = useForms(blogId as string); // For global forms
+  const { data: formsData } = useForms(blogId as string);
   const { categories } = useBlogFilterOptions(
     workspaceSlug as string,
     blogId as string
   );
 
-  // Mutations
   const toggleFormMutation = useToggleForm(blogId as string);
   const deleteFormMutation = useDeleteForm(blogId as string);
 
-  // Get global forms from basic forms data
   const globalForms = useMemo(
-    () => formsData?.forms?.filter((f: any) => f.categoryId === 'global') || [],
+    () =>
+      formsData?.forms?.filter(
+        (f: any) =>
+          (f.categoryIds || []).includes('global') || f.categoryId === 'global'
+      ) || [],
     [formsData?.forms]
   );
 
-  // Handlers
   const handleSearchChange = (search: string) => {
     setFilters((prev) => ({ ...prev, search: search || undefined }));
     setPagination((prev) => ({ ...prev, page: 1 }));
@@ -197,7 +223,6 @@ export default function FormManagement() {
 
   return (
     <div className="space-y-6">
-      {/* Global Forms Section */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Global Forms</CardTitle>
@@ -270,7 +295,6 @@ export default function FormManagement() {
         </CardContent>
       </Card>
 
-      {/* Post Forms Section */}
       <Card>
         <CardHeader>
           <div className="grid gap-2">
@@ -376,19 +400,63 @@ export default function FormManagement() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-1">
                           {form.isGlobal ? (
                             <Badge variant="secondary">Global</Badge>
-                          ) : form.category ? (
-                            <>
-                              <Badge variant="outline">
-                                {form.category.name}
-                              </Badge>
-                            </>
                           ) : (
-                            <span className="text-sm text-muted-foreground">
-                              No category
-                            </span>
+                            <>
+                              {(() => {
+                                const allItems = [
+                                  ...(form.categories?.map((cat) => ({
+                                    ...cat,
+                                    type: 'category',
+                                  })) || []),
+                                  ...(form.tags?.map((tag) => ({
+                                    ...tag,
+                                    type: 'tag',
+                                  })) || []),
+                                ];
+
+                                const visibleItems = allItems.slice(0, 2);
+                                const remainingCount = allItems.length - 2;
+
+                                return (
+                                  <>
+                                    {visibleItems.map((item) => (
+                                      <Badge
+                                        key={`${item.type}-${item.id}`}
+                                        variant="outline"
+                                        className={
+                                          item.type === 'category'
+                                            ? 'bg-blue-50 text-blue-700'
+                                            : 'bg-green-50 text-green-700'
+                                        }
+                                      >
+                                        {item.type === 'category' ? (
+                                          <Folder className="h-3 w-3 mr-1" />
+                                        ) : (
+                                          <Tag className="h-3 w-3 mr-1" />
+                                        )}
+                                        {item.name}
+                                      </Badge>
+                                    ))}
+                                    {remainingCount > 0 && (
+                                      <Badge
+                                        variant="outline"
+                                        className="bg-gray-50 text-gray-700"
+                                      >
+                                        +{remainingCount} more
+                                      </Badge>
+                                    )}
+                                    {allItems.length === 0 && (
+                                      <span className="text-sm text-muted-foreground">
+                                        No categories or tags
+                                      </span>
+                                    )}
+                                  </>
+                                );
+                              })()}
+                            </>
                           )}
                         </div>
                       </TableCell>
@@ -442,7 +510,6 @@ export default function FormManagement() {
                 </TableBody>
               </Table>
 
-              {/* Pagination */}
               {tableData.totalCount > pagination.pageSize && (
                 <div className="flex items-center justify-between mt-4">
                   <p className="text-sm text-muted-foreground">

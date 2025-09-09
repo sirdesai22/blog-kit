@@ -1,9 +1,8 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -20,6 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   DropdownMenu,
@@ -39,19 +39,17 @@ import {
   Eye,
   EyeOff,
   ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
   Folder,
   Tag,
-  SortAsc,
 } from 'lucide-react';
 import Link from 'next/link';
-import {
-  useCtaTable,
-  useCtaTableState,
-} from '@/modules/blogs/hooks/use-cta-table';
+import { useCtaTable, useCtaTableState } from '@/modules/blogs/hooks/use-cta-table';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
-export default function CTAManagement() {
+const CtaTable = () => {
   const params = useParams();
   const { workspaceSlug, blogId } = params;
   const pageId = blogId as string;
@@ -116,150 +114,115 @@ export default function CTAManagement() {
 
   const getTypeBadgeColor = (type: string) => {
     const colorMap = {
-      EndOfPost:
-        'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-      Sidebar:
-        'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-      InLine:
-        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-      PopUp:
-        'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-      Floating: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200',
+      EndOfPost: 'bg-blue-100 text-blue-800',
+      Sidebar: 'bg-green-100 text-green-800',
+      InLine: 'bg-yellow-100 text-yellow-800',
+      PopUp: 'bg-purple-100 text-purple-800',
+      Floating: 'bg-pink-100 text-pink-800',
     };
-    return (
-      colorMap[type as keyof typeof colorMap] || 'bg-gray-100 text-gray-800'
-    );
+    return colorMap[type as keyof typeof colorMap] || 'bg-gray-100 text-gray-800';
   };
 
   if (error) {
     return (
-      <div className="text-center text-red-500 p-8">
-        Error loading CTAs: {error.message}
-        <Button variant="outline" onClick={() => refetch()} className="ml-4">
-          Retry
-        </Button>
-      </div>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center text-red-500">
+            Error loading CTAs: {error.message}
+            <Button variant="outline" onClick={() => refetch()} className="ml-4">
+              Retry
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="">
-      {/* Global CTA Section */}
-      <div className="  rounded-lg px-4">
-        <h3 className="text-lg font-medium mb-2">Global CTA</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Create and edit end-of-posts. Watch tutorial (2 mins) →
-        </p>
-      </div>
-
-      {/* After Content CTA Section */}
-      <div className=" rounded-lg p-4">
+    <Card>
+      <CardHeader>
         <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-medium">
-              After Content CTA - main page
-            </h3>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Switch id="after-content-enabled" defaultChecked />
-              <label
-                htmlFor="after-content-enabled"
-                className="text-sm font-medium"
-              >
-                Enabled
-              </label>
-            </div>
-            <div className="text-sm">
-              <span className="font-medium text-green-600">5 clicks</span>
-              <span className="text-xs bg-green-100 text-green-800 px-1 py-0.5 rounded ml-1">
-                30%
-              </span>
-            </div>
-            <Button variant="outline" size="sm">
-              Edit CTA
+          <CardTitle>CTA Management</CardTitle>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={resetFilters}
+              disabled={!search && type === 'all' && category === 'all' && tag === 'all'}
+            >
+              Clear Filters
             </Button>
+            <Link
+              href={`/${workspaceSlug}/blogs/${blogId}/forms-cta/cta-dashboard`}
+            >
+              <Button size="sm">+ New CTA</Button>
+            </Link>
           </div>
         </div>
-      </div>
-
-      {/* Post CTA Section */}
-      <div className="  rounded-lg">
-        {/* Header */}
-        <div className="p-4 border-b">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium">Post CTA</h3>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Create and edit end-of-posts. Watch tutorial (2 mins) →
-          </p>
-        </div>
-
-        {/* CTA Count and Filters */}
-        <div className="p-4 border-b">
-          <div className="flex items-center justify-between mb-4">
-            <h4 className="text-base font-medium">
-              {tableData?.totalCount || 0} CTA
-            </h4>
-            <div className="flex items-center gap-2">
-              <SortAsc className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                Recent on top
-              </span>
+      </CardHeader>
+      <CardContent>
+        {/* Filters */}
+        <div className="flex flex-wrap gap-4 mb-6">
+          <div className="flex-1 min-w-64">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search CTAs..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10"
+              />
             </div>
           </div>
-
-          {/* Filter Row */}
-          <div className="flex items-center gap-4">
-            <div className="flex-1 min-w-40">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="w-32">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="global">Global</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={tag} onValueChange={setTag}>
-                <SelectTrigger className="w-24">
-                  <SelectValue placeholder="Tag" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Tags</SelectItem>
-                  {/* Tags will be populated dynamically */}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <Select value={type} onValueChange={setType}>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="EndOfPost">End of Post</SelectItem>
+              <SelectItem value="Sidebar">Sidebar</SelectItem>
+              <SelectItem value="InLine">Inline</SelectItem>
+              <SelectItem value="PopUp">Pop Up</SelectItem>
+              <SelectItem value="Floating">Floating</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="global">Global</SelectItem>
+              {/* Categories will be populated dynamically */}
+            </SelectContent>
+          </Select>
+          <Select value={tag} onValueChange={setTag}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Tags</SelectItem>
+              {/* Tags will be populated dynamically */}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
+        <div className="border rounded-lg">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-4">
+                  <input type="checkbox" className="rounded border-gray-300" />
+                </TableHead>
                 <TableHead>
                   <Button
                     variant="ghost"
                     onClick={() => handleSort('name')}
                     className="font-medium p-0 h-auto hover:bg-transparent"
                   >
-                    Form {getSortIcon('name')}
+                    CTA Name {getSortIcon('name')}
                   </Button>
                 </TableHead>
                 <TableHead>
@@ -290,7 +253,7 @@ export default function CTAManagement() {
                     Last Modified {getSortIcon('lastModified')}
                   </Button>
                 </TableHead>
-                <TableHead className="text-right"></TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -298,36 +261,22 @@ export default function CTAManagement() {
                 // Loading skeleton
                 Array.from({ length: pageSize }).map((_, i) => (
                   <TableRow key={i}>
-                    <TableCell>
-                      <Skeleton className="h-4 w-32" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-6 w-20" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-24" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-16" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-20" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-8 w-20" />
-                    </TableCell>
+                    <TableCell><Skeleton className="h-4 w-4" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-8 w-20" /></TableCell>
                   </TableRow>
                 ))
               ) : tableData?.ctas.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
+                  <TableCell colSpan={7} className="text-center py-8">
                     <div className="text-gray-500">
                       <p className="text-lg mb-2">No CTAs found</p>
                       <p className="text-sm">
-                        {search ||
-                        type !== 'all' ||
-                        category !== 'all' ||
-                        tag !== 'all'
+                        {search || type !== 'all' || category !== 'all' || tag !== 'all'
                           ? 'Try adjusting your filters'
                           : 'Create your first CTA to get started'}
                       </p>
@@ -336,9 +285,13 @@ export default function CTAManagement() {
                 </TableRow>
               ) : (
                 tableData?.ctas.map((cta) => (
-                  <TableRow key={cta.id} className="hover:bg-muted/50">
+                  <TableRow key={cta.id}>
+                    <TableCell>
+                      <input type="checkbox" className="rounded border-gray-300" />
+                    </TableCell>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
+                        <span>{getTypeIcon(cta.type)}</span>
                         {cta.name}
                         {cta.isGlobal && (
                           <Badge variant="secondary" className="text-xs">
@@ -349,18 +302,10 @@ export default function CTAManagement() {
                     </TableCell>
                     <TableCell>
                       <Badge
-                        className={cn(
-                          'text-xs px-2 py-1',
-                          getTypeBadgeColor(cta.type)
-                        )}
+                        className={cn('text-xs', getTypeBadgeColor(cta.type))}
+                        variant="secondary"
                       >
-                        {cta.type === 'EndOfPost'
-                          ? 'End of Post'
-                          : cta.type === 'InLine'
-                          ? 'Inline'
-                          : cta.type === 'PopUp'
-                          ? 'Pop Up'
-                          : cta.type}
+                        {cta.type.replace(/([A-Z])/g, ' $1').trim()}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -385,27 +330,14 @@ export default function CTAManagement() {
                             {tag.name}
                           </Badge>
                         ))}
-                        {cta.isGlobal &&
-                          !cta.categories.length &&
-                          !cta.tags.length && (
-                            <Badge
-                              variant="outline"
-                              className="text-xs flex items-center gap-1"
-                            >
-                              <Folder className="h-3 w-3 text-blue-500" />
-                              Global
-                            </Badge>
-                          )}
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        <span className="font-medium">
-                          {cta.clickCount} Clicks
-                        </span>
-                        <span className="text-xs bg-green-100 text-green-800 px-1 py-0.5 rounded ml-1">
+                        <div className="font-medium">{cta.clickCount} Clicks</div>
+                        <div className="text-xs text-muted-foreground">
                           {cta.conversionRate}%
-                        </span>
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -429,19 +361,27 @@ export default function CTAManagement() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <Link
-                              href={`/${workspaceSlug}/blogs/${blogId}/forms-cta/cta-dashboard?ctaId=${cta.id}`}
-                            >
-                              <DropdownMenuItem>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                              </DropdownMenuItem>
-                            </Link>
+                            <DropdownMenuItem>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
                             <DropdownMenuItem>
                               <Copy className="mr-2 h-4 w-4" />
                               Duplicate
                             </DropdownMenuItem>
-
+                            <DropdownMenuItem>
+                              {cta.enabled ? (
+                                <>
+                                  <EyeOff className="mr-2 h-4 w-4" />
+                                  Disable
+                                </>
+                              ) : (
+                                <>
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  Enable
+                                </>
+                              )}
+                            </DropdownMenuItem>
                             <DropdownMenuItem className="text-red-600">
                               <Trash2 className="mr-2 h-4 w-4" />
                               Delete
@@ -459,12 +399,13 @@ export default function CTAManagement() {
 
         {/* Pagination */}
         {tableData && tableData.totalCount > 0 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t">
-            <div className="text-sm text-muted-foreground">
-              Showing{' '}
-              {Math.min((page - 1) * pageSize + 1, tableData.totalCount)} to{' '}
-              {Math.min(page * pageSize, tableData.totalCount)} of{' '}
-              {tableData.totalCount} CTAs
+          <div className="flex items-center justify-between px-2 py-4">
+            <div className="flex items-center space-x-2">
+              <p className="text-sm text-muted-foreground">
+                Showing {Math.min((page - 1) * pageSize + 1, tableData.totalCount)} to{' '}
+                {Math.min(page * pageSize, tableData.totalCount)} of {tableData.totalCount}{' '}
+                CTAs
+              </p>
             </div>
             <div className="flex items-center space-x-2">
               <Button
@@ -473,27 +414,25 @@ export default function CTAManagement() {
                 onClick={() => setPage(page - 1)}
                 disabled={!tableData.hasPreviousPage}
               >
+                <ChevronLeft className="h-4 w-4" />
                 Previous
               </Button>
               <div className="flex items-center space-x-1">
-                {Array.from(
-                  { length: Math.min(5, tableData.pageCount) },
-                  (_, i) => {
-                    const pageNum = page <= 3 ? i + 1 : page - 2 + i;
-                    if (pageNum > tableData.pageCount) return null;
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={page === pageNum ? 'default' : 'outline'}
-                        size="sm"
-                        className="w-8 h-8 p-0"
-                        onClick={() => setPage(pageNum)}
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  }
-                )}
+                {Array.from({ length: Math.min(5, tableData.pageCount) }, (_, i) => {
+                  const pageNum = page <= 3 ? i + 1 : page - 2 + i;
+                  if (pageNum > tableData.pageCount) return null;
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={page === pageNum ? 'default' : 'outline'}
+                      size="sm"
+                      className="w-8 h-8 p-0"
+                      onClick={() => setPage(pageNum)}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
               </div>
               <Button
                 variant="outline"
@@ -502,11 +441,14 @@ export default function CTAManagement() {
                 disabled={!tableData.hasNextPage}
               >
                 Next
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
-}
+};
+
+export default CtaTable;

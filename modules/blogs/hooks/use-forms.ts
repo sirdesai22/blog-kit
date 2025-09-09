@@ -5,12 +5,18 @@ export interface FormData {
   id: string;
   name: string;
   type: 'EndOfPost' | 'Sidebar' | 'InLine' | 'PopUp' | 'Floating' | 'Gated';
-  category?: {
+  categories: Array<{
     id: string;
     name: string;
     slug: string;
-  };
-  categoryId?: string;
+  }>;
+  tags: Array<{
+    id: string;
+    name: string;
+    slug: string;
+  }>;
+  categoryIds: string[]; // For filtering
+  tagIds: string[];
   isGlobal: boolean;
   enabled: boolean;
   submissionCount: number;

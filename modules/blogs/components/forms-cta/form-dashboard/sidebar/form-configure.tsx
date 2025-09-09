@@ -12,8 +12,32 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Settings, HelpCircle, Loader2, RefreshCw } from 'lucide-react';
+import { MultiSelectFilter } from '@/components/ui/multi-select-filter';
+import {
+  Settings,
+  HelpCircle,
+  Loader2,
+  RefreshCw,
+  Tag,
+  Folder,
+  Check,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { ChevronDown, X } from 'lucide-react';
 
 // SVGs for Form Types (Unchanged)
 const EndOfPostIcon = () => (
@@ -130,43 +154,70 @@ export default function FormConfigure() {
     updateField,
     setActiveTab,
     categories,
+    tags,
     loadingCategories,
+    loadingTags,
     categoriesError,
+    tagsError,
     refreshCategories,
+    refreshTags,
   } = useContext(FormContext);
 
   const {
     formName,
     formType,
-    category,
+    categories: selectedCategoriesRaw,
+    tags: selectedTagsRaw,
     formTrigger,
     timeDelay,
     scrollTrigger,
     isMandatory,
   } = formState;
 
-  // Get the display name for selected category
-  const selectedCategoryDisplay = useMemo(() => {
-    if (!category) return '';
+  // Add safety checks to ensure arrays
+  const selectedCategories = Array.isArray(selectedCategoriesRaw)
+    ? selectedCategoriesRaw
+    : [];
+  const selectedTags = Array.isArray(selectedTagsRaw) ? selectedTagsRaw : [];
 
-    if (category === 'global') {
-      return (
-        <div className="flex items-center">
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 mr-2">
-            Global
-          </span>
-          Apply to all categories
-        </div>
-      );
-    }
+  // Combine categories and tags for multiselect
+  const allOptions = useMemo(() => {
+    const categoryOptions = categories.map((cat) => ({
+      id: cat.id,
+      name: cat.name,
+      label: cat.name,
+      type: 'category' as const,
+    }));
 
-    const selectedCategory = categories.find((cat) => cat.id === category);
-    if (selectedCategory) {
-      return <div className="flex items-center">{selectedCategory.name}</div>;
-    }
+    const tagOptions = tags.map((tag) => ({
+      id: tag.id,
+      name: tag.name,
+      label: tag.name,
+      type: 'tag' as const,
+    }));
 
-    return category; // fallback to raw value
-  }, [category, categories]);
+    return [...categoryOptions, ...tagOptions];
+  }, [categories, tags]);
+
+  const selectedValues = useMemo(() => {
+    return [...selectedCategories, ...selectedTags];
+  }, [selectedCategories, selectedTags]);
+
+  const handleSelectionChange = (values: string[]) => {
+    const newCategories: string[] = [];
+    const newTags: string[] = [];
+
+    values.forEach((value) => {
+      if (categories.some((cat) => cat.id === value)) {
+        newCategories.push(value);
+      } else if (tags.some((tag) => tag.id === value)) {
+        newTags.push(value);
+      }
+    });
+
+    updateField('categories', newCategories);
+    updateField('tags', newTags);
+  };
 
   const isTriggerConfigurable = ['PopUp', 'Floating', 'Gated'].includes(
     formType
@@ -176,6 +227,202 @@ export default function FormConfigure() {
     formTrigger === 'TimeDelay' &&
     ['PopUp', 'Floating', 'Gated'].includes(formType);
   const showScrollTrigger = isTriggerConfigurable && formTrigger === 'Scroll';
+
+  // Create a custom multiselect component
+  const CategoriesTagsMultiSelect = () => {
+    const [open, setOpen] = useState(false);
+
+    // Combine categories and tags for multiselect
+    const allOptions = useMemo(() => {
+      const categoryOptions = (categories || []).map((cat) => ({
+        id: cat.id,
+        name: cat.name,
+        label: cat.name,
+        type: 'category' as const,
+      }));
+
+      const tagOptions = (tags || []).map((tag) => ({
+        id: tag.id,
+        name: tag.name,
+        label: tag.name,
+        type: 'tag' as const,
+      }));
+
+      return [...categoryOptions, ...tagOptions];
+    }, [categories, tags]);
+
+    const selectedValues = useMemo(() => {
+      return [...selectedCategories, ...selectedTags];
+    }, [selectedCategories, selectedTags]);
+
+    const handleSelectionChange = (value: string) => {
+      const newCategories = [...selectedCategories];
+      const newTags = [...selectedTags];
+
+      // Check if it's a category
+      const isCategory = categories?.some((cat) => cat.id === value);
+      const isTag = tags?.some((tag) => tag.id === value);
+
+      if (isCategory) {
+        const index = newCategories.indexOf(value);
+        if (index > -1) {
+          newCategories.splice(index, 1);
+        } else {
+          newCategories.push(value);
+        }
+        updateField('categories', newCategories);
+      } else if (isTag) {
+        const index = newTags.indexOf(value);
+        if (index > -1) {
+          newTags.splice(index, 1);
+        } else {
+          newTags.push(value);
+        }
+        updateField('tags', newTags);
+      }
+    };
+
+    const removeItem = (value: string) => {
+      const newCategories = selectedCategories.filter((id) => id !== value);
+      const newTags = selectedTags.filter((id) => id !== value);
+      updateField('categories', newCategories);
+      updateField('tags', newTags);
+    };
+
+    const getSelectedItemsDisplay = () => {
+      const selectedItems = [];
+
+      selectedCategories.forEach((catId) => {
+        const cat = categories?.find((c) => c.id === catId);
+        if (cat) {
+          selectedItems.push({ id: catId, name: cat.name, type: 'category' });
+        }
+      });
+
+      selectedTags.forEach((tagId) => {
+        const tag = tags?.find((t) => t.id === tagId);
+        if (tag) {
+          selectedItems.push({ id: tagId, name: tag.name, type: 'tag' });
+        }
+      });
+
+      return selectedItems;
+    };
+
+    const selectedItems = getSelectedItemsDisplay();
+
+    return (
+      <div className="space-y-2">
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className="w-full justify-between min-h-10"
+              disabled={loadingCategories || loadingTags}
+            >
+              <div className="flex flex-wrap gap-1">
+                {selectedItems.length === 0 ? (
+                  <span className="text-muted-foreground">
+                    {loadingCategories || loadingTags
+                      ? 'Loading...'
+                      : 'Select categories and tags...'}
+                  </span>
+                ) : (
+                  selectedItems.slice(0, 3).map((item) => (
+                    <span
+                      key={item.id}
+                      className="inline-flex items-center gap-1 px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs"
+                    >
+                      {item.type === 'category' ? (
+                        <Folder className="h-3 w-3 text-blue-500" />
+                      ) : (
+                        <Tag className="h-3 w-3 text-green-500" />
+                      )}
+                      {item.name}
+                      <X
+                        className="h-3 w-3 cursor-pointer hover:text-destructive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeItem(item.id);
+                        }}
+                      />
+                    </span>
+                  ))
+                )}
+                {selectedItems.length > 3 && (
+                  <span className="text-xs text-muted-foreground">
+                    +{selectedItems.length - 3} more
+                  </span>
+                )}
+              </div>
+              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-full p-0">
+            <Command>
+              <CommandInput placeholder="Search categories and tags..." />
+              <CommandEmpty>No items found.</CommandEmpty>
+              <CommandList>
+                <CommandGroup>
+                  {allOptions.map((option) => (
+                    <CommandItem
+                      key={option.id}
+                      value={option.id}
+                      onSelect={() => handleSelectionChange(option.id)}
+                    >
+                      <div className="flex items-center gap-2 w-full">
+                        <div className="mr-2 h-4 w-4 border border-muted-foreground rounded flex items-center justify-center">
+                          {selectedValues.includes(option.id) && (
+                            <Check className="h-3 w-3" />
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {option.type === 'category' ? (
+                            <Folder className="h-3 w-3 text-blue-500" />
+                          ) : (
+                            <Tag className="h-3 w-3 text-green-500" />
+                          )}
+                          <span className="text-sm">{option.label}</span>
+                          <span className="text-xs text-muted-foreground">
+                            ({option.type})
+                          </span>
+                        </div>
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+
+        {/* Selected items display */}
+        {selectedItems.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {selectedItems.map((item) => (
+              <span
+                key={item.id}
+                className="inline-flex items-center gap-1 px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs"
+              >
+                {item.type === 'category' ? (
+                  <Folder className="h-3 w-3 text-blue-500" />
+                ) : (
+                  <Tag className="h-3 w-3 text-green-500" />
+                )}
+                {item.name}
+                <X
+                  className="h-3 w-3 cursor-pointer hover:text-destructive"
+                  onClick={() => removeItem(item.id)}
+                />
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -219,124 +466,75 @@ export default function FormConfigure() {
           </div>
         </div>
 
-        {/* Category Selection */}
+        {/* Categories and Tags Selection */}
         <div>
           <div className="flex items-center gap-1.5 mb-2">
-            <Label htmlFor="category" className="text-normal">
-              Category / Tag
+            <Label htmlFor="categories-tags" className="text-normal">
+              Categories & Tags
             </Label>
             <HelpCircle className="h-4 w-4 text-gray-400" />
-            {categoriesError && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={refreshCategories}
-                className="ml-auto h-6 px-2"
-              >
-                <RefreshCw className="h-3 w-3" />
-              </Button>
+            {(categoriesError || tagsError) && (
+              <div className="ml-auto flex gap-1">
+                {categoriesError && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={refreshCategories}
+                    className="h-6 px-2"
+                    title="Refresh categories"
+                  >
+                    <RefreshCw className="h-3 w-3" />
+                  </Button>
+                )}
+                {tagsError && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={refreshTags}
+                    className="h-6 px-2"
+                    title="Refresh tags"
+                  >
+                    <RefreshCw className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
             )}
           </div>
 
-          <Select
-            value={category}
-            onValueChange={(v: string) => updateField('category', v)}
-            disabled={loadingCategories}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue
-                placeholder={
-                  loadingCategories
-                    ? 'Loading categories...'
-                    : 'Select a category'
-                }
-              >
-                {loadingCategories ? (
-                  <div className="flex items-center">
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Loading categories...
-                  </div>
-                ) : (
-                  selectedCategoryDisplay
-                )}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {/* Global option */}
-              <SelectItem value="global">
-                <div className="flex items-center">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 mr-2">
-                    Global
-                  </span>
-                  Apply to all categories
-                </div>
-              </SelectItem>
-
-              {/* Loading state */}
-              {loadingCategories && (
-                <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                  <div className="flex items-center">
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Loading categories...
-                  </div>
-                </div>
-              )}
-
-              {/* Error state */}
-              {categoriesError && !loadingCategories && (
-                <div className="px-2 py-1.5 text-sm text-red-500">
-                  <div className="flex items-center">
-                    <span className="mr-2">⚠️</span>
-                    {categoriesError}
-                  </div>
-                </div>
-              )}
-
-              {/* Categories from database */}
-              {!loadingCategories && categories.length > 0 && (
-                <>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      <div className="flex items-center">{cat.name}</div>
-                    </SelectItem>
-                  ))}
-                </>
-              )}
-
-              {/* No categories found */}
-              {!loadingCategories &&
-                !categoriesError &&
-                categories.length === 0 && (
-                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                    <div className="flex items-center">
-                      <span className="mr-2">📁</span>
-                      No categories found
-                    </div>
-                  </div>
-                )}
-            </SelectContent>
-          </Select>
+          <CategoriesTagsMultiSelect />
 
           {/* Helper text */}
-          {!loadingCategories &&
-            categories.length === 0 &&
-            !categoriesError && (
-              <p className="text-sm text-muted-foreground mt-1">
-                Create categories in your blog settings to organize forms by
-                category
-              </p>
-            )}
-
-          {categoriesError && (
-            <p className="text-sm text-red-500 mt-1">
-              Failed to load categories.
-              <button
-                onClick={refreshCategories}
-                className="underline ml-1 hover:no-underline"
-              >
-                Try again
-              </button>
+          {!loadingCategories && !loadingTags && allOptions.length === 0 && (
+            <p className="text-sm text-muted-foreground mt-1">
+              Create categories and tags in your blog settings to organize forms
             </p>
+          )}
+
+          {(categoriesError || tagsError) && (
+            <div className="mt-1 space-y-1">
+              {categoriesError && (
+                <p className="text-sm text-red-500">
+                  Failed to load categories.
+                  <button
+                    onClick={refreshCategories}
+                    className="underline ml-1 hover:no-underline"
+                  >
+                    Try again
+                  </button>
+                </p>
+              )}
+              {tagsError && (
+                <p className="text-sm text-red-500">
+                  Failed to load tags.
+                  <button
+                    onClick={refreshTags}
+                    className="underline ml-1 hover:no-underline"
+                  >
+                    Try again
+                  </button>
+                </p>
+              )}
+            </div>
           )}
         </div>
 

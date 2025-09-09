@@ -1,18 +1,39 @@
-"use client";
-import React, { useContext } from "react";
-import { CtaContext, CtaType, CtaTrigger } from "../context/cta-context";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+'use client';
+import React, { useContext, useMemo, useState } from 'react';
+import { CtaContext, CtaType, CtaTrigger } from '../context/cta-context';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Settings, HelpCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import {
+  Settings,
+  HelpCircle,
+  RefreshCw,
+  Tag,
+  Folder,
+  Check,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { ChevronDown, X } from 'lucide-react';
 
 // SVGs for CTA Types
 const EndOfPostIcon = () => (
@@ -91,9 +112,9 @@ const CtaTypeCard = ({
 }) => (
   <div
     onClick={() => onSelect(type)}
-    className={cn("p-2 border-2 rounded-lg text-center cursor-pointer", {
-      "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/50": isActive,
-      "border-gray-200 hover:border-gray-400 dark:border-zinc-700": !isActive,
+    className={cn('p-2 border-2 rounded-lg text-center cursor-pointer', {
+      'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/50': isActive,
+      'border-gray-200 hover:border-gray-400 dark:border-zinc-700': !isActive,
     })}
   >
     <div className="h-16 bg-gray-100 dark:bg-zinc-800 mb-2 rounded-md flex items-center justify-center overflow-hidden">
@@ -104,12 +125,235 @@ const CtaTypeCard = ({
 );
 
 export default function CtaConfigure() {
-  const { ctaState, updateField, setActiveTab } = useContext(CtaContext);
-  const { ctaName, type, category, trigger, timeDelay, scrollTrigger } =
-    ctaState;
-  const isTriggerConfigurable = ["PopUp", "Floating"].includes(type);
-  const showTimeDelay = isTriggerConfigurable && trigger === "TimeDelay";
-  const showScrollTrigger = isTriggerConfigurable && trigger === "Scroll";
+  const {
+    ctaState,
+    updateField,
+    setActiveTab,
+    categories,
+    tags,
+    loadingCategories,
+    loadingTags,
+    categoriesError,
+    tagsError,
+    refreshCategories,
+    refreshTags,
+  } = useContext(CtaContext);
+
+  const {
+    ctaName,
+    type,
+    categories: selectedCategoriesRaw,
+    tags: selectedTagsRaw,
+    trigger,
+    timeDelay,
+    scrollTrigger,
+  } = ctaState;
+
+  // Add safety checks to ensure arrays
+  const selectedCategories = Array.isArray(selectedCategoriesRaw)
+    ? selectedCategoriesRaw
+    : [];
+  const selectedTags = Array.isArray(selectedTagsRaw) ? selectedTagsRaw : [];
+
+  const isTriggerConfigurable = ['PopUp', 'Floating'].includes(type);
+  const showTimeDelay = isTriggerConfigurable && trigger === 'TimeDelay';
+  const showScrollTrigger = isTriggerConfigurable && trigger === 'Scroll';
+
+  // Create a custom multiselect component
+  const CategoriesTagsMultiSelect = () => {
+    const [open, setOpen] = useState(false);
+
+    // Combine categories and tags for multiselect
+    const allOptions = useMemo(() => {
+      const categoryOptions = (categories || []).map((cat) => ({
+        id: cat.id,
+        name: cat.name,
+        label: cat.name,
+        type: 'category' as const,
+      }));
+
+      const tagOptions = (tags || []).map((tag) => ({
+        id: tag.id,
+        name: tag.name,
+        label: tag.name,
+        type: 'tag' as const,
+      }));
+
+      return [...categoryOptions, ...tagOptions];
+    }, [categories, tags]);
+
+    const selectedValues = useMemo(() => {
+      return [...selectedCategories, ...selectedTags];
+    }, [selectedCategories, selectedTags]);
+
+    const handleSelectionChange = (value: string) => {
+      const newCategories = [...selectedCategories];
+      const newTags = [...selectedTags];
+
+      // Check if it's a category
+      const isCategory = categories?.some((cat) => cat.id === value);
+      const isTag = tags?.some((tag) => tag.id === value);
+
+      if (isCategory) {
+        const index = newCategories.indexOf(value);
+        if (index > -1) {
+          newCategories.splice(index, 1);
+        } else {
+          newCategories.push(value);
+        }
+        updateField('categories', newCategories);
+      } else if (isTag) {
+        const index = newTags.indexOf(value);
+        if (index > -1) {
+          newTags.splice(index, 1);
+        } else {
+          newTags.push(value);
+        }
+        updateField('tags', newTags);
+      }
+    };
+
+    const removeItem = (value: string) => {
+      const newCategories = selectedCategories.filter((id) => id !== value);
+      const newTags = selectedTags.filter((id) => id !== value);
+      updateField('categories', newCategories);
+      updateField('tags', newTags);
+    };
+
+    const getSelectedItemsDisplay = () => {
+      const selectedItems = [];
+
+      selectedCategories.forEach((catId) => {
+        const cat = categories?.find((c) => c.id === catId);
+        if (cat) {
+          selectedItems.push({ id: catId, name: cat.name, type: 'category' });
+        }
+      });
+
+      selectedTags.forEach((tagId) => {
+        const tag = tags?.find((t) => t.id === tagId);
+        if (tag) {
+          selectedItems.push({ id: tagId, name: tag.name, type: 'tag' });
+        }
+      });
+
+      return selectedItems;
+    };
+
+    const selectedItems = getSelectedItemsDisplay();
+
+    return (
+      <div className="space-y-2">
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className="w-full justify-between min-h-10"
+              disabled={loadingCategories || loadingTags}
+            >
+              <div className="flex flex-wrap gap-1">
+                {selectedItems.length === 0 ? (
+                  <span className="text-muted-foreground">
+                    {loadingCategories || loadingTags
+                      ? 'Loading...'
+                      : 'Select categories and tags...'}
+                  </span>
+                ) : (
+                  selectedItems.slice(0, 3).map((item) => (
+                    <span
+                      key={item.id}
+                      className="inline-flex items-center gap-1 px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs"
+                    >
+                      {item.type === 'category' ? (
+                        <Folder className="h-3 w-3 text-blue-500" />
+                      ) : (
+                        <Tag className="h-3 w-3 text-green-500" />
+                      )}
+                      {item.name}
+                      <X
+                        className="h-3 w-3 cursor-pointer hover:text-destructive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeItem(item.id);
+                        }}
+                      />
+                    </span>
+                  ))
+                )}
+                {selectedItems.length > 3 && (
+                  <span className="text-xs text-muted-foreground">
+                    +{selectedItems.length - 3} more
+                  </span>
+                )}
+              </div>
+              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-full p-0">
+            <Command>
+              <CommandInput placeholder="Search categories and tags..." />
+              <CommandEmpty>No items found.</CommandEmpty>
+              <CommandList>
+                <CommandGroup>
+                  {allOptions.map((option) => (
+                    <CommandItem
+                      key={option.id}
+                      value={option.id}
+                      onSelect={() => handleSelectionChange(option.id)}
+                    >
+                      <div className="flex items-center gap-2 w-full">
+                        <div className="mr-2 h-4 w-4 border border-muted-foreground rounded flex items-center justify-center">
+                          {selectedValues.includes(option.id) && (
+                            <Check className="h-3 w-3" />
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {option.type === 'category' ? (
+                            <Folder className="h-3 w-3 text-blue-500" />
+                          ) : (
+                            <Tag className="h-3 w-3 text-green-500" />
+                          )}
+                          <span className="text-sm">{option.label}</span>
+                          <span className="text-xs text-muted-foreground">
+                            ({option.type})
+                          </span>
+                        </div>
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+
+        {/* Selected items display */}
+        {selectedItems.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {selectedItems.map((item) => (
+              <span
+                key={item.id}
+                className="inline-flex items-center gap-1 px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs"
+              >
+                {item.type === 'category' ? (
+                  <Folder className="h-3 w-3 text-blue-500" />
+                ) : (
+                  <Tag className="h-3 w-3 text-green-500" />
+                )}
+                {item.name}
+                <X
+                  className="h-3 w-3 cursor-pointer hover:text-destructive"
+                  onClick={() => removeItem(item.id)}
+                />
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -131,7 +375,7 @@ export default function CtaConfigure() {
             id="cta-name"
             value={ctaName}
             placeholder="e.g. Homepage Welcome CTA"
-            onChange={(e) => updateField("ctaName", e.target.value)}
+            onChange={(e) => updateField('ctaName', e.target.value)}
           />
         </div>
         <div>
@@ -141,33 +385,90 @@ export default function CtaConfigure() {
               <CtaTypeCard
                 key={key}
                 type={key as CtaType}
-                label={key.replace(/([A-Z])/g, " $1").trim()}
+                label={key.replace(/([A-Z])/g, ' $1').trim()}
                 isActive={type === key}
-                onSelect={(t) => updateField("type", t)}
+                onSelect={(t) => updateField('type', t)}
               />
             ))}
           </div>
         </div>
+
+        {/* Categories and Tags Selection */}
         <div>
           <div className="flex items-center gap-1.5 mb-2">
-            <Label htmlFor="category" className=" text-normal">
-              Category / Tag
+            <Label htmlFor="categories-tags" className="text-normal">
+              Categories & Tags
             </Label>
             <HelpCircle className="h-4 w-4 text-gray-400" />
+            {(categoriesError || tagsError) && (
+              <div className="ml-auto flex gap-1">
+                {categoriesError && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={refreshCategories}
+                    className="h-6 px-2"
+                    title="Refresh categories"
+                  >
+                    <RefreshCw className="h-3 w-3" />
+                  </Button>
+                )}
+                {tagsError && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={refreshTags}
+                    className="h-6 px-2"
+                    title="Refresh tags"
+                  >
+                    <RefreshCw className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
-          <Select
-            value={category}
-            onValueChange={(v: string) => updateField("category", v)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Global">Global</SelectItem>
-              <SelectItem value="Blog">Blog</SelectItem>
-            </SelectContent>
-          </Select>
+
+          <CategoriesTagsMultiSelect />
+
+          {/* Helper text */}
+          {!loadingCategories &&
+            !loadingTags &&
+            categories.length === 0 &&
+            tags.length === 0 && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Create categories and tags in your blog settings to organize
+                CTAs
+              </p>
+            )}
+
+          {(categoriesError || tagsError) && (
+            <div className="mt-1 space-y-1">
+              {categoriesError && (
+                <p className="text-sm text-red-500">
+                  Failed to load categories.
+                  <button
+                    onClick={refreshCategories}
+                    className="underline ml-1 hover:no-underline"
+                  >
+                    Try again
+                  </button>
+                </p>
+              )}
+              {tagsError && (
+                <p className="text-sm text-red-500">
+                  Failed to load tags.
+                  <button
+                    onClick={refreshTags}
+                    className="underline ml-1 hover:no-underline"
+                  >
+                    Try again
+                  </button>
+                </p>
+              )}
+            </div>
+          )}
         </div>
+
         {isTriggerConfigurable && (
           <div className="space-y-3 p-3 border rounded-md bg-muted/30 dark:border-zinc-700">
             <div className="flex items-center gap-1.5 mb-2">
@@ -178,7 +479,7 @@ export default function CtaConfigure() {
             </div>
             <Select
               value={trigger}
-              onValueChange={(v: CtaTrigger) => updateField("trigger", v)}
+              onValueChange={(v: CtaTrigger) => updateField('trigger', v)}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Time delay / Scroll trigger / Exit Intent" />
@@ -186,7 +487,7 @@ export default function CtaConfigure() {
               <SelectContent>
                 <SelectItem value="TimeDelay">Time delay</SelectItem>
                 <SelectItem value="Scroll">Scroll trigger</SelectItem>
-                {type === "PopUp" && (
+                {type === 'PopUp' && (
                   <SelectItem value="ExitIntent">Exit Intent</SelectItem>
                 )}
               </SelectContent>
@@ -201,7 +502,7 @@ export default function CtaConfigure() {
                   type="number"
                   value={timeDelay}
                   onChange={(e) =>
-                    updateField("timeDelay", parseInt(e.target.value, 10))
+                    updateField('timeDelay', parseInt(e.target.value, 10))
                   }
                 />
                 <span className="text-small">Seconds</span>
@@ -217,7 +518,7 @@ export default function CtaConfigure() {
                   type="number"
                   value={scrollTrigger}
                   onChange={(e) =>
-                    updateField("scrollTrigger", parseInt(e.target.value, 10))
+                    updateField('scrollTrigger', parseInt(e.target.value, 10))
                   }
                 />
                 <span className="text-small">% of post page</span>
@@ -226,7 +527,7 @@ export default function CtaConfigure() {
           </div>
         )}
         <div className="flex justify-end items-center pt-2">
-          <Button onClick={() => setActiveTab("cta")}>Next -&gt;</Button>
+          <Button onClick={() => setActiveTab('cta')}>Next -&gt;</Button>
         </div>
       </div>
     </div>

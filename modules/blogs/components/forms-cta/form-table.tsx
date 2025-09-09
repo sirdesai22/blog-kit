@@ -57,7 +57,6 @@ import { useBlogFilterOptions } from '@/modules/blogs/hooks/use-blog-filter-opti
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
-// Form type configuration
 const FORM_TYPE_CONFIG = {
   EndOfPost: {
     label: 'End of Post',
@@ -100,7 +99,6 @@ export default function FormsManagementPage() {
   const params = useParams();
   const { workspaceSlug, blogId } = params;
 
-  // State management
   const [activeTab, setActiveTab] = useState('forms');
   const [filters, setFilters] = useState<FormsFilters>({});
   const [sort, setSort] = useState<FormsSort>({
@@ -112,30 +110,26 @@ export default function FormsManagementPage() {
     pageSize: 10,
   });
 
-  // Data fetching - separate APIs for different purposes
   const {
     data: tableData,
     isLoading,
     error,
     refetch,
   } = useFormsTable(blogId as string, filters, sort, pagination);
-  const { data: formsData } = useForms(blogId as string); // For global forms
+  const { data: formsData } = useForms(blogId as string);
   const { categories } = useBlogFilterOptions(
     workspaceSlug as string,
     blogId as string
   );
 
-  // Mutations
   const toggleFormMutation = useToggleForm(blogId as string);
   const deleteFormMutation = useDeleteForm(blogId as string);
 
-  // Get global forms from basic forms data
   const globalForms = useMemo(
     () => formsData?.forms?.filter((f: any) => f.categoryId === 'global') || [],
     [formsData?.forms]
   );
 
-  // Handlers
   const handleSearchChange = (search: string) => {
     setFilters((prev) => ({ ...prev, search: search || undefined }));
     setPagination((prev) => ({ ...prev, page: 1 }));
@@ -204,7 +198,6 @@ export default function FormsManagementPage() {
     <div className="min-h-screen bg-gray-50/50 p-6">
       <div className="max-w-7xl mx-auto">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <TabsList className="grid w-48 grid-cols-2">
@@ -229,7 +222,6 @@ export default function FormsManagementPage() {
           </div>
 
           <TabsContent value="forms" className="space-y-6">
-            {/* Global Forms Section */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Global Forms</CardTitle>
@@ -302,7 +294,6 @@ export default function FormsManagementPage() {
               </CardContent>
             </Card>
 
-            {/* Post Forms Section */}
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -491,7 +482,6 @@ export default function FormsManagementPage() {
                       </TableBody>
                     </Table>
 
-                    {/* Pagination */}
                     {tableData.totalCount > pagination.pageSize && (
                       <div className="flex items-center justify-between mt-4">
                         <p className="text-sm text-muted-foreground">
