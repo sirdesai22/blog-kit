@@ -49,20 +49,22 @@ const FormDashboard = ({ activeTab }: { activeTab: string }) => {
             <SidebarContent activeTab={activeTab} />
           )}
         </div>
-        <div className="mt-auto border-t px-5 py-3">
-          <div className="flex items-center justify-between">
-            <span className="text-normal">Custom Code &lt;/&gt;</span>
-            <div className="flex items-center gap-2">
-              <p className="text-sm">
-                {formState.customCode.isEnabled ? "Enabled" : "Disabled"}
-              </p>
-              <Switch
-                checked={formState.customCode.isEnabled}
-                onCheckedChange={setCustomCodeEnabled}
-              />
+        {activeTab === "configure" && !isCustomCodeActive && (
+          <div className="mt-auto border-t px-5 py-3">
+            <div className="flex items-center justify-between">
+              <span className="text-normal">Embed Form &lt;/&gt;</span>
+              <div className="flex items-center gap-2">
+                <p className="text-sm">
+                  {formState.customCode.isEnabled ? "Enabled" : "Disabled"}
+                </p>
+                <Switch
+                  checked={formState.customCode.isEnabled}
+                  onCheckedChange={setCustomCodeEnabled}
+                />
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </aside>
 
       <main className="flex-1 bg-gray-100 dark:bg-zinc-900 overflow-y-auto flex justify-center p-2">
@@ -127,6 +129,7 @@ const LayoutContent = ({
         isSaving={isSaving}
         saveMessage={saveMessage}
         saveError={saveError}
+        isDisabled={isCustomCodeActive}
       />
       <FormDashboard activeTab={activeTab} />
     </>

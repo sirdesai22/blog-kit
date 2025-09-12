@@ -51,20 +51,22 @@ const CtaDashboard = ({ activeTab }: { activeTab: string }) => {
             <SidebarContent activeTab={activeTab} />
           )}
         </div>
-        <div className="mt-auto border-t px-5 py-3">
-          <div className="flex items-center justify-between">
-            <span className="text-normal">Custom Code &lt;/&gt;</span>
-            <div className="flex items-center gap-2">
-              <p className="text-sm">
-                {isCustomCodeActive ? "Enabled" : "Disabled"}
-              </p>
-              <Switch
-                checked={isCustomCodeActive}
-                onCheckedChange={setCustomCodeEnabled}
-              />
+        {(activeTab === "configure" && !isCustomCodeActive) && (
+          <div className="mt-auto border-t px-5 py-3">
+            <div className="flex items-center justify-between">
+              <span className="text-normal">Custom Code &lt;/&gt;</span>
+              <div className="flex items-center gap-2">
+                <p className="text-sm">
+                  {isCustomCodeActive ? "Enabled" : "Disabled"}
+                </p>
+                <Switch
+                  checked={isCustomCodeActive}
+                  onCheckedChange={setCustomCodeEnabled}
+                />
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </aside>
       <main className="flex-1 bg-gray-100 dark:bg-zinc-900 overflow-y-auto flex justify-center p-2">
         <div
@@ -94,6 +96,7 @@ const LayoutContent = ({
 }) => {
   const {
     ctaTabs,
+    ctaState,
     setCustomCodeEnabled,
     onBack,
     theme,
@@ -103,6 +106,9 @@ const LayoutContent = ({
     saveChanges,
     cancelChanges,
   } = useContext(CtaContext);
+
+  const isCustomCodeActive = ctaState.customCode.isEnabled;
+
   return (
     <>
       <EditorHeader
@@ -117,11 +123,13 @@ const LayoutContent = ({
         onSaveChanges={saveChanges}
         onCancelChanges={cancelChanges}
         onBack={onBack}
+        isDisabled={isCustomCodeActive}
       />
       <CtaDashboard activeTab={activeTab} />
     </>
   );
 };
+
 
 export default function MainLayout({ pageId }: { pageId: string }) {
   const [activeTab, setActiveTab] = useState("configure");

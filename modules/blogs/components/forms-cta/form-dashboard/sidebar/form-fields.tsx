@@ -27,7 +27,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 export default function FormFields() {
-  const { formState, updateField, setFields, deleteFormField } =
+  const { formState, updateField,setActiveTab,  setFields, deleteFormField } =
     useContext(FormContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingField, setEditingField] = useState<FormField | null>(null);
@@ -71,9 +71,14 @@ export default function FormFields() {
       <div className="space-y-6">
         {/* --- Content Section --- */}
         <div className="space-y-4">
-          <h3 className="text-main">Content</h3>
+          <div>
+            <h3 className="text-main">Content</h3>
+            <p className="text-small">Set the Content of your form.</p>
+          </div>
           <div className="space-y-2">
-            <Label htmlFor="heading">Heading</Label>
+            <Label className="text-normal font-medium" htmlFor="heading">
+              Heading
+            </Label>
             <Input
               id="heading"
               value={formState.heading}
@@ -81,7 +86,9 @@ export default function FormFields() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label className="text-normal font-medium" htmlFor="description">
+              Description
+            </Label>
             <Textarea
               id="description"
               value={formState.description}
@@ -90,10 +97,12 @@ export default function FormFields() {
           </div>
         </div>
 
+        <Separator />
+
         {/* --- Fields Section --- */}
-        <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <h3 className="text-main ">Fields</h3>
+        <div className="space-y-2">
+          <div className="flex justify-between items-end">
+            <h3 className="text-normal font-medium ">Fields</h3>
             <Button variant="outline" size="sm" onClick={handleAddNew}>
               <Plus className="h-4 w-4 mr-2" />
               Add Field
@@ -120,9 +129,10 @@ export default function FormFields() {
 
         {/* --- Submission Section --- */}
         <div className="space-y-4">
-          <h3 className="text-main">Submission</h3>
           <div className="space-y-2">
-            <Label htmlFor="button-text">Button Text</Label>
+            <Label className="text-normal font-medium" htmlFor="button-text">
+              Button Text
+            </Label>
             <Input
               id="button-text"
               value={formState.buttonText}
@@ -130,13 +140,19 @@ export default function FormFields() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="footnote">Footnote</Label>
+            <Label className="text-normal font-medium" htmlFor="footnote">
+              Footnote
+            </Label>
             <Textarea
               id="footnote"
               value={formState.footnote}
               onChange={(e) => updateField("footnote", e.target.value)}
             />
           </div>
+        </div>
+        <div className="flex justify-between">
+          <Button variant="outline" onClick={() => setActiveTab("configure")}>Back ←</Button>
+          <Button onClick={() => setActiveTab("confirmation")}>Next →</Button>
         </div>
 
         {/* Modals */}

@@ -1,16 +1,16 @@
-'use client';
-import React, { useContext, useMemo, useState } from 'react';
-import { CtaContext, CtaType, CtaTrigger } from '../context/cta-context';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+"use client";
+import React, { useContext, useMemo, useState } from "react";
+import { CtaContext, CtaType, CtaTrigger } from "../context/cta-context";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import {
   Settings,
   HelpCircle,
@@ -18,8 +18,8 @@ import {
   Tag,
   Folder,
   Check,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   Command,
   CommandEmpty,
@@ -27,13 +27,14 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '@/components/ui/command';
+} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
-import { ChevronDown, X } from 'lucide-react';
+} from "@/components/ui/popover";
+import { ChevronDown, X } from "lucide-react";
+import { Tooltip } from "@/components/common/tooltip";
 
 // SVGs for CTA Types
 const EndOfPostIcon = () => (
@@ -112,9 +113,9 @@ const CtaTypeCard = ({
 }) => (
   <div
     onClick={() => onSelect(type)}
-    className={cn('p-2 border-2 rounded-lg text-center cursor-pointer', {
-      'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/50': isActive,
-      'border-gray-200 hover:border-gray-400 dark:border-zinc-700': !isActive,
+    className={cn("p-2 border-2 rounded-lg text-center cursor-pointer", {
+      "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/50": isActive,
+      "border-gray-200 hover:border-gray-400 dark:border-zinc-700": !isActive,
     })}
   >
     <div className="h-16 bg-gray-100 dark:bg-zinc-800 mb-2 rounded-md flex items-center justify-center overflow-hidden">
@@ -155,9 +156,9 @@ export default function CtaConfigure() {
     : [];
   const selectedTags = Array.isArray(selectedTagsRaw) ? selectedTagsRaw : [];
 
-  const isTriggerConfigurable = ['PopUp', 'Floating'].includes(type);
-  const showTimeDelay = isTriggerConfigurable && trigger === 'TimeDelay';
-  const showScrollTrigger = isTriggerConfigurable && trigger === 'Scroll';
+  const isTriggerConfigurable = ["PopUp", "Floating"].includes(type);
+  const showTimeDelay = isTriggerConfigurable && trigger === "TimeDelay";
+  const showScrollTrigger = isTriggerConfigurable && trigger === "Scroll";
 
   // Create a custom multiselect component
   const CategoriesTagsMultiSelect = () => {
@@ -169,14 +170,14 @@ export default function CtaConfigure() {
         id: cat.id,
         name: cat.name,
         label: cat.name,
-        type: 'category' as const,
+        type: "category" as const,
       }));
 
       const tagOptions = (tags || []).map((tag) => ({
         id: tag.id,
         name: tag.name,
         label: tag.name,
-        type: 'tag' as const,
+        type: "tag" as const,
       }));
 
       return [...categoryOptions, ...tagOptions];
@@ -201,7 +202,7 @@ export default function CtaConfigure() {
         } else {
           newCategories.push(value);
         }
-        updateField('categories', newCategories);
+        updateField("categories", newCategories);
       } else if (isTag) {
         const index = newTags.indexOf(value);
         if (index > -1) {
@@ -209,15 +210,15 @@ export default function CtaConfigure() {
         } else {
           newTags.push(value);
         }
-        updateField('tags', newTags);
+        updateField("tags", newTags);
       }
     };
 
     const removeItem = (value: string) => {
       const newCategories = selectedCategories.filter((id) => id !== value);
       const newTags = selectedTags.filter((id) => id !== value);
-      updateField('categories', newCategories);
-      updateField('tags', newTags);
+      updateField("categories", newCategories);
+      updateField("tags", newTags);
     };
 
     const getSelectedItemsDisplay = () => {
@@ -226,14 +227,14 @@ export default function CtaConfigure() {
       selectedCategories.forEach((catId) => {
         const cat = categories?.find((c) => c.id === catId);
         if (cat) {
-          selectedItems.push({ id: catId, name: cat.name, type: 'category' });
+          selectedItems.push({ id: catId, name: cat.name, type: "category" });
         }
       });
 
       selectedTags.forEach((tagId) => {
         const tag = tags?.find((t) => t.id === tagId);
         if (tag) {
-          selectedItems.push({ id: tagId, name: tag.name, type: 'tag' });
+          selectedItems.push({ id: tagId, name: tag.name, type: "tag" });
         }
       });
 
@@ -257,8 +258,8 @@ export default function CtaConfigure() {
                 {selectedItems.length === 0 ? (
                   <span className="text-muted-foreground">
                     {loadingCategories || loadingTags
-                      ? 'Loading...'
-                      : 'Select categories and tags...'}
+                      ? "Loading..."
+                      : "Select categories and tags..."}
                   </span>
                 ) : (
                   selectedItems.slice(0, 3).map((item) => (
@@ -266,7 +267,7 @@ export default function CtaConfigure() {
                       key={item.id}
                       className="inline-flex items-center gap-1 px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs"
                     >
-                      {item.type === 'category' ? (
+                      {item.type === "category" ? (
                         <Folder className="h-3 w-3 text-blue-500" />
                       ) : (
                         <Tag className="h-3 w-3 text-green-500" />
@@ -310,7 +311,7 @@ export default function CtaConfigure() {
                           )}
                         </div>
                         <div className="flex items-center gap-1">
-                          {option.type === 'category' ? (
+                          {option.type === "category" ? (
                             <Folder className="h-3 w-3 text-blue-500" />
                           ) : (
                             <Tag className="h-3 w-3 text-green-500" />
@@ -337,7 +338,7 @@ export default function CtaConfigure() {
                 key={item.id}
                 className="inline-flex items-center gap-1 px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs"
               >
-                {item.type === 'category' ? (
+                {item.type === "category" ? (
                   <Folder className="h-3 w-3 text-blue-500" />
                 ) : (
                   <Tag className="h-3 w-3 text-green-500" />
@@ -358,7 +359,7 @@ export default function CtaConfigure() {
   return (
     <div className="space-y-6">
       <div className="flex items-start gap-3">
-        <Settings className="h-4 w-4 text-gray-600 dark:text-gray-400 mt-1" />
+        {/* <Settings className="h-4 w-4 text-gray-600 dark:text-small mt-1" /> */}
         <div>
           <h1 className="text-main">Configure CTA</h1>
           <p className="text-small">
@@ -368,26 +369,26 @@ export default function CtaConfigure() {
       </div>
       <div className="space-y-5">
         <div>
-          <Label htmlFor="cta-name" className=" text-normal mb-2 block">
+          <Label htmlFor="cta-name" className=" text-normal font-medium mb-2 block">
             CTA Name
           </Label>
           <Input
             id="cta-name"
             value={ctaName}
             placeholder="e.g. Homepage Welcome CTA"
-            onChange={(e) => updateField('ctaName', e.target.value)}
+            onChange={(e) => updateField("ctaName", e.target.value)}
           />
         </div>
         <div>
-          <Label className=" text-normal mb-2 block">Type</Label>
+          <Label className=" text-normal font-medium mb-2 block">Type</Label>
           <div className="grid grid-cols-3 gap-3">
             {Object.keys(icons).map((key) => (
               <CtaTypeCard
                 key={key}
                 type={key as CtaType}
-                label={key.replace(/([A-Z])/g, ' $1').trim()}
+                label={key.replace(/([A-Z])/g, " $1").trim()}
                 isActive={type === key}
-                onSelect={(t) => updateField('type', t)}
+                onSelect={(t) => updateField("type", t)}
               />
             ))}
           </div>
@@ -396,10 +397,12 @@ export default function CtaConfigure() {
         {/* Categories and Tags Selection */}
         <div>
           <div className="flex items-center gap-1.5 mb-2">
-            <Label htmlFor="categories-tags" className="text-normal">
+            <Label htmlFor="categories-tags" className="text-normal font-medium">
               Categories & Tags
             </Label>
-            <HelpCircle className="h-4 w-4 text-gray-400" />
+            <Tooltip content="Select categories and tags to organize your CTAs.">
+              <HelpCircle className="h-4 w-4 ml-2 text-small cursor-pointer" />
+            </Tooltip>
             {(categoriesError || tagsError) && (
               <div className="ml-auto flex gap-1">
                 {categoriesError && (
@@ -470,16 +473,18 @@ export default function CtaConfigure() {
         </div>
 
         {isTriggerConfigurable && (
-          <div className="space-y-3 p-3 border rounded-md bg-muted/30 dark:border-zinc-700">
+          <>
             <div className="flex items-center gap-1.5 mb-2">
-              <Label htmlFor="cta-trigger" className="">
+              <Label htmlFor="cta-trigger" className="text-normal font-medium">
                 CTA trigger
               </Label>
-              <HelpCircle className="h-4 w-4 text-gray-400" />
+              <Tooltip content="Select the trigger for the CTA.">
+                <HelpCircle className="h-4 w-4 ml-2 text-small cursor-pointer" />
+              </Tooltip>
             </div>
             <Select
               value={trigger}
-              onValueChange={(v: CtaTrigger) => updateField('trigger', v)}
+              onValueChange={(v: CtaTrigger) => updateField("trigger", v)}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Time delay / Scroll trigger / Exit Intent" />
@@ -487,14 +492,14 @@ export default function CtaConfigure() {
               <SelectContent>
                 <SelectItem value="TimeDelay">Time delay</SelectItem>
                 <SelectItem value="Scroll">Scroll trigger</SelectItem>
-                {type === 'PopUp' && (
+                {type === "PopUp" && (
                   <SelectItem value="ExitIntent">Exit Intent</SelectItem>
                 )}
               </SelectContent>
             </Select>
             {showTimeDelay && (
               <div className="flex items-center gap-2 mt-3">
-                <Label className="text-small whitespace-nowrap">
+                <Label className="text-normal whitespace-nowrap">
                   Time Delay
                 </Label>
                 <Input
@@ -502,15 +507,15 @@ export default function CtaConfigure() {
                   type="number"
                   value={timeDelay}
                   onChange={(e) =>
-                    updateField('timeDelay', parseInt(e.target.value, 10))
+                    updateField("timeDelay", parseInt(e.target.value, 10))
                   }
                 />
-                <span className="text-small">Seconds</span>
+                <span className="text-normal">Seconds</span>
               </div>
             )}
             {showScrollTrigger && (
               <div className="flex items-center gap-2 mt-3">
-                <Label className="text-small whitespace-nowrap">
+                <Label className="text-normal whitespace-nowrap">
                   Scroll Trigger
                 </Label>
                 <Input
@@ -518,16 +523,16 @@ export default function CtaConfigure() {
                   type="number"
                   value={scrollTrigger}
                   onChange={(e) =>
-                    updateField('scrollTrigger', parseInt(e.target.value, 10))
+                    updateField("scrollTrigger", parseInt(e.target.value, 10))
                   }
                 />
-                <span className="text-small">% of post page</span>
+                <span className="text-normal">% of post page</span>
               </div>
             )}
-          </div>
+          </>
         )}
         <div className="flex justify-end items-center pt-2">
-          <Button onClick={() => setActiveTab('cta')}>Next -&gt;</Button>
+          <Button onClick={() => setActiveTab("cta")}>Next →</Button>
         </div>
       </div>
     </div>

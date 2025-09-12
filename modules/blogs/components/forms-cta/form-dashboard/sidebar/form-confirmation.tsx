@@ -14,9 +14,11 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { CheckCircle2 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 
 export default function FormConfirmation() {
-  const { formState, setFormState } = useContext(FormContext);
+  const { formState,setActiveTab, setFormState } = useContext(FormContext);
   const { confirmation } = formState;
 
   // Corrected state update logic for nested objects
@@ -38,14 +40,18 @@ export default function FormConfirmation() {
         {/* <CheckCircle2 className="h-4 w-4 text-normal mt-1" /> */}
         <div>
           <h1 className="text-main">Confirmation Message</h1>
+          <p className="text-small">
+            Set the confirmation message of your form.
+          </p>
         </div>
       </div>
 
       {/* --- Message Content Section --- */}
       <div className="space-y-4">
-        <h3 className="text-main">Message Content</h3>
         <div className="space-y-2">
-          <Label htmlFor="conf-heading">Heading</Label>
+          <Label className="text-normal font-medium" htmlFor="conf-heading">
+            Heading
+          </Label>
           <Input
             id="conf-heading"
             value={confirmation.heading}
@@ -55,7 +61,9 @@ export default function FormConfirmation() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="conf-description">Description</Label>
+          <Label className="text-normal font-medium" htmlFor="conf-description">
+            Description
+          </Label>
           <Textarea
             id="conf-description"
             value={confirmation.description}
@@ -65,10 +73,14 @@ export default function FormConfirmation() {
           />
         </div>
 
+<Separator />
+
+
         {/* --- Action Button Section --- */}
-        <h3 className="text-main">Action Button</h3>
         <div className="space-y-2">
-          <Label htmlFor="conf-button-text">Button Text</Label>
+          <Label className="text-normal font-medium" htmlFor="conf-button-text">
+            Button Text
+          </Label>
           <Input
             id="conf-button-text"
             value={confirmation.buttonText}
@@ -78,7 +90,9 @@ export default function FormConfirmation() {
           />
         </div>
         <div className="space-y-2 w-full">
-          <Label htmlFor="conf-button-type">Button Type</Label>
+          <Label className="text-normal font-medium" htmlFor="conf-button-type">
+            Button Type
+          </Label>
           <Select
             value={confirmation.buttonType}
             onValueChange={(v: ConfirmationButtonType) =>
@@ -95,11 +109,18 @@ export default function FormConfirmation() {
           </Select>
         </div>
 
+        <div className="flex justify-between">
+          <Button variant="outline" onClick={() => setActiveTab("form")}>← Back</Button>
+          <Button onClick={() => setActiveTab("action")}>Next →</Button>
+        </div>
+
         {/* Conditional fields for 'Link' type */}
         {confirmation.buttonType === "Link" && (
           <div className="space-y-4  mt-4">
             <div className="space-y-2">
-              <Label htmlFor="conf-url">Redirect URL</Label>
+              <Label className="text-normal font-medium" htmlFor="conf-url">
+                Redirect URL
+              </Label>
               <Input
                 id="conf-url"
                 placeholder="https://example.com"
@@ -117,7 +138,9 @@ export default function FormConfirmation() {
                   handleConfirmationChange("openInNewTab", c)
                 }
               />
-              <Label htmlFor="conf-new-tab">Open in New Tab</Label>
+              <Label className="text-normal font-medium" htmlFor="conf-new-tab">
+                Open in New Tab
+              </Label>
             </div>
           </div>
         )}

@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Menu, Bold, Italic, Underline, Link } from "lucide-react";
 import { produce } from "immer";
+import { Separator } from "@/components/ui/separator";
 
 export default function CtaEditor() {
   const { ctaState, updateContentField, saveChanges, setActiveTab } =
@@ -27,12 +28,13 @@ export default function CtaEditor() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex flex-col mb-5">
         <h1 className="text-main">CTA</h1>
+        <p className="text-small">Set the CTA for this callout.</p>
       </div>
       <div className="flex-1 space-y-4 overflow-y-auto pr-2">
         <div className="space-y-2">
-          <Label htmlFor="cta-heading">Heading</Label>
+          <Label className="text-normal font-medium" htmlFor="cta-heading">Heading</Label>
           <Input
             id="cta-heading"
             value={content.heading}
@@ -40,7 +42,7 @@ export default function CtaEditor() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="cta-desc">Description</Label>
+          <Label className="text-normal font-medium" htmlFor="cta-desc">Description</Label>
           <Textarea
             id="cta-desc"
             value={content.description}
@@ -48,8 +50,11 @@ export default function CtaEditor() {
             className="rounded-t-none"
           />
         </div>
+
+        <Separator />
+
         <div className="space-y-2">
-          <Label>Primary Button</Label>
+          <Label className="text-normal font-medium">Primary Button</Label>
           <Input
             placeholder="Button Text"
             value={content.primaryButton.text}
@@ -66,7 +71,7 @@ export default function CtaEditor() {
           />
         </div>
         <div className="space-y-2">
-          <Label>Secondary Button</Label>
+          <Label className="text-normal font-medium">Secondary Button</Label>
           <Input
             placeholder="Button Text"
             value={content.secondaryButton.text}
@@ -82,8 +87,10 @@ export default function CtaEditor() {
             }
           />
         </div>
+        <Separator />
+
         <div className="space-y-2">
-          <Label htmlFor="cta-footnote">Footnote</Label>
+          <Label className="text-normal font-medium" htmlFor="cta-footnote">Footnote</Label>
           <Textarea
             id="cta-footnote"
             value={content.footnote}
@@ -91,13 +98,14 @@ export default function CtaEditor() {
             className="rounded-t-none"
           />
         </div>
+        <div className="flex justify-between mt-auto pt-2">
+          <Button variant="outline" onClick={() => setActiveTab("configure")}>
+            ← Back
+          </Button>
+          <Button onClick={saveChanges}>Save</Button>
+        </div>
       </div>
-      <div className="flex justify-between mt-auto pt-4 border-t">
-        <Button variant="outline" onClick={() => setActiveTab("configure")}>
-          &lt;- Back
-        </Button>
-        <Button onClick={saveChanges}>Save</Button>
-      </div>
+
     </div>
   );
 }

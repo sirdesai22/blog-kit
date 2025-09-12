@@ -1,8 +1,14 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Code } from "lucide-react";
+import { FormContext } from "../context/form-context";
+import { useContext } from "react";
 
 export default function FormAction() {
+  const {  setActiveTab } =
+  useContext(FormContext);
+
   return (
     <Card className="border-none shadow-none p-0">
       <CardHeader className="p-0">
@@ -17,6 +23,9 @@ export default function FormAction() {
           </p>
         </div>
       </CardContent>
+      <div className="flex justify-between">
+          <Button variant="outline" onClick={() => setActiveTab("confirmation")}>Back ←</Button>
+        </div>
     </Card>
   );
 }

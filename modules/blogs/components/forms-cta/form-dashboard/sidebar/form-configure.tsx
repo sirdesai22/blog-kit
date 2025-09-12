@@ -1,18 +1,18 @@
-'use client';
-import React, { useContext, useMemo } from 'react';
-import { FormContext, FormType, FormTrigger } from '../context/form-context';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+"use client";
+import React, { useContext, useMemo } from "react";
+import { FormContext, FormType, FormTrigger } from "../context/form-context";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
-import { MultiSelectFilter } from '@/components/ui/multi-select-filter';
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import {
   Settings,
   HelpCircle,
@@ -21,9 +21,9 @@ import {
   Tag,
   Folder,
   Check,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useState } from 'react';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
 import {
   Command,
   CommandEmpty,
@@ -31,13 +31,14 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '@/components/ui/command';
+} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
-import { ChevronDown, X } from 'lucide-react';
+} from "@/components/ui/popover";
+import { ChevronDown, X } from "lucide-react";
+import { Tooltip } from "@/components/common/tooltip";
 
 // SVGs for Form Types (Unchanged)
 const EndOfPostIcon = () => (
@@ -133,10 +134,10 @@ const FormTypeCard = ({
   <div
     onClick={() => onSelect(type)}
     className={cn(
-      'p-2 border-2 rounded-lg text-center cursor-pointer transition-all duration-200',
+      "p-2 border-2 rounded-lg text-center cursor-pointer transition-all duration-200",
       {
-        'border-blue-500 bg-blue-50 dark:bg-blue-900/50': isActive,
-        'border-gray-200 hover:border-gray-400 dark:border-zinc-700 dark:hover:border-zinc-500':
+        "border-blue-500 bg-blue-50 dark:bg-blue-900/50": isActive,
+        "border-gray-200 hover:border-gray-400 dark:border-zinc-700 dark:hover:border-zinc-500":
           !isActive,
       }
     )}
@@ -186,14 +187,14 @@ export default function FormConfigure() {
       id: cat.id,
       name: cat.name,
       label: cat.name,
-      type: 'category' as const,
+      type: "category" as const,
     }));
 
     const tagOptions = tags.map((tag) => ({
       id: tag.id,
       name: tag.name,
       label: tag.name,
-      type: 'tag' as const,
+      type: "tag" as const,
     }));
 
     return [...categoryOptions, ...tagOptions];
@@ -215,18 +216,18 @@ export default function FormConfigure() {
       }
     });
 
-    updateField('categories', newCategories);
-    updateField('tags', newTags);
+    updateField("categories", newCategories);
+    updateField("tags", newTags);
   };
 
-  const isTriggerConfigurable = ['PopUp', 'Floating', 'Gated'].includes(
+  const isTriggerConfigurable = ["PopUp", "Floating", "Gated"].includes(
     formType
   );
   const showTimeDelay =
     isTriggerConfigurable &&
-    formTrigger === 'TimeDelay' &&
-    ['PopUp', 'Floating', 'Gated'].includes(formType);
-  const showScrollTrigger = isTriggerConfigurable && formTrigger === 'Scroll';
+    formTrigger === "TimeDelay" &&
+    ["PopUp", "Floating", "Gated"].includes(formType);
+  const showScrollTrigger = isTriggerConfigurable && formTrigger === "Scroll";
 
   // Create a custom multiselect component
   const CategoriesTagsMultiSelect = () => {
@@ -238,14 +239,14 @@ export default function FormConfigure() {
         id: cat.id,
         name: cat.name,
         label: cat.name,
-        type: 'category' as const,
+        type: "category" as const,
       }));
 
       const tagOptions = (tags || []).map((tag) => ({
         id: tag.id,
         name: tag.name,
         label: tag.name,
-        type: 'tag' as const,
+        type: "tag" as const,
       }));
 
       return [...categoryOptions, ...tagOptions];
@@ -270,7 +271,7 @@ export default function FormConfigure() {
         } else {
           newCategories.push(value);
         }
-        updateField('categories', newCategories);
+        updateField("categories", newCategories);
       } else if (isTag) {
         const index = newTags.indexOf(value);
         if (index > -1) {
@@ -278,15 +279,15 @@ export default function FormConfigure() {
         } else {
           newTags.push(value);
         }
-        updateField('tags', newTags);
+        updateField("tags", newTags);
       }
     };
 
     const removeItem = (value: string) => {
       const newCategories = selectedCategories.filter((id) => id !== value);
       const newTags = selectedTags.filter((id) => id !== value);
-      updateField('categories', newCategories);
-      updateField('tags', newTags);
+      updateField("categories", newCategories);
+      updateField("tags", newTags);
     };
 
     const getSelectedItemsDisplay = () => {
@@ -295,14 +296,14 @@ export default function FormConfigure() {
       selectedCategories.forEach((catId) => {
         const cat = categories?.find((c) => c.id === catId);
         if (cat) {
-          selectedItems.push({ id: catId, name: cat.name, type: 'category' });
+          selectedItems.push({ id: catId, name: cat.name, type: "category" });
         }
       });
 
       selectedTags.forEach((tagId) => {
         const tag = tags?.find((t) => t.id === tagId);
         if (tag) {
-          selectedItems.push({ id: tagId, name: tag.name, type: 'tag' });
+          selectedItems.push({ id: tagId, name: tag.name, type: "tag" });
         }
       });
 
@@ -326,8 +327,8 @@ export default function FormConfigure() {
                 {selectedItems.length === 0 ? (
                   <span className="text-muted-foreground">
                     {loadingCategories || loadingTags
-                      ? 'Loading...'
-                      : 'Select categories and tags...'}
+                      ? "Loading..."
+                      : "Select categories and tags..."}
                   </span>
                 ) : (
                   selectedItems.slice(0, 3).map((item) => (
@@ -335,7 +336,7 @@ export default function FormConfigure() {
                       key={item.id}
                       className="inline-flex items-center gap-1 px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs"
                     >
-                      {item.type === 'category' ? (
+                      {item.type === "category" ? (
                         <Folder className="h-3 w-3 text-blue-500" />
                       ) : (
                         <Tag className="h-3 w-3 text-green-500" />
@@ -379,7 +380,7 @@ export default function FormConfigure() {
                           )}
                         </div>
                         <div className="flex items-center gap-1">
-                          {option.type === 'category' ? (
+                          {option.type === "category" ? (
                             <Folder className="h-3 w-3 text-blue-500" />
                           ) : (
                             <Tag className="h-3 w-3 text-green-500" />
@@ -406,7 +407,7 @@ export default function FormConfigure() {
                 key={item.id}
                 className="inline-flex items-center gap-1 px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs"
               >
-                {item.type === 'category' ? (
+                {item.type === "category" ? (
                   <Folder className="h-3 w-3 text-blue-500" />
                 ) : (
                   <Tag className="h-3 w-3 text-green-500" />
@@ -427,7 +428,7 @@ export default function FormConfigure() {
   return (
     <div className="space-y-6">
       <div className="flex items-start gap-3">
-        <Settings className="h-4 w-4 text-gray-600 dark:text-gray-400 mt-1" />
+        {/* <Settings className="h-4 w-4 text-gray-600 dark:text-gray-400 mt-1" /> */}
         <div>
           <h1 className="text-main">Configure Form</h1>
           <p className="text-small">
@@ -439,28 +440,33 @@ export default function FormConfigure() {
       <div className="space-y-5">
         {/* Form Name */}
         <div>
-          <Label htmlFor="form-name" className="text-normal mb-2 block">
+          <Label
+            htmlFor="form-name"
+            className="text-normal font-medium mb-2 block"
+          >
             Form Name
           </Label>
           <Input
             id="form-name"
             value={formName}
             placeholder="e.g. Blog Post Lead Magnet"
-            onChange={(e) => updateField('formName', e.target.value)}
+            onChange={(e) => updateField("formName", e.target.value)}
           />
         </div>
 
         {/* Form Type */}
         <div>
-          <Label className="text-normal mb-2 block">Type</Label>
+          <Label className="text-normal font-medium font-medium mb-2 block">
+            Type
+          </Label>
           <div className="grid grid-cols-3 gap-3">
             {Object.keys(icons).map((key) => (
               <FormTypeCard
                 key={key}
                 type={key as FormType}
-                label={key.replace(/([A-Z])/g, ' $1').trim()}
+                label={key.replace(/([A-Z])/g, " $1").trim()}
                 isActive={formType === key}
-                onSelect={(t) => updateField('formType', t)}
+                onSelect={(t) => updateField("formType", t)}
               />
             ))}
           </div>
@@ -469,10 +475,15 @@ export default function FormConfigure() {
         {/* Categories and Tags Selection */}
         <div>
           <div className="flex items-center gap-1.5 mb-2">
-            <Label htmlFor="categories-tags" className="text-normal">
+            <Label
+              htmlFor="categories-tags"
+              className="text-normal font-medium"
+            >
               Categories & Tags
             </Label>
-            <HelpCircle className="h-4 w-4 text-gray-400" />
+            <Tooltip content="Select categories and tags to organize your forms.">
+              <HelpCircle className="h-4 w-4 text-gray-400 cursor-pointer" />
+            </Tooltip>
             {(categoriesError || tagsError) && (
               <div className="ml-auto flex gap-1">
                 {categoriesError && (
@@ -540,16 +551,18 @@ export default function FormConfigure() {
 
         {/* Form Trigger Configuration */}
         {isTriggerConfigurable && (
-          <div className="space-y-3 p-3 border rounded-md bg-muted/30 dark:border-zinc-700 dark:bg-zinc-900/50">
+          <>
             <div className="flex items-center gap-1.5 mb-2">
-              <Label htmlFor="form-trigger" className="font-semibold">
+              <Label htmlFor="form-trigger" className="font-medium">
                 Form trigger
               </Label>
-              <HelpCircle className="h-4 w-4 text-gray-400" />
+              <Tooltip content="Select the trigger for the form.">
+                <HelpCircle className="h-4 w-4 text-gray-400 cursor-pointer" />
+              </Tooltip>
             </div>
             <Select
               value={formTrigger}
-              onValueChange={(v: FormTrigger) => updateField('formTrigger', v)}
+              onValueChange={(v: FormTrigger) => updateField("formTrigger", v)}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Time delay / Scroll trigger / Exit Intent" />
@@ -557,7 +570,7 @@ export default function FormConfigure() {
               <SelectContent>
                 <SelectItem value="TimeDelay">Time delay</SelectItem>
                 <SelectItem value="Scroll">Scroll trigger</SelectItem>
-                {formType === 'PopUp' && (
+                {formType === "PopUp" && (
                   <SelectItem value="ExitIntent">Exit Intent</SelectItem>
                 )}
               </SelectContent>
@@ -565,7 +578,7 @@ export default function FormConfigure() {
 
             {showTimeDelay && (
               <div className="flex items-center gap-2 mt-3">
-                <Label className="text-small whitespace-nowrap">
+                <Label className="text-normal whitespace-nowrap">
                   Time Delay
                 </Label>
                 <Input
@@ -573,53 +586,54 @@ export default function FormConfigure() {
                   type="number"
                   value={timeDelay}
                   onChange={(e) =>
-                    updateField('timeDelay', parseInt(e.target.value, 10))
+                    updateField("timeDelay", parseInt(e.target.value, 10))
                   }
                 />
-                <span className="text-small text-muted-foreground">
-                  Seconds
-                </span>
+                <span className="text-normal">Seconds</span>
               </div>
             )}
 
             {showScrollTrigger && (
               <div className="flex items-center gap-2 mt-3">
-                <Label className="text-small whitespace-nowrap">
-                  Scroll Trigger
-                </Label>
+                <Label className="text-normal">Scroll Trigger</Label>
                 <Input
                   className="w-16 h-8 text-center"
                   type="number"
                   value={scrollTrigger}
                   onChange={(e) =>
-                    updateField('scrollTrigger', parseInt(e.target.value, 10))
+                    updateField("scrollTrigger", parseInt(e.target.value, 10))
                   }
                 />
-                <span className="text-small text-muted-foreground">
-                  % of post page
-                </span>
+                <span className="text-normal">% of post page</span>
               </div>
             )}
-          </div>
+          </>
         )}
 
         {/* Mandatory Form & Next Button */}
-        <div className="flex justify-between items-center pt-2">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5">
-              <Label className="font-semibold">Mandatory Form</Label>
-              <HelpCircle className="h-4 w-4 text-gray-400" />
+        {(formType === "PopUp" || formType === "Floating" || formType === "Gated") && (
+          <div className="flex justify-between items-center pt-2">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
+                <Label className="font-medium">Mandatory Form</Label>
+                <Tooltip content="Make the form mandatory to submit.">
+                  <HelpCircle className="h-4 w-4  text-gray-400 cursor-pointer" />
+                </Tooltip>
+              </div>
+              <Checkbox
+                id="mandatory"
+                checked={isMandatory}
+                onCheckedChange={(c) => updateField("isMandatory", !!c)}
+              />
+              <Label htmlFor="mandatory" className="text-normal">
+                Yes
+              </Label>
             </div>
-            <Checkbox
-              id="mandatory"
-              checked={isMandatory}
-              onCheckedChange={(c) => updateField('isMandatory', !!c)}
-            />
-            <label htmlFor="mandatory" className="text-small">
-              Yes
-            </label>
           </div>
-          <Button onClick={() => setActiveTab('form')}>Next →</Button>
+        )}
+
+        <div className="flex justify-end">
+          <Button onClick={() => setActiveTab("form")}>Next →</Button>
         </div>
       </div>
     </div>
