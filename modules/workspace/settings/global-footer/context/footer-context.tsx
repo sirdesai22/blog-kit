@@ -95,7 +95,7 @@ export const FooterProvider = ({ children }: { children: ReactNode }) => {
   const backUrl = `/${slug}`;
   const { logoUrls, setLogoUrl, faviconUrl, setFaviconUrl } =
     useContext(BrandContext);
-  const [logoUrl, setLogoUrlLink] = useState("https://postcrafts.co");
+  const [logoUrl, setLogoUrlLink] = useState("https://example.com");
   const [description, setDescription] = useState(
     "Graphy empowers teams to transform raw data into clear, compelling visuals — making insights easier to share, understand, and act on."
   );

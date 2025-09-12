@@ -8,6 +8,7 @@ import { DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import FontSettings from "./components/font-setting-row";
 import Image from "next/image";
 import { HeaderContext } from "@/modules/workspace/settings/global-header/context/header-context";
+import { BrandContext } from "@/providers/brand-provider";
 
 function ColorSwatch({
   hex,
@@ -22,9 +23,8 @@ function ColorSwatch({
 
   return (
     <div
-      className={`flex flex-col items-start gap-y-1  ${
-        disabled ? "hidden" : ""
-      }`}
+      className={`flex flex-col items-start gap-y-1  ${disabled ? "hidden" : ""
+        }`}
     >
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
@@ -71,16 +71,14 @@ const ImageUploadPlaceholder = ({
 
   return (
     <div
-      className={`flex flex-col items-start gap-y-2 ${
-        disabled ? "hidden" : ""
-      }`}
+      className={`flex flex-col items-start gap-y-2 ${disabled ? "hidden" : ""
+        }`}
     >
       {label && <p className="text-normal">{label}</p>}
 
       <label
-        className={`relative flex items-center justify-center bg-secondary ${className}  overflow-hidden cursor-pointer ${
-          disabled ? "pointer-events-none" : ""
-        }`}
+        className={`relative flex items-center justify-center bg-secondary ${className}  overflow-hidden cursor-pointer ${disabled ? "pointer-events-none" : ""
+          }`}
       >
         {imageUrl ? (
           <Image
@@ -149,9 +147,8 @@ function CornerRadiusSelector() {
           className="flex flex-col items-center gap-y-2 focus:outline-none"
         >
           <p
-            className={`text-normal ${
-              selected === label ? "text-normal" : "text-normal-muted"
-            }`}
+            className={`text-normal ${selected === label ? "text-normal" : "text-normal-muted"
+              }`}
           >
             {label}
           </p>
@@ -159,10 +156,9 @@ function CornerRadiusSelector() {
           {/* outer box */}
           <div
             className={`flex h-[80px] w-[80px] items-start justify-start cursor-pointer p-2 transition rounded-xl 
-              ${
-                selected === label
-                  ? "border-2 border-primary/50"
-                  : "border-2 border-secondary"
+              ${selected === label
+                ? "border-2 border-primary/50"
+                : "border-2 border-secondary"
               }`}
           >
             {/* inner corner stroke */}
@@ -212,9 +208,8 @@ function BrandColors({ darkModeDisabled }: { darkModeDisabled: boolean }) {
 
             <p className="text-normal text-center  mt-1 ml-2">Light Mode</p>
             <p
-              className={`text-normal text-center mt-1 ml-2 ${
-                !darkModeDisabled ? "hidden" : "text-foreground"
-              }`}
+              className={`text-normal text-center mt-1 ml-2 ${!darkModeDisabled ? "hidden" : "text-foreground"
+                }`}
             >
               Dark Mode
             </p>
@@ -252,10 +247,15 @@ function BrandColors({ darkModeDisabled }: { darkModeDisabled: boolean }) {
 }
 
 export default function BrandSettings() {
-  const { logoUrls, setLogoUrl, faviconUrl, setFaviconUrl } =
-    useContext(HeaderContext);
+  const {
+    logoUrls,
+    setLogoUrl,
+    faviconUrl,
+    setFaviconUrl,
+    darkModeEnabled,
+    setDarkModeEnabled,
+  } = useContext(BrandContext);  // <-- use BrandContext instead of HeaderContext
 
-  const [darkModeDisabled, setDarkModeDisabled] = useState(true);
   return (
     <div className="h-full p-4 sm:p-6">
       <header className="mb-md">
@@ -266,24 +266,23 @@ export default function BrandSettings() {
       <main>
         <SettingsSection
           title="Dark Mode"
-          description="Supported formats (JPG, PNG, WebP) 
-          Minimum size: 100px"
+          description="Toggle dark mode support"
         >
           <div className="flex items-center gap-x-2">
             <Switch
               id="dark-mode"
-              checked={darkModeDisabled}
-              onCheckedChange={setDarkModeDisabled}
+              checked={darkModeEnabled}
+              onCheckedChange={setDarkModeEnabled}
             />
             <label htmlFor="dark-mode" className="text-normal ">
-              {darkModeDisabled ? "Enabled" : "Disabled"}
+              {darkModeEnabled ? "Enabled" : "Disabled"}
             </label>
           </div>
         </SettingsSection>
 
         <SettingsSection
           title="Brand Logo"
-          description="Supported formats (JPG, PNG, WebP) Minimum size: 100px"
+          description="Supported formats (JPG, PNG, WebP)"
         >
           <div className="flex gap-x-4">
             <ImageUploadPlaceholder
@@ -293,7 +292,7 @@ export default function BrandSettings() {
               onImageChange={(url) => setLogoUrl("light", url)}
             />
             <ImageUploadPlaceholder
-              disabled={!darkModeDisabled}
+              disabled={!darkModeEnabled}
               className="w-28 h-16"
               label="Dark Mode"
               imageUrl={logoUrls.dark}
@@ -302,10 +301,7 @@ export default function BrandSettings() {
           </div>
         </SettingsSection>
 
-        <SettingsSection
-          title="Favicon"
-          description="Supported formats (JPG, PNG, WebP) Recommended size: 100px x 100px"
-        >
+        <SettingsSection title="Favicon" description="Recommended size 100x100">
           <ImageUploadPlaceholder
             className="w-18 h-18"
             imageUrl={faviconUrl}
@@ -313,23 +309,17 @@ export default function BrandSettings() {
           />
         </SettingsSection>
 
-        <BrandColors darkModeDisabled={darkModeDisabled} />
+        <BrandColors darkModeDisabled={darkModeEnabled} />
 
-        <SettingsSection
-          title="Corner Radius"
-          description="Recommended size: 100px x 100px"
-        >
+        <SettingsSection title="Corner Radius" description="">
           <CornerRadiusSelector />
         </SettingsSection>
 
-        <SettingsSection
-          title="Fonts"
-          description="Supported formats (JPG, PNG, WebP) Recommended size: 100px x 100px"
-          showRestore={true}
-        >
+        <SettingsSection title="Fonts" description="" showRestore>
           <FontSettings />
         </SettingsSection>
       </main>
     </div>
   );
 }
+

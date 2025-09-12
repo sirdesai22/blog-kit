@@ -7,14 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface CustomCodeProps {
   onBack: () => void;
+  isCustomCodeEnabled: boolean;
 }
 
-export default function CustomCode({ onBack }: CustomCodeProps) {
+export default function CustomCode({ onBack, isCustomCodeEnabled }: CustomCodeProps) {
   const {
     customCode,
     setCustomCode,
-    isCustomCodeEnabled,
-    setIsCustomCodeEnabled,
     saveChanges,
   } = useContext(HeaderContext);
 
@@ -34,7 +33,7 @@ export default function CustomCode({ onBack }: CustomCodeProps) {
           <Switch
             id="custom-code-switch"
             checked={isCustomCodeEnabled}
-            onCheckedChange={setIsCustomCodeEnabled}
+            onCheckedChange={onBack}
           />
         </div>
       </div>

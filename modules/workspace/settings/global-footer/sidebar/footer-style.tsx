@@ -90,9 +90,9 @@ export default function FooterStyle() {
             value={[footerStyle.borderWidth]}
             onValueChange={(val) => handleChange("borderWidth", val[0])}
             min={0}
-            max={10}
+            max={5}
             step={1}
-            className="flex-1 min-w-30"
+            className="flex-1 w-22"
           />
           <span className="text-normal text-gray-500 ">
             {footerStyle.borderWidth}px

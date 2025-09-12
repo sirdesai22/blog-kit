@@ -39,6 +39,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { Separator } from "@/components/ui/separator";
+import { BrandContext } from "@/providers/brand-provider";
 
 export default function HeaderItems() {
   const {
@@ -53,6 +54,10 @@ export default function HeaderItems() {
     setTheme,
     theme,
   } = useContext(HeaderContext);
+
+  const {
+    darkModeEnabled
+  } = useContext(BrandContext);
 
   // Modal States
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -194,27 +199,30 @@ export default function HeaderItems() {
         {/* Logo Section */}
         <Card className=" bg-transparent border-none shadow-none p-0">
           <CardContent className="space-y-4 p-0">
-            <div className="flex items-center justify-between">
+            <div className="flex items-start justify-between">
               <div className="space-y-2">
                 <CardTitle className="text-normal">Logo</CardTitle>
-                <Select
-                  value={theme}
-                  onValueChange={(v: ThemeType) => setTheme(v)}
-                >
-                  <SelectTrigger className="w-fit">
-                    <SelectValue placeholder="Select Mode" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="light">Light Mode</SelectItem>
-                    <SelectItem value="dark">Dark Mode</SelectItem>
-                  </SelectContent>
-                </Select>
+                {darkModeEnabled && (
+                  <Select
+                    value={theme}
+                    onValueChange={(v: ThemeType) => setTheme(v)}
+                  >
+                    <SelectTrigger className="w-fit">
+                      <SelectValue placeholder="Select Mode" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="light">Light Mode</SelectItem>
+                      <SelectItem value="dark">Dark Mode</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+
                 <Button
                   variant="link"
-                  className="p-0 h-auto text-small !pl-1"
+                  className="!p-0 h-auto text-small"
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <Upload className="mr-1 h-3 w-3" /> Upload
+                  <Upload className=" h-3 w-3" /> Upload
                 </Button>
               </div>
               <div

@@ -102,7 +102,7 @@ export default function HeaderStyle() {
             min={40}
             max={100}
             step={1}
-            className="flex-1 min-w-40"
+            className="flex-1 min-w-46"
           />
           <span className="text-normal text-gray-500">
             {headerStyle.height}px
@@ -128,7 +128,7 @@ export default function HeaderStyle() {
 
       {/* Navbar Border Width */}
       <Card className="p-0 shadow-none border-none items-center gap-0 flex flex-row align-center justify-between">
-        <CardTitle className="text-normal font-medium">Navbar</CardTitle>
+        <CardTitle className="text-normal font-medium">Border</CardTitle>
         <div className="flex items-center gap-2">
           <ColorSwatch
             hex={headerStyle.borderColor}
@@ -138,9 +138,9 @@ export default function HeaderStyle() {
             value={[headerStyle.borderWidth]}
             onValueChange={(val) => handleChange("borderWidth", val[0])}
             min={0}
-            max={10}
+            max={5}
             step={1}
-            className="flex-1 min-w-30"
+            className="flex-1 min-w-21.5"
           />
           <span className="text-normal text-gray-500 ">
             {headerStyle.borderWidth}px
@@ -149,7 +149,7 @@ export default function HeaderStyle() {
       </Card>
 
       {/* Sticky Header */}
-      <Card className="shadow-none border-none flex-row items-center p-0">
+      <Card className="shadow-none border-none flex-row items-center p-0 gap-8">
         <CardTitle className="text-normal font-medium">Sticky Header</CardTitle>
         <div className="flex items-center gap-2">
           <Switch

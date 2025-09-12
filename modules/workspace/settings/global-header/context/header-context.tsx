@@ -88,7 +88,7 @@ export const HeaderProvider = ({ children }: { children: ReactNode }) => {
   const backUrl = `/${slug}`;
   const { logoUrls, setLogoUrl, faviconUrl, setFaviconUrl } =
     useContext(BrandContext);
-  const [logoUrl, setLogoUrlLink] = useState("https://postcrafts.co");
+  const [logoUrl, setLogoUrlLink] = useState("https://example.com");
   const [headerTabs, setHeaderTabs] = useState([
     { value: "items", label: "Header Items" },
     { value: "style", label: "Header Style" },
@@ -170,6 +170,7 @@ export const HeaderProvider = ({ children }: { children: ReactNode }) => {
   const [device, setDevice] = useState<DeviceType>("desktop");
 
   const [customCode, setCustomCode] = useState(defaultNavbarCode);
+
   const [isCustomCodeEnabled, setIsCustomCodeEnabled] = useState(false);
 
   const addItem = (item: Omit<HeaderItem, "id" | "order">) => {

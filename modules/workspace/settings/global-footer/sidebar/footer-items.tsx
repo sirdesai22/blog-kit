@@ -63,6 +63,7 @@ import {
   Popover,
   PopoverContent,
 } from "@radix-ui/react-popover";
+import { BrandContext } from "@/providers/brand-provider";
 
 function FooterItems() {
   const {
@@ -83,6 +84,9 @@ function FooterItems() {
     theme,
     setTheme,
   } = useContext(FooterContext);
+  const {
+    darkModeEnabled
+  } = useContext(BrandContext);
 
   const [isSocialPopoverOpen, setSocialPopoverOpen] = useState(false);
   const socialInputRefs = useRef<Map<string, HTMLInputElement>>(new Map());
@@ -242,10 +246,12 @@ function FooterItems() {
       <div className="p-4 space-y-4">
         <Card className="bg-transparent border-none shadow-none p-0">
           <CardContent className="space-y-4 p-0">
-            <div className="flex items-center justify-between">
+            <div className="flex items-start justify-between">
               <div className="space-y-2">
+
                 <CardTitle className="text-normal">Logo</CardTitle>
-                <Select
+
+                {darkModeEnabled && (<Select
                   value={theme}
                   onValueChange={(v: ThemeType) => setTheme(v)}
                 >
@@ -256,10 +262,11 @@ function FooterItems() {
                     <SelectItem value="light">Light Mode</SelectItem>
                     <SelectItem value="dark">Dark Mode</SelectItem>
                   </SelectContent>
-                </Select>
+                </Select>)}
+
                 <Button
                   variant="link"
-                  className="p-0 h-auto text-small !pl-1"
+                  className="!p-0 h-auto text-small "
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <Upload className="mr-1 h-3 w-3" /> Upload
