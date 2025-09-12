@@ -46,8 +46,9 @@ export function SortableFormField({
         <GripVertical className="h-4 w-4" />
       </div>
       <p className="font-medium text-sm flex-1 ml-1 truncate">{field.label}</p>
-      <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full mx-2">
-        {field.type}
+
+      <span className="text-small px-2 py-0.5 rounded-full mx-2">
+        {field.type} {field.isRequired && "*"}
       </span>
       <Button variant="ghost" size="icon" onClick={() => onEdit(field)}>
         <Pencil className="h-4 w-4" />

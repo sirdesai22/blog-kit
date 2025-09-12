@@ -27,7 +27,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 export default function FormFields() {
-  const { formState, updateField,setActiveTab,  setFields, deleteFormField } =
+  const { formState, updateField, setActiveTab, setFields, deleteFormField } =
     useContext(FormContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingField, setEditingField] = useState<FormField | null>(null);
@@ -69,7 +69,6 @@ export default function FormFields() {
       onDragEnd={handleDragEnd}
     >
       <div className="space-y-6">
-        {/* --- Content Section --- */}
         <div className="space-y-4">
           <div>
             <h3 className="text-main">Content</h3>
@@ -99,7 +98,6 @@ export default function FormFields() {
 
         <Separator />
 
-        {/* --- Fields Section --- */}
         <div className="space-y-2">
           <div className="flex justify-between items-end">
             <h3 className="text-normal font-medium ">Fields</h3>
@@ -127,7 +125,6 @@ export default function FormFields() {
           </div>
         </div>
 
-        {/* --- Submission Section --- */}
         <div className="space-y-4">
           <div className="space-y-2">
             <Label className="text-normal font-medium" htmlFor="button-text">
@@ -151,11 +148,12 @@ export default function FormFields() {
           </div>
         </div>
         <div className="flex justify-between">
-          <Button variant="outline" onClick={() => setActiveTab("configure")}>Back ←</Button>
+          <Button variant="outline" onClick={() => setActiveTab("configure")}>
+            Back ←
+          </Button>
           <Button onClick={() => setActiveTab("confirmation")}>Next →</Button>
         </div>
 
-        {/* Modals */}
         {isModalOpen && (
           <AddEditFieldModal
             isOpen={isModalOpen}

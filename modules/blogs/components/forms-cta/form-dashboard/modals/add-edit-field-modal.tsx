@@ -1,5 +1,11 @@
 "use client";
-import { useContext, useState, useEffect, KeyboardEvent } from "react";
+import {
+  useContext,
+  useState,
+  useEffect,
+  KeyboardEvent,
+  useMemo,
+} from "react";
 import { FormContext, FormField, FieldType } from "../context/form-context";
 import {
   Dialog,
@@ -19,9 +25,75 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { X, PlusCircle } from "lucide-react";
+import { X, PlusCircle, GripVertical } from "lucide-react";
 import { produce } from "immer";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
+// --- Draggable Option Item Component ---
+interface SortableOptionProps {
+  id: string;
+  option: string;
+  index: number;
+  onUpdate: (index: number, value: string) => void;
+  onDelete: (index: number) => void;
+}
+
+function SortableOptionItem({
+  id,
+  option,
+  index,
+  onUpdate,
+  onDelete,
+}: SortableOptionProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="flex items-center gap-2">
+      <div {...attributes} {...listeners} className="cursor-grab p-1">
+        <GripVertical className="h-5 w-5 text-muted-foreground" />
+      </div>
+      <Input
+        value={option}
+        onChange={(e) => onUpdate(index, e.target.value)}
+        className="flex-1"
+      />
+      <Button variant="ghost" size="icon" onClick={() => onDelete(index)}>
+        <X className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+}
+
+// --- Main Modal Component ---
 interface Props {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
@@ -40,6 +112,16 @@ export default function AddEditFieldModal({ isOpen, setIsOpen, field }: Props) {
   const { addField, updateFormField } = useContext(FormContext);
   const [formState, setFormState] = useState(defaultState);
   const [newOption, setNewOption] = useState("");
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const optionIds = useMemo(
+    () => formState.options?.map((_, index) => `option-${index}`) || [],
+    [formState.options]
+  );
 
   useEffect(() => {
     if (field) {
@@ -75,6 +157,16 @@ export default function AddEditFieldModal({ isOpen, setIsOpen, field }: Props) {
     }
   };
 
+  const handleUpdateOption = (index: number, value: string) => {
+    setFormState(
+      produce((draft) => {
+        if (draft.options) {
+          draft.options[index] = value;
+        }
+      })
+    );
+  };
+
   const handleDeleteOption = (index: number) => {
     setFormState(
       produce((draft) => {
@@ -90,12 +182,27 @@ export default function AddEditFieldModal({ isOpen, setIsOpen, field }: Props) {
     }
   };
 
+  const handleOptionDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = optionIds.indexOf(active.id as string);
+      const newIndex = optionIds.indexOf(over.id as string);
+      setFormState(
+        produce((draft) => {
+          if (draft.options) {
+            draft.options = arrayMove(draft.options, oldIndex, newIndex);
+          }
+        })
+      );
+    }
+  };
+
   const showOptionsEditor =
     formState.type === "Select" || formState.type === "MultiSelect";
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-[400px]">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{field ? "Edit" : "Add"} Field</DialogTitle>
         </DialogHeader>
@@ -107,7 +214,7 @@ export default function AddEditFieldModal({ isOpen, setIsOpen, field }: Props) {
             <Select
               value={formState.type}
               onValueChange={(v: FieldType) =>
-                setFormState((p) => ({ ...p, type: v }))
+                setFormState((p) => ({ ...p, type: v, options: [] }))
               }
             >
               <SelectTrigger className="col-span-3 w-full">
@@ -115,6 +222,7 @@ export default function AddEditFieldModal({ isOpen, setIsOpen, field }: Props) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Email">Email</SelectItem>
+                <SelectItem value="Password">Password</SelectItem>
                 <SelectItem value="ShortText">Short Text</SelectItem>
                 <SelectItem value="LongText">Long Text</SelectItem>
                 <SelectItem value="Phone">Phone</SelectItem>
@@ -152,46 +260,65 @@ export default function AddEditFieldModal({ isOpen, setIsOpen, field }: Props) {
           </div>
 
           {showOptionsEditor && (
-            <div className="col-span-4 space-y-3 p-3 border rounded-md bg-muted/50">
-              <Label>Options</Label>
-              <div className="space-y-2">
-                {formState.options?.map((opt, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Input value={opt} readOnly className="flex-1" />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDeleteOption(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-              <div className="flex items-center gap-2 pt-2">
-                <Input
-                  placeholder="Add new option"
-                  value={newOption}
-                  onChange={(e) => setNewOption(e.target.value)}
-                  onKeyDown={handleOptionKeyDown}
-                />
-                <Button onClick={handleAddOption}>
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Add
-                </Button>
-              </div>
+            <div className="flex flex-col gap-4">
+              <Label className="text-right pt-2">Options</Label>
+              <>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleOptionDragEnd}
+                >
+                  <SortableContext
+                    items={optionIds}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="space-y-2">
+                      {formState.options?.map((opt, index) => (
+                        <SortableOptionItem
+                          key={optionIds[index]}
+                          id={optionIds[index]}
+                          option={opt}
+                          index={index}
+                          onUpdate={handleUpdateOption}
+                          onDelete={handleDeleteOption}
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
+                <div className="flex items-center gap-2 pt-2">
+                  <Input
+                    placeholder="Add new option"
+                    value={newOption}
+                    onChange={(e) => setNewOption(e.target.value)}
+                    onKeyDown={handleOptionKeyDown}
+                  />
+                  <Button
+                    size="sm"
+                    onClick={handleAddOption}
+                    disabled={!newOption.trim()}
+                  >
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Add
+                  </Button>
+                </div>
+              </>
             </div>
           )}
 
-          <div className="flex items-center  space-x-12 pt-2">
-            <Label htmlFor="required">Required</Label>
-            <Checkbox
-              id="required"
-              checked={formState.isRequired}
-              onCheckedChange={(c) =>
-                setFormState((p) => ({ ...p, isRequired: !!c }))
-              }
-            />
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="required" className="text-right">
+              Required
+            </Label>
+            <div className="col-span-3 flex items-center">
+              <Checkbox
+                id="required"
+                checked={formState.isRequired}
+                onCheckedChange={(c) =>
+                  setFormState((p) => ({ ...p, isRequired: !!c }))
+                }
+              />
+            </div>
           </div>
         </div>
         <DialogFooter>

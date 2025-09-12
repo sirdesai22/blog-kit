@@ -22,6 +22,7 @@ export type FormType =
 export type FormTrigger = "TimeDelay" | "Scroll" | "ExitIntent";
 export type FieldType =
   | "Email"
+  | "Password"
   | "ShortText"
   | "LongText"
   | "Phone"
@@ -81,30 +82,22 @@ export interface FormState {
 }
 
 interface FormContextType {
-  // Form state
   formState: FormState;
   setFormState: (state: FormState) => void;
   updateField: <K extends keyof FormState>(
     field: K,
     value: FormState[K]
   ) => void;
-
-  // Form fields management
   addField: (field: Omit<FormField, "id" | "order">) => void;
   updateFormField: (field: FormField) => void;
   deleteFormField: (id: string) => void;
   setFields: (fields: FormField[]) => void;
   updateFieldValue: (fieldId: string, value: any) => void;
-
-  // Form configuration
   setEmbedCodeEnabled: (isEnabled: boolean) => void;
   setCustomCodeEnabled: (isEnabled: boolean) => void;
   setCustomCode: (code: string) => void;
-
   formTabs: { value: string; label: string }[];
   onBack: () => void;
-
-  // UI state
   theme: ThemeType;
   setTheme: (t: ThemeType) => void;
   device: DeviceType;
@@ -112,19 +105,13 @@ interface FormContextType {
   setActiveTab: (tab: string) => void;
   isConfirmationVisible: boolean;
   setIsConfirmationVisible: (visible: boolean) => void;
-
-  // Form operations
   saveChanges: () => void;
   cancelChanges: () => void;
   refresh: () => void;
-
-  // API state
   isSaving: boolean;
   saveMessage: string | null;
   saveError: string | null;
   formId: string | null;
-
-  // Categories and Tags state
   categories: Category[];
   tags: Tag[];
   loadingCategories: boolean;
@@ -142,8 +129,8 @@ const initialState: FormState = {
   heading: "Subscribe to Our Newsletter",
   description: "Get the latest news and updates.\nNo spam, we promise.",
   formType: "PopUp",
-  categories: [], // Changed to empty array
-  tags: [], // Added empty tags array
+  categories: [],
+  tags: [],
   formTrigger: "TimeDelay",
   timeDelay: 0,
   scrollTrigger: 50,
@@ -201,12 +188,10 @@ export const FormProvider = ({
   pageId: string;
   formId?: string | null;
 }) => {
-  // Form state
   const [formState, setFormState] = useState<FormState>(initialState);
   const [theme, setTheme] = useState<ThemeType>("light");
   const [device, setDevice] = useState<DeviceType>("desktop");
   const [isConfirmationVisible, setIsConfirmationVisible] = useState(false);
-
   const [formTabs, setFormTabs] = useState([
     { value: "configure", label: "Configure" },
     { value: "form", label: "Form" },
@@ -219,12 +204,9 @@ export const FormProvider = ({
   const segments = pathname?.split("/").filter(Boolean);
   const backUrl = "/" + segments.slice(0, -1).join("/");
 
-  // API state
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
-
-  // Categories and Tags state
   const [categories, setCategories] = useState<Category[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
@@ -232,25 +214,19 @@ export const FormProvider = ({
   const [categoriesError, setCategoriesError] = useState<string | null>(null);
   const [tagsError, setTagsError] = useState<string | null>(null);
 
-  // Categories management
   const loadCategories = useCallback(async () => {
     if (!pageId) return;
-
     try {
       setLoadingCategories(true);
       setCategoriesError(null);
-
       const response = await fetch(`/api/blogs/${pageId}/forms`);
       const result = await response.json();
-
       if (result.success) {
         setCategories(result.data.availableCategories || []);
       } else {
         setCategoriesError("Failed to load categories");
-        console.error("Failed to load categories:", result.error);
       }
     } catch (error) {
-      console.error("Error loading categories:", error);
       setCategoriesError("Error loading categories");
     } finally {
       setLoadingCategories(false);
@@ -259,37 +235,26 @@ export const FormProvider = ({
 
   const loadTags = useCallback(async () => {
     if (!pageId) return;
-
     try {
       setLoadingTags(true);
       setTagsError(null);
-
       const response = await fetch(`/api/blogs/${pageId}/forms`);
       const result = await response.json();
-
       if (result.success) {
         setTags(result.data.availableTags || []);
       } else {
         setTagsError("Failed to load tags");
-        console.error("Failed to load tags:", result.error);
       }
     } catch (error) {
-      console.error("Error loading tags:", error);
       setTagsError("Error loading tags");
     } finally {
       setLoadingTags(false);
     }
   }, [pageId]);
 
-  const refreshCategories = () => {
-    loadCategories();
-  };
+  const refreshCategories = () => loadCategories();
+  const refreshTags = () => loadTags();
 
-  const refreshTags = () => {
-    loadTags();
-  };
-
-  // Form data management
   const loadFormData = useCallback(
     async (formIdToLoad: string) => {
       try {
@@ -297,21 +262,18 @@ export const FormProvider = ({
           `/api/blogs/${pageId}/forms/${formIdToLoad}`
         );
         const result = await response.json();
-
         if (result.success) {
           setFormState(result.data.form.config);
         } else {
           setSaveError("Failed to load form data");
         }
       } catch (error) {
-        console.error("Error loading form data:", error);
         setSaveError("Error loading form data");
       }
     },
     [pageId]
   );
 
-  // Form state management functions
   const updateField = <K extends keyof FormState>(
     field: K,
     value: FormState[K]
@@ -392,49 +354,27 @@ export const FormProvider = ({
     );
   };
 
-  // Form operations
   const saveChanges = async () => {
     setIsSaving(true);
     setSaveMessage(null);
     setSaveError(null);
-
     try {
-      const payload = {
-        config: formState,
-        values: formState.formValues,
-      };
-
-      let response;
-
-      if (formId) {
-        // Update existing form
-        response = await fetch(`/api/blogs/${pageId}/forms`, {
+      const payload = { config: formState, values: formState.formValues };
+      const response = formId
+        ? await fetch(`/api/blogs/${pageId}/forms`, {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            formId: formId,
-            config: formState,
-          }),
-        });
-      } else {
-        // Create new form
-        response = await fetch(`/api/blogs/${pageId}/forms`, {
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ formId: formId, config: formState }),
+        })
+        : await fetch(`/api/blogs/${pageId}/forms`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-      }
 
       const result = await response.json();
-
       if (result.success) {
         setSaveMessage(result.data.message || "Form saved successfully!");
-
-        // If creating new form, redirect to edit mode
         if (!formId && result.data.form?.id) {
           setTimeout(() => {
             router.push(
@@ -444,17 +384,11 @@ export const FormProvider = ({
         }
       } else {
         setSaveError(result.error || "Failed to save form");
-        if (result.details) {
-          console.error("Validation errors:", result.details);
-        }
       }
     } catch (error) {
-      console.error("Error saving form:", error);
       setSaveError("Network error. Please try again.");
     } finally {
       setIsSaving(false);
-
-      // Clear messages after 3 seconds
       setTimeout(() => {
         setSaveMessage(null);
         setSaveError(null);
@@ -464,51 +398,36 @@ export const FormProvider = ({
 
   const cancelChanges = () => {
     setFormState(initialState);
-    setSaveMessage(null);
-    setSaveError(null);
     router.push(backUrl);
   };
 
   const onBack = () => router.push(backUrl);
-
   const refresh = () => {
-    if (formId) {
-      loadFormData(formId);
-    }
+    if (formId) loadFormData(formId);
     loadCategories();
     loadTags();
   };
 
-  // Load categories, tags and form data on mount
   useEffect(() => {
     loadCategories();
     loadTags();
-    if (formId) {
-      loadFormData(formId);
-    }
+    if (formId) loadFormData(formId);
   }, [pageId, formId, loadCategories, loadTags, loadFormData]);
 
   return (
     <FormContext.Provider
       value={{
-        // Form state
         formState,
         setFormState,
         updateField,
-
-        // Form fields management
         addField,
         updateFormField,
         deleteFormField,
         setFields,
         updateFieldValue,
-
-        // Form configuration
         setEmbedCodeEnabled,
         setCustomCodeEnabled,
         setCustomCode,
-
-        // UI state
         theme,
         setTheme,
         device,
@@ -516,21 +435,15 @@ export const FormProvider = ({
         setActiveTab: passedSetActiveTab,
         isConfirmationVisible,
         setIsConfirmationVisible,
-
-        // Form operations
         saveChanges,
         cancelChanges,
         refresh,
-
-        // API state
         isSaving,
         saveMessage,
         saveError,
         formId,
         formTabs,
         onBack,
-
-        // Categories and Tags state
         categories,
         tags,
         loadingCategories,
