@@ -258,14 +258,20 @@ const renderField = (
 
 // --- Main Form Component ---
 export default function DynamicForm() {
-  const { formState, theme, updateFieldValue, setIsConfirmationVisible } =
-    useContext(FormContext);
+  const {
+    formState,
+    theme,
+    updateFieldValue,
+    setIsConfirmationVisible,
+    setIsFormAndConfirmationVisible, // New context function
+  } = useContext(FormContext);
   const {
     heading,
     description,
     fields,
     buttonText,
     footnote,
+    isMandatory,
     formType,
     formValues,
   } = formState;
@@ -275,7 +281,7 @@ export default function DynamicForm() {
   const countryOptions = useMemo(() => countries, []);
 
   const formClasses = cn(
-    "p-6 rounded-lg flex flex-col items-center gap-4 w-full max-w-[400px] mx-auto shadow-xl",
+    "p-6 rounded-lg flex flex-col items-center gap-4 w-full max-w-[400px] mx-auto shadow-xl relative", // Added relative positioning
     {
       "bg-white text-gray-800": !isDark,
       "bg-zinc-800 text-gray-200": isDark,
@@ -317,8 +323,28 @@ export default function DynamicForm() {
     }
   };
 
+  const handleClose = () => {
+    // New handler to close the form
+    if (setIsFormAndConfirmationVisible) {
+      setIsFormAndConfirmationVisible(false);
+    }
+  };
+
+  const showCloseButton =
+    !isMandatory && ["PopUp", "Floating", "Gated"].includes(formType);
+
   return (
     <form className={formClasses}>
+      {showCloseButton && (
+        <button
+          type="button"
+          onClick={handleClose}
+          className="absolute top-2 right-2 p-1 rounded-full text-muted-foreground hover:bg-muted"
+          aria-label="Close form"
+        >
+          <CloseIcon className="h-5 w-5" />
+        </button>
+      )}
       <div className="text-center">
         <h2 className="text-2xl font-bold">{heading}</h2>
         {description && (

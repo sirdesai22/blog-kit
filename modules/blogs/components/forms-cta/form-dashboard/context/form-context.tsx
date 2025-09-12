@@ -92,6 +92,9 @@ interface FormContextType {
   updateFormField: (field: FormField) => void;
   deleteFormField: (id: string) => void;
   setFields: (fields: FormField[]) => void;
+  isFormVisible: boolean;
+  setIsFormVisible: (isEnabled: boolean) => void;
+  setIsFormAndConfirmationVisible: (visible: boolean) => void;
   updateFieldValue: (fieldId: string, value: any) => void;
   setEmbedCodeEnabled: (isEnabled: boolean) => void;
   setCustomCodeEnabled: (isEnabled: boolean) => void;
@@ -192,6 +195,7 @@ export const FormProvider = ({
   const [theme, setTheme] = useState<ThemeType>("light");
   const [device, setDevice] = useState<DeviceType>("desktop");
   const [isConfirmationVisible, setIsConfirmationVisible] = useState(false);
+  const [isFormVisible, setIsFormVisible] = useState(false);
   const [formTabs, setFormTabs] = useState([
     { value: "configure", label: "Configure" },
     { value: "form", label: "Form" },
@@ -322,6 +326,11 @@ export const FormProvider = ({
     );
   };
 
+  const setIsFormAndConfirmationVisible = (visible: boolean) => {
+    setIsFormVisible(visible);
+    setIsConfirmationVisible(visible);
+  };
+
   const setEmbedCodeEnabled = (isEnabled: boolean) => {
     setFormState(
       produce((draft) => {
@@ -362,15 +371,15 @@ export const FormProvider = ({
       const payload = { config: formState, values: formState.formValues };
       const response = formId
         ? await fetch(`/api/blogs/${pageId}/forms`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ formId: formId, config: formState }),
-        })
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ formId: formId, config: formState }),
+          })
         : await fetch(`/api/blogs/${pageId}/forms`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
 
       const result = await response.json();
       if (result.success) {
@@ -452,6 +461,9 @@ export const FormProvider = ({
         tagsError,
         refreshCategories,
         refreshTags,
+        isFormVisible,
+        setIsFormVisible,
+        setIsFormAndConfirmationVisible,
       }}
     >
       {children}

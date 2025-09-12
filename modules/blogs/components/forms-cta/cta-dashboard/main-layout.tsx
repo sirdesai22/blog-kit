@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useSearchParams } from "next/navigation";
 import EditorHeader from "@/components/common/editor-header";
+import DynamicCta from "./content/dynamic-cta"; // Import DynamicCta
 
 const SidebarContent = ({ activeTab }: { activeTab: string }) => {
   switch (activeTab) {
@@ -26,13 +27,11 @@ const CtaDashboard = ({ activeTab }: { activeTab: string }) => {
   const {
     ctaState,
     setCustomCodeEnabled,
-    theme,
-    setTheme,
     device,
-    setDevice,
-    saveChanges,
-    cancelChanges,
+    isCtaVisible,
+    setIsCtaVisible,
   } = useContext(CtaContext);
+  const { type } = ctaState;
   const isCustomCodeActive = ctaState.customCode.isEnabled;
   const { closeSidebar, openSidebar } = useSidebar();
 
@@ -40,6 +39,12 @@ const CtaDashboard = ({ activeTab }: { activeTab: string }) => {
     closeSidebar();
     return () => openSidebar();
   }, [closeSidebar, openSidebar]);
+
+  const handleOverlayClick = () => {
+    setIsCtaVisible(false);
+  };
+
+  const isOverlayCtaVisible = type === "PopUp" && isCtaVisible;
 
   return (
     <div className="flex flex-1 overflow-hidden">
@@ -51,7 +56,7 @@ const CtaDashboard = ({ activeTab }: { activeTab: string }) => {
             <SidebarContent activeTab={activeTab} />
           )}
         </div>
-        {(activeTab === "configure" && !isCustomCodeActive) && (
+        {activeTab === "configure" && !isCustomCodeActive && (
           <div className="mt-auto border-t px-5 py-3">
             <div className="flex items-center justify-between">
               <span className="text-normal">Custom Code &lt;/&gt;</span>
@@ -81,6 +86,27 @@ const CtaDashboard = ({ activeTab }: { activeTab: string }) => {
           >
             <ContentPanel />
           </div>
+
+          {/* --- MODAL AND OVERLAY LOGIC IS NOW HERE --- */}
+          {isOverlayCtaVisible && (
+            <div
+              className="absolute inset-0 z-20 flex items-center justify-center p-4 "
+              onClick={handleOverlayClick}
+            >
+              <div
+                className="relative z-30"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <DynamicCta />
+              </div>
+            </div>
+          )}
+
+          {type === "Floating" && isCtaVisible && (
+            <div className="absolute bottom-5 right-5 z-20 max-w-[500px]">
+              <DynamicCta />
+            </div>
+          )}
         </div>
       </main>
     </div>
@@ -97,7 +123,6 @@ const LayoutContent = ({
   const {
     ctaTabs,
     ctaState,
-    setCustomCodeEnabled,
     onBack,
     theme,
     setTheme,
@@ -129,7 +154,6 @@ const LayoutContent = ({
     </>
   );
 };
-
 
 export default function MainLayout({ pageId }: { pageId: string }) {
   const [activeTab, setActiveTab] = useState("configure");

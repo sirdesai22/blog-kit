@@ -175,11 +175,15 @@ export default function FormConfigure() {
     isMandatory,
   } = formState;
 
-  // Add safety checks to ensure arrays
-  const selectedCategories = Array.isArray(selectedCategoriesRaw)
-    ? selectedCategoriesRaw
-    : [];
-  const selectedTags = Array.isArray(selectedTagsRaw) ? selectedTagsRaw : [];
+  const selectedCategories = useMemo(
+    () => (Array.isArray(selectedCategoriesRaw) ? selectedCategoriesRaw : []),
+    [selectedCategoriesRaw]
+  );
+
+  const selectedTags = useMemo(
+    () => (Array.isArray(selectedTagsRaw) ? selectedTagsRaw : []),
+    [selectedTagsRaw]
+  );
 
   // Combine categories and tags for multiselect
   const allOptions = useMemo(() => {
@@ -250,11 +254,11 @@ export default function FormConfigure() {
       }));
 
       return [...categoryOptions, ...tagOptions];
-    }, [categories, tags]);
+    }, []);
 
     const selectedValues = useMemo(() => {
       return [...selectedCategories, ...selectedTags];
-    }, [selectedCategories, selectedTags]);
+    }, []);
 
     const handleSelectionChange = (value: string) => {
       const newCategories = [...selectedCategories];
@@ -457,9 +461,7 @@ export default function FormConfigure() {
 
         {/* Form Type */}
         <div>
-          <Label className="text-normal font-medium font-medium mb-2 block">
-            Type
-          </Label>
+          <Label className="text-normal font-medium mb-2 block">Type</Label>
           <div className="grid grid-cols-3 gap-3">
             {Object.keys(icons).map((key) => (
               <FormTypeCard

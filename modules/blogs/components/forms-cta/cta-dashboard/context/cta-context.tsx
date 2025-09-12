@@ -72,6 +72,9 @@ interface CtaContextType {
   cancelChanges: () => void;
   refresh: () => void;
 
+  isCtaVisible: boolean;
+  setIsCtaVisible: (visible: boolean) => void;
+
   // API state
   isSaving: boolean;
   saveMessage: string | null;
@@ -97,7 +100,7 @@ const initialState: CtaState = {
   categories: [], // Changed to empty array
   tags: [], // Added empty tags array
   trigger: "TimeDelay",
-  timeDelay: 5,
+  timeDelay: 0,
   scrollTrigger: 50,
   content: {
     heading: "This is a big heading for the callout section of the page",
@@ -133,6 +136,7 @@ export const CtaProvider = ({
   const pathname = usePathname();
   const segments = pathname?.split("/").filter(Boolean);
   const backUrl = "/" + segments.slice(0, -1).join("/");
+  const [isCtaVisible, setIsCtaVisible] = useState(false);
 
   // API state
   const [isSaving, setIsSaving] = useState(false);
@@ -396,6 +400,8 @@ export const CtaProvider = ({
         categories,
         tags,
         loadingCategories,
+        isCtaVisible,
+        setIsCtaVisible,
         loadingTags,
         categoriesError,
         tagsError,

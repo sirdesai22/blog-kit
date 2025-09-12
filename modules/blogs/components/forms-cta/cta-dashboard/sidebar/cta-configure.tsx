@@ -16,8 +16,8 @@ import {
   HelpCircle,
   RefreshCw,
   Tag,
-  Folder,
   Check,
+  Hash,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -181,11 +181,11 @@ export default function CtaConfigure() {
       }));
 
       return [...categoryOptions, ...tagOptions];
-    }, [categories, tags]);
+    }, []);
 
     const selectedValues = useMemo(() => {
       return [...selectedCategories, ...selectedTags];
-    }, [selectedCategories, selectedTags]);
+    }, []);
 
     const handleSelectionChange = (value: string) => {
       const newCategories = [...selectedCategories];
@@ -262,30 +262,11 @@ export default function CtaConfigure() {
                       : "Select categories and tags..."}
                   </span>
                 ) : (
-                  selectedItems.slice(0, 3).map((item) => (
-                    <span
-                      key={item.id}
-                      className="inline-flex items-center gap-1 px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs"
-                    >
-                      {item.type === "category" ? (
-                        <Folder className="h-3 w-3 text-blue-500" />
-                      ) : (
-                        <Tag className="h-3 w-3 text-green-500" />
-                      )}
-                      {item.name}
-                      <X
-                        className="h-3 w-3 cursor-pointer hover:text-destructive"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeItem(item.id);
-                        }}
-                      />
-                    </span>
-                  ))
+                  ""
                 )}
-                {selectedItems.length > 3 && (
+                {selectedItems.length > 0 && (
                   <span className="text-xs text-muted-foreground">
-                    +{selectedItems.length - 3} more
+                    {selectedItems.length} selected
                   </span>
                 )}
               </div>
@@ -312,7 +293,7 @@ export default function CtaConfigure() {
                         </div>
                         <div className="flex items-center gap-1">
                           {option.type === "category" ? (
-                            <Folder className="h-3 w-3 text-blue-500" />
+                            <Hash className="h-3 w-3 text-blue-500" />
                           ) : (
                             <Tag className="h-3 w-3 text-green-500" />
                           )}
@@ -339,7 +320,7 @@ export default function CtaConfigure() {
                 className="inline-flex items-center gap-1 px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs"
               >
                 {item.type === "category" ? (
-                  <Folder className="h-3 w-3 text-blue-500" />
+                  <Hash className="h-3 w-3 text-blue-500" />
                 ) : (
                   <Tag className="h-3 w-3 text-green-500" />
                 )}
@@ -369,7 +350,10 @@ export default function CtaConfigure() {
       </div>
       <div className="space-y-5">
         <div>
-          <Label htmlFor="cta-name" className=" text-normal font-medium mb-2 block">
+          <Label
+            htmlFor="cta-name"
+            className=" text-normal font-medium mb-2 block"
+          >
             CTA Name
           </Label>
           <Input
@@ -397,7 +381,10 @@ export default function CtaConfigure() {
         {/* Categories and Tags Selection */}
         <div>
           <div className="flex items-center gap-1.5 mb-2">
-            <Label htmlFor="categories-tags" className="text-normal font-medium">
+            <Label
+              htmlFor="categories-tags"
+              className="text-normal font-medium"
+            >
               Categories & Tags
             </Label>
             <Tooltip content="Select categories and tags to organize your CTAs.">

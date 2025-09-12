@@ -1,10 +1,10 @@
-'use client';
-import React, { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
+"use client";
+import React, { useState, useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -12,21 +12,21 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Search,
   Filter,
@@ -40,9 +40,9 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
-} from 'lucide-react';
-import Link from 'next/link';
-import { useParams } from 'next/navigation';
+} from "lucide-react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import {
   useFormsTable,
   useForms,
@@ -52,59 +52,59 @@ import {
   FormsFilters,
   FormsSort,
   FormsPagination,
-} from '@/modules/blogs/hooks/use-forms';
-import { useBlogFilterOptions } from '@/modules/blogs/hooks/use-blog-filter-options';
-import { format } from 'date-fns';
-import { toast } from 'sonner';
+} from "@/modules/blogs/hooks/use-forms";
+import { useBlogFilterOptions } from "@/modules/blogs/hooks/use-blog-filter-options";
+import { format } from "date-fns";
+import { toast } from "sonner";
 
 // Form type configuration
 const FORM_TYPE_CONFIG = {
   EndOfPost: {
-    label: 'End of Post',
-    icon: '📝',
-    color: 'bg-blue-100 text-blue-800',
+    label: "End of Post",
+    icon: "📝",
+    color: "bg-blue-100 text-blue-800",
   },
   Sidebar: {
-    label: 'Sidebar',
-    icon: '📌',
-    color: 'bg-green-100 text-green-800',
+    label: "Sidebar",
+    icon: "📌",
+    color: "bg-green-100 text-green-800",
   },
   InLine: {
-    label: 'In Line',
-    icon: '📄',
-    color: 'bg-purple-100 text-purple-800',
+    label: "In Line",
+    icon: "📄",
+    color: "bg-purple-100 text-purple-800",
   },
   PopUp: {
-    label: 'Pop Up',
-    icon: '🔔',
-    color: 'bg-orange-100 text-orange-800',
+    label: "Pop Up",
+    icon: "🔔",
+    color: "bg-orange-100 text-orange-800",
   },
   Floating: {
-    label: 'Floating',
-    icon: '💬',
-    color: 'bg-pink-100 text-pink-800',
+    label: "Floating",
+    icon: "💬",
+    color: "bg-pink-100 text-pink-800",
   },
-  Gated: { label: 'Gated', icon: '🔒', color: 'bg-red-100 text-red-800' },
+  Gated: { label: "Gated", icon: "🔒", color: "bg-red-100 text-red-800" },
 };
 
 const SORT_OPTIONS = [
-  { value: 'lastModified-desc', label: 'Recent on top' },
-  { value: 'lastModified-asc', label: 'Oldest on top' },
-  { value: 'submissionCount-desc', label: 'Leads - Higher to Lower' },
-  { value: 'submissionCount-asc', label: 'Leads - Lower to Higher' },
-  { value: 'name-asc', label: 'Name A-Z' },
-  { value: 'name-desc', label: 'Name Z-A' },
+  { value: "lastModified-desc", label: "Recent on top" },
+  { value: "lastModified-asc", label: "Oldest on top" },
+  { value: "submissionCount-desc", label: "Leads - Higher to Lower" },
+  { value: "submissionCount-asc", label: "Leads - Lower to Higher" },
+  { value: "name-asc", label: "Name A-Z" },
+  { value: "name-desc", label: "Name Z-A" },
 ];
 
 export default function FormsManagementPage() {
   const params = useParams();
   const { workspaceSlug, blogId } = params;
 
-  const [activeTab, setActiveTab] = useState('forms');
+  const [activeTab, setActiveTab] = useState("forms");
   const [filters, setFilters] = useState<FormsFilters>({});
   const [sort, setSort] = useState<FormsSort>({
-    field: 'lastModified',
-    direction: 'desc',
+    field: "lastModified",
+    direction: "desc",
   });
   const [pagination, setPagination] = useState<FormsPagination>({
     page: 1,
@@ -127,7 +127,7 @@ export default function FormsManagementPage() {
   const deleteFormMutation = useDeleteForm(blogId as string);
 
   const globalForms = useMemo(
-    () => formsData?.forms?.filter((f: any) => f.categoryId === 'global') || [],
+    () => formsData?.forms?.filter((f: any) => f.categoryId === "global") || [],
     [formsData?.forms]
   );
 
@@ -139,15 +139,15 @@ export default function FormsManagementPage() {
   const handleFilterChange = (key: keyof FormsFilters, value: string) => {
     setFilters((prev) => ({
       ...prev,
-      [key]: value === 'all' ? undefined : value,
+      [key]: value === "all" ? undefined : value,
     }));
     setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
   const handleSortChange = (sortValue: string) => {
-    const [field, direction] = sortValue.split('-') as [
-      FormsSort['field'],
-      FormsSort['direction']
+    const [field, direction] = sortValue.split("-") as [
+      FormsSort["field"],
+      FormsSort["direction"]
     ];
     setSort({ field, direction });
   };
@@ -155,9 +155,9 @@ export default function FormsManagementPage() {
   const handleToggleForm = async (formId: string, enabled: boolean) => {
     try {
       await toggleFormMutation.mutateAsync({ formId, enabled });
-      toast.success(`Form ${enabled ? 'enabled' : 'disabled'} successfully`);
+      toast.success(`Form ${enabled ? "enabled" : "disabled"} successfully`);
     } catch (error) {
-      toast.error('Failed to update form status');
+      toast.error("Failed to update form status");
     }
   };
 
@@ -172,9 +172,9 @@ export default function FormsManagementPage() {
 
     try {
       await deleteFormMutation.mutateAsync(formId);
-      toast.success('Form deleted successfully');
+      toast.success("Form deleted successfully");
     } catch (error) {
-      toast.error('Failed to delete form');
+      toast.error("Failed to delete form");
     }
   };
 
@@ -225,7 +225,7 @@ export default function FormsManagementPage() {
 
           <TabsContent value="forms" className="space-y-6">
             {/* Global Forms Section */}
-            <Card>
+            <Card className="">
               <CardHeader>
                 <CardTitle className="text-lg">Global Forms</CardTitle>
                 <p className="text-sm text-muted-foreground">
@@ -259,7 +259,7 @@ export default function FormsManagementPage() {
                             </Badge>
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            {format(new Date(form.updatedAt), 'dd MMM yy')}
+                            {format(new Date(form.updatedAt), "dd MMM yy")}
                           </div>
                           <Switch
                             checked={form.enabled}
@@ -269,7 +269,7 @@ export default function FormsManagementPage() {
                             disabled={toggleFormMutation.isPending}
                           />
                           <span className="text-sm text-green-600">
-                            {form.enabled ? 'Enabled' : 'Disabled'}
+                            {form.enabled ? "Enabled" : "Disabled"}
                           </span>
                           <Link
                             href={`/${workspaceSlug}/blogs/${blogId}/forms-cta/form-dashboard?formId=${form.id}`}
@@ -313,14 +313,14 @@ export default function FormsManagementPage() {
                       <Input
                         placeholder="Search..."
                         className="pl-9 w-64"
-                        value={filters.search || ''}
+                        value={filters.search || ""}
                         onChange={(e) => handleSearchChange(e.target.value)}
                       />
                     </div>
                     <Select
-                      value={filters.type || 'all'}
+                      value={filters.type || "all"}
                       onValueChange={(value) =>
-                        handleFilterChange('type', value)
+                        handleFilterChange("type", value)
                       }
                     >
                       <SelectTrigger className="w-32">
@@ -339,9 +339,9 @@ export default function FormsManagementPage() {
                       </SelectContent>
                     </Select>
                     <Select
-                      value={filters.category || 'all'}
+                      value={filters.category || "all"}
                       onValueChange={(value) =>
-                        handleFilterChange('category', value)
+                        handleFilterChange("category", value)
                       }
                     >
                       <SelectTrigger className="w-40">
@@ -417,7 +417,8 @@ export default function FormsManagementPage() {
                               <div className="flex items-center gap-2">
                                 {form.isGlobal ? (
                                   <Badge variant="secondary">Global</Badge>
-                                ) : form.categories && form.categories.length > 0 ? (
+                                ) : form.categories &&
+                                  form.categories.length > 0 ? (
                                   <>
                                     <Badge variant="outline">
                                       {form.categories[0].slug}
@@ -426,7 +427,10 @@ export default function FormsManagementPage() {
                                       {form.categories[0].name}
                                     </span>
                                     {form.categories.length > 1 && (
-                                      <Badge variant="outline" className="text-xs">
+                                      <Badge
+                                        variant="outline"
+                                        className="text-xs"
+                                      >
                                         +{form.categories.length - 1} more
                                       </Badge>
                                     )}
@@ -449,7 +453,7 @@ export default function FormsManagementPage() {
                               </div>
                             </TableCell>
                             <TableCell>
-                              {format(new Date(form.lastModified), 'dd MMM yy')}
+                              {format(new Date(form.lastModified), "dd MMM yy")}
                             </TableCell>
                             <TableCell>
                               <DropdownMenu>
@@ -495,12 +499,12 @@ export default function FormsManagementPage() {
                     {tableData.totalCount > pagination.pageSize && (
                       <div className="flex items-center justify-between mt-4">
                         <p className="text-sm text-muted-foreground">
-                          Showing{' '}
-                          {(pagination.page - 1) * pagination.pageSize + 1} to{' '}
+                          Showing{" "}
+                          {(pagination.page - 1) * pagination.pageSize + 1} to{" "}
                           {Math.min(
                             pagination.page * pagination.pageSize,
                             tableData.totalCount
-                          )}{' '}
+                          )}{" "}
                           of {tableData.totalCount} forms
                         </p>
                         <div className="flex items-center gap-2">

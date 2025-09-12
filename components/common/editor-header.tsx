@@ -55,6 +55,7 @@ export default function EditorHeader({
   saveError = null,
 }: EditorHeaderProps) {
   const gridColsClass = `grid-cols-${tabs.length}`;
+  const router = useRouter();
 
   return (
     <>
@@ -93,20 +94,24 @@ export default function EditorHeader({
             )}
           </Button>
 
-          <Button variant="ghost" size="icon" >
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => window.location.reload()}
+          >
             <RefreshCcw className="w-4 h-4" />
           </Button>
-
           <Button
             variant="ghost"
             size="icon"
             onClick={() => onDeviceChange("desktop")}
           >
             <Monitor
-              className={`h-4 w-4 ${device === "desktop"
-                ? "text-foreground"
-                : "text-muted-foreground"
-                }`}
+              className={`h-4 w-4 ${
+                device === "desktop"
+                  ? "text-foreground"
+                  : "text-muted-foreground"
+              }`}
             />
           </Button>
 
@@ -116,10 +121,11 @@ export default function EditorHeader({
             onClick={() => onDeviceChange("mobile")}
           >
             <Smartphone
-              className={`h-4 w-4 ${device === "mobile"
-                ? "text-foreground"
-                : "text-muted-foreground"
-                }`}
+              className={`h-4 w-4 ${
+                device === "mobile"
+                  ? "text-foreground"
+                  : "text-muted-foreground"
+              }`}
             />
           </Button>
 

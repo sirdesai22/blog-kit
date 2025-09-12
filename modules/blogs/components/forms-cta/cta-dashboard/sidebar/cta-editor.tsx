@@ -107,7 +107,7 @@ export default function CtaEditor() {
           <Button variant="outline" onClick={() => setActiveTab("configure")}>
             ← Back
           </Button>
-          <Button onClick={saveChanges}>Save</Button>
+          <Button onClick={saveChanges}>Save →</Button>
         </div>
       </div>
     </div>

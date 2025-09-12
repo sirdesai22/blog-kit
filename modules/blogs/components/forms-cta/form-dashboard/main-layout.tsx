@@ -12,6 +12,9 @@ import { Switch } from "@/components/ui/switch";
 import { useSidebar } from "@/components/ui/sidebar";
 import CustomCode from "./sidebar/custom-code";
 import EditorHeader from "@/components/common/editor-header";
+import DynamicForm from "./content/dynamic-form";
+import { Button } from "@/components/ui/button";
+import parse from "html-react-parser";
 
 const SidebarContent = ({ activeTab }: { activeTab: string }) => {
   switch (activeTab) {
@@ -28,9 +31,50 @@ const SidebarContent = ({ activeTab }: { activeTab: string }) => {
   }
 };
 
-// Inner component with access to context
+// Extracted ConfirmationMessage to be used here
+const ConfirmationMessage = () => {
+  const { formState, theme, setIsConfirmationVisible } =
+    useContext(FormContext);
+  const { confirmation } = formState;
+  const isDark = theme === "dark";
+
+  const handleButtonClick = () => {
+    if (confirmation.buttonType === "Link" && confirmation.url) {
+      window.open(
+        confirmation.url,
+        confirmation.openInNewTab ? "_blank" : "_self"
+      );
+    }
+    setIsConfirmationVisible(false);
+  };
+
+  const confirmationClasses = cn(
+    "p-4 rounded-lg flex flex-col items-center justify-center gap-2 w-full max-w-[400px] mx-auto shadow-xl text-center",
+    isDark ? "bg-zinc-800 text-gray-200" : "bg-white text-gray-800"
+  );
+
+  return (
+    <div className={confirmationClasses}>
+      <h2 className="text-header">{confirmation.heading}</h2>
+      <p className="text-normal">{parse(confirmation.description)}</p>
+      <Button onClick={handleButtonClick} className="mt-4">
+        {confirmation.buttonText}
+      </Button>
+    </div>
+  );
+};
+
 const FormDashboard = ({ activeTab }: { activeTab: string }) => {
-  const { device, formState, setCustomCodeEnabled } = useContext(FormContext);
+  const {
+    device,
+    formState,
+    setCustomCodeEnabled,
+    isFormVisible,
+    isConfirmationVisible,
+    setIsFormAndConfirmationVisible,
+  } = useContext(FormContext);
+
+  const { formType, isMandatory } = formState;
   const isCustomCodeActive = formState.customCode.isEnabled;
   const { closeSidebar, openSidebar } = useSidebar();
 
@@ -38,6 +82,15 @@ const FormDashboard = ({ activeTab }: { activeTab: string }) => {
     closeSidebar();
     return () => openSidebar();
   }, [closeSidebar, openSidebar]);
+
+  const handleOverlayClick = () => {
+    if (!isMandatory && setIsFormAndConfirmationVisible) {
+      setIsFormAndConfirmationVisible(false);
+    }
+  };
+
+  const isOverlayFormVisible =
+    (formType === "PopUp" || formType === "Gated") && isFormVisible;
 
   return (
     <div className="flex flex-1 overflow-hidden">
@@ -80,13 +133,47 @@ const FormDashboard = ({ activeTab }: { activeTab: string }) => {
           >
             <ContentPanel />
           </div>
+
+          {/* --- MODAL AND OVERLAY LOGIC IS NOW HERE --- */}
+          {isOverlayFormVisible && (
+            <div
+              className="absolute inset-0 z-20 flex items-center justify-center p-4"
+              onClick={handleOverlayClick}
+            >
+              <div
+                className={cn(
+                  "absolute inset-0 ",
+                  formType === "Gated" && "backdrop-blur-sm bg-black/60"
+                )}
+              ></div>
+              <div
+                className="relative z-30"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {isConfirmationVisible ? (
+                  <ConfirmationMessage />
+                ) : (
+                  <DynamicForm />
+                )}
+              </div>
+            </div>
+          )}
+
+          {formType === "Floating" && isFormVisible && (
+            <div className="absolute bottom-5 right-5 z-20 max-w-[400px]">
+              {isConfirmationVisible ? (
+                <ConfirmationMessage />
+              ) : (
+                <DynamicForm />
+              )}
+            </div>
+          )}
         </div>
       </main>
     </div>
   );
 };
 
-// NEW: A wrapper component that can access the context
 const LayoutContent = ({
   activeTab,
   setActiveTab,
@@ -94,7 +181,6 @@ const LayoutContent = ({
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }) => {
-  // Now we can safely access the context here
   const {
     theme,
     setTheme,
@@ -113,7 +199,6 @@ const LayoutContent = ({
 
   return (
     <>
-      {/* The disabled prop is now passed correctly from a component that has access to the context state */}
       <EditorHeader
         title="Form"
         tabs={formTabs}
@@ -136,7 +221,6 @@ const LayoutContent = ({
   );
 };
 
-// Main component that manages state
 export default function MainLayout({ pageId }: { pageId: string }) {
   const [activeTab, setActiveTab] = useState("configure");
   const searchParams = useSearchParams();
