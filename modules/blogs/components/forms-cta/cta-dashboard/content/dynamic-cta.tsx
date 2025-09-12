@@ -3,6 +3,7 @@ import { useContext } from "react";
 import { CtaContext } from "../context/cta-context";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import parse from "html-react-parser";
 
 export default function DynamicCta() {
   const { ctaState } = useContext(CtaContext);
@@ -21,7 +22,14 @@ export default function DynamicCta() {
   return (
     <div className={ctaClasses}>
       <h2 className="text-3xl font-bold">{content.heading}</h2>
-      <p className="text-indigo-200">{content.description}</p>
+
+      {/* description with HTML */}
+      {content.description && (
+        <div className="text-indigo-200 text-sm">
+          {parse(content.description)}
+        </div>
+      )}
+
       <div className="flex items-center gap-4 mt-4">
         {content.primaryButton.text && (
           <Button variant="secondary" size="lg">
@@ -38,8 +46,12 @@ export default function DynamicCta() {
           </Button>
         )}
       </div>
+
+      {/* footnote with HTML */}
       {content.footnote && (
-        <p className="text-xs text-indigo-300 mt-4">{content.footnote}</p>
+        <div className="text-xs text-indigo-300 mt-4">
+          {parse(content.footnote)}
+        </div>
       )}
     </div>
   );

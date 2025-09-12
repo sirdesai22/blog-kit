@@ -56,7 +56,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { Separator } from "@/components/ui/separator";
-import DescriptionEditor from "@/components/models/description-editor";
+import DescriptionEditor from "@/components/common/description-editor";
 import dynamic from "next/dynamic";
 import {
   PopoverTrigger,
@@ -84,9 +84,7 @@ function FooterItems() {
     theme,
     setTheme,
   } = useContext(FooterContext);
-  const {
-    darkModeEnabled
-  } = useContext(BrandContext);
+  const { darkModeEnabled } = useContext(BrandContext);
 
   const [isSocialPopoverOpen, setSocialPopoverOpen] = useState(false);
   const socialInputRefs = useRef<Map<string, HTMLInputElement>>(new Map());
@@ -248,21 +246,22 @@ function FooterItems() {
           <CardContent className="space-y-4 p-0">
             <div className="flex items-start justify-between">
               <div className="space-y-2">
-
                 <CardTitle className="text-normal">Logo</CardTitle>
 
-                {darkModeEnabled && (<Select
-                  value={theme}
-                  onValueChange={(v: ThemeType) => setTheme(v)}
-                >
-                  <SelectTrigger className="w-fit">
-                    <SelectValue placeholder="Select Mode" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="light">Light Mode</SelectItem>
-                    <SelectItem value="dark">Dark Mode</SelectItem>
-                  </SelectContent>
-                </Select>)}
+                {darkModeEnabled && (
+                  <Select
+                    value={theme}
+                    onValueChange={(v: ThemeType) => setTheme(v)}
+                  >
+                    <SelectTrigger className="w-fit">
+                      <SelectValue placeholder="Select Mode" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="light">Light Mode</SelectItem>
+                      <SelectItem value="dark">Dark Mode</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
 
                 <Button
                   variant="link"

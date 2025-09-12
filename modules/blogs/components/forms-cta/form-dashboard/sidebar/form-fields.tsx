@@ -25,6 +25,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { Separator } from "@/components/ui/separator";
+import DescriptionEditor from "@/components/common/description-editor";
 
 export default function FormFields() {
   const { formState, updateField, setActiveTab, setFields, deleteFormField } =
@@ -88,10 +89,11 @@ export default function FormFields() {
             <Label className="text-normal font-medium" htmlFor="description">
               Description
             </Label>
-            <Textarea
-              id="description"
+            <DescriptionEditor
               value={formState.description}
-              onChange={(e) => updateField("description", e.target.value)}
+              onChange={(content: string) =>
+                updateField("description", content)
+              }
             />
           </div>
         </div>
@@ -140,10 +142,9 @@ export default function FormFields() {
             <Label className="text-normal font-medium" htmlFor="footnote">
               Footnote
             </Label>
-            <Textarea
-              id="footnote"
+            <DescriptionEditor
               value={formState.footnote}
-              onChange={(e) => updateField("footnote", e.target.value)}
+              onChange={(content: string) => updateField("footnote", content)}
             />
           </div>
         </div>

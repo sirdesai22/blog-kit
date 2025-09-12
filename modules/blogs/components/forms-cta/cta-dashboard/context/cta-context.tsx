@@ -102,8 +102,8 @@ const initialState: CtaState = {
   content: {
     heading: "This is a big heading for the callout section of the page",
     description: "This is a subheading for the callout section",
-    primaryButton: { text: "Main Button", url: "#" },
-    secondaryButton: { text: "Secondary", url: "#" },
+    primaryButton: { text: "Main Button", url: "https://example.com" },
+    secondaryButton: { text: "Secondary", url: "https://test.com" },
     footnote: "This is a small footnote.",
   },
   customCode: { isEnabled: false, code: "" },

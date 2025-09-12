@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { countries, Country } from "@/lib/countries";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import parse from "html-react-parser";
 import {
   Select,
   SelectContent,
@@ -40,7 +41,6 @@ const renderField = (
   setPhoneCountry: React.Dispatch<React.SetStateAction<Country>>,
   countryOptions: Country[]
 ) => {
-
   const baseInputClasses =
     "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
 
@@ -55,7 +55,13 @@ const renderField = (
     case "ShortText":
       return (
         <Input
-          type={field.type === "Password" ? "password" : field.type === "Email" ? "email" : "text"}
+          type={
+            field.type === "Password"
+              ? "password"
+              : field.type === "Email"
+              ? "email"
+              : "text"
+          }
           placeholder={field.placeholder}
           className={cn(errorClasses)}
           value={value || ""}
@@ -81,7 +87,9 @@ const renderField = (
           value={value || ""}
         >
           <SelectTrigger className={cn("w-full", errorClasses)}>
-            <SelectValue placeholder={field.placeholder || "Select an option"} />
+            <SelectValue
+              placeholder={field.placeholder || "Select an option"}
+            />
           </SelectTrigger>
           <SelectContent>
             {field.options?.map((opt) => (
@@ -100,7 +108,9 @@ const renderField = (
           value={value || ""}
         >
           <SelectTrigger className={cn("w-full", errorClasses)}>
-            <SelectValue placeholder={field.placeholder || "Select a country"} />
+            <SelectValue
+              placeholder={field.placeholder || "Select a country"}
+            />
           </SelectTrigger>
           <SelectContent>
             {countryOptions.map((country) => (
@@ -122,12 +132,21 @@ const renderField = (
 
       return (
         <div className="flex items-center">
-          <Select onValueChange={(code) => setPhoneCountry(countries.find(c => c.code === code) || countries[0])} defaultValue={phoneCountry.code}>
-            <SelectTrigger className={cn("w-[80px] rounded-r-none", errorClasses)}>
+          <Select
+            onValueChange={(code) =>
+              setPhoneCountry(
+                countries.find((c) => c.code === code) || countries[0]
+              )
+            }
+            defaultValue={phoneCountry.code}
+          >
+            <SelectTrigger
+              className={cn("w-[80px] rounded-r-none", errorClasses)}
+            >
               <SelectValue>{phoneCountry.flag}</SelectValue>
             </SelectTrigger>
             <SelectContent className="max-h-[200px]">
-              {countries.map(c => (
+              {countries.map((c) => (
                 <SelectItem key={c.code} value={c.code}>
                   {c.flag} {c.phone}
                 </SelectItem>
@@ -142,7 +161,7 @@ const renderField = (
             onChange={handlePhoneChange}
           />
         </div>
-      )
+      );
 
     case "MultiSelect":
       const selectedValues = new Set(value || []);
@@ -304,7 +323,7 @@ export default function DynamicForm() {
         <h2 className="text-2xl font-bold">{heading}</h2>
         {description && (
           <p className="text-muted-foreground mt-2 whitespace-pre-wrap">
-            {description}
+            {parse(description)}
           </p>
         )}
       </div>
@@ -342,7 +361,9 @@ export default function DynamicForm() {
         {buttonText}
       </button>
       {footnote && (
-        <p className="text-xs text-center text-muted-foreground">{footnote}</p>
+        <p className="text-xs text-center text-muted-foreground">
+          {parse(footnote)}
+        </p>
       )}
     </form>
   );

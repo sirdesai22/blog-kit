@@ -1,11 +1,5 @@
 "use client";
-import {
-  useContext,
-  useState,
-  useEffect,
-  KeyboardEvent,
-  useMemo,
-} from "react";
+import { useContext, useState, useEffect, KeyboardEvent, useMemo } from "react";
 import { FormContext, FormField, FieldType } from "../context/form-context";
 import {
   Dialog,
@@ -77,14 +71,18 @@ function SortableOptionItem({
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="flex items-center gap-2">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center h-[32px] border rounded-md bg-background"
+    >
       <div {...attributes} {...listeners} className="cursor-grab p-1">
-        <GripVertical className="h-5 w-5 text-muted-foreground" />
+        <GripVertical className="h-4 w-4 text-muted-foreground" />
       </div>
       <Input
         value={option}
         onChange={(e) => onUpdate(index, e.target.value)}
-        className="flex-1"
+        className="flex-1 !border-none !shadow-none !ring-0 !outline-none focus:!outline-none focus:!border-none focus:!ring-0"
       />
       <Button variant="ghost" size="icon" onClick={() => onDelete(index)}>
         <X className="h-4 w-4" />
@@ -260,32 +258,35 @@ export default function AddEditFieldModal({ isOpen, setIsOpen, field }: Props) {
           </div>
 
           {showOptionsEditor && (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col ">
               <Label className="text-right pt-2">Options</Label>
               <>
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleOptionDragEnd}
-                >
-                  <SortableContext
-                    items={optionIds}
-                    strategy={verticalListSortingStrategy}
+                {formState.options.length > 0 && (
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleOptionDragEnd}
                   >
-                    <div className="space-y-2">
-                      {formState.options?.map((opt, index) => (
-                        <SortableOptionItem
-                          key={optionIds[index]}
-                          id={optionIds[index]}
-                          option={opt}
-                          index={index}
-                          onUpdate={handleUpdateOption}
-                          onDelete={handleDeleteOption}
-                        />
-                      ))}
-                    </div>
-                  </SortableContext>
-                </DndContext>
+                    <SortableContext
+                      items={optionIds}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="space-y-2 mt-2">
+                        {formState.options?.map((opt, index) => (
+                          <SortableOptionItem
+                            key={optionIds[index]}
+                            id={optionIds[index]}
+                            option={opt}
+                            index={index}
+                            onUpdate={handleUpdateOption}
+                            onDelete={handleDeleteOption}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+                )}
+
                 <div className="flex items-center gap-2 pt-2">
                   <Input
                     placeholder="Add new option"

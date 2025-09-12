@@ -4,6 +4,7 @@ import { FormContext } from "../context/form-context";
 import DynamicForm from "./dynamic-form";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import parse from "html-react-parser";
 
 // --- NEW: Confirmation Message Component ---
 const ConfirmationMessage = () => {
@@ -30,7 +31,7 @@ const ConfirmationMessage = () => {
   return (
     <div className={confirmationClasses}>
       <h2 className="text-header">{confirmation.heading}</h2>
-      <p className="text-normal">{confirmation.description}</p>
+      <p className="text-normal">{parse(confirmation.description)}</p>
       <Button onClick={handleButtonClick} className="mt-4">
         {confirmation.buttonText}
       </Button>

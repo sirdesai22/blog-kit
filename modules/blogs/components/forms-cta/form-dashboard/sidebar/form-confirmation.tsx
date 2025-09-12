@@ -16,9 +16,10 @@ import { Switch } from "@/components/ui/switch";
 import { CheckCircle2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import DescriptionEditor from "@/components/common/description-editor";
 
 export default function FormConfirmation() {
-  const { formState,setActiveTab, setFormState } = useContext(FormContext);
+  const { formState, setActiveTab, setFormState } = useContext(FormContext);
   const { confirmation } = formState;
 
   // Corrected state update logic for nested objects
@@ -64,17 +65,15 @@ export default function FormConfirmation() {
           <Label className="text-normal font-medium" htmlFor="conf-description">
             Description
           </Label>
-          <Textarea
-            id="conf-description"
+          <DescriptionEditor
             value={confirmation.description}
-            onChange={(e) =>
-              handleConfirmationChange("description", e.target.value)
+            onChange={(content: string) =>
+              handleConfirmationChange("description", content)
             }
           />
         </div>
 
-<Separator />
-
+        <Separator />
 
         {/* --- Action Button Section --- */}
         <div className="space-y-2">
@@ -110,7 +109,9 @@ export default function FormConfirmation() {
         </div>
 
         <div className="flex justify-between">
-          <Button variant="outline" onClick={() => setActiveTab("form")}>← Back</Button>
+          <Button variant="outline" onClick={() => setActiveTab("form")}>
+            ← Back
+          </Button>
           <Button onClick={() => setActiveTab("action")}>Next →</Button>
         </div>
 

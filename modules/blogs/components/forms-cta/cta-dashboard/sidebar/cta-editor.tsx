@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, Bold, Italic, Underline, Link } from "lucide-react";
 import { produce } from "immer";
 import { Separator } from "@/components/ui/separator";
+import DescriptionEditor from "@/components/common/description-editor";
 
 export default function CtaEditor() {
   const { ctaState, updateContentField, saveChanges, setActiveTab } =
@@ -34,7 +35,9 @@ export default function CtaEditor() {
       </div>
       <div className="flex-1 space-y-4 overflow-y-auto pr-2">
         <div className="space-y-2">
-          <Label className="text-normal font-medium" htmlFor="cta-heading">Heading</Label>
+          <Label className="text-normal font-medium" htmlFor="cta-heading">
+            Heading
+          </Label>
           <Input
             id="cta-heading"
             value={content.heading}
@@ -42,11 +45,12 @@ export default function CtaEditor() {
           />
         </div>
         <div className="space-y-2">
-          <Label className="text-normal font-medium" htmlFor="cta-desc">Description</Label>
-          <Textarea
-            id="cta-desc"
+          <Label className="text-normal font-medium" htmlFor="cta-desc">
+            Description
+          </Label>
+          <DescriptionEditor
             value={content.description}
-            onChange={(e) => updateContentField("description", e.target.value)}
+            onChange={(val: string) => updateContentField("description", val)}
             className="rounded-t-none"
           />
         </div>
@@ -90,11 +94,12 @@ export default function CtaEditor() {
         <Separator />
 
         <div className="space-y-2">
-          <Label className="text-normal font-medium" htmlFor="cta-footnote">Footnote</Label>
-          <Textarea
-            id="cta-footnote"
+          <Label className="text-normal font-medium" htmlFor="cta-footnote">
+            Footnote
+          </Label>
+          <DescriptionEditor
             value={content.footnote}
-            onChange={(e) => updateContentField("footnote", e.target.value)}
+            onChange={(val: string) => updateContentField("footnote", val)}
             className="rounded-t-none"
           />
         </div>
@@ -105,7 +110,6 @@ export default function CtaEditor() {
           <Button onClick={saveChanges}>Save</Button>
         </div>
       </div>
-
     </div>
   );
 }

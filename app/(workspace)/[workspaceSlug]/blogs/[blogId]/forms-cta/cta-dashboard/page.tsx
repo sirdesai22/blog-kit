@@ -1,5 +1,5 @@
-import MainLayout from '@/modules/blogs/components/forms-cta/cta-dashboard/main-layout';
-import React from 'react';
+import MainLayout from "@/modules/blogs/components/forms-cta/cta-dashboard/main-layout";
+import React from "react";
 
 async function page({
   params,

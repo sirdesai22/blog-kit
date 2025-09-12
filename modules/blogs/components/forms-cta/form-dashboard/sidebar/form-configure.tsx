@@ -19,7 +19,7 @@ import {
   Loader2,
   RefreshCw,
   Tag,
-  Folder,
+  Hash,
   Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -331,30 +331,31 @@ export default function FormConfigure() {
                       : "Select categories and tags..."}
                   </span>
                 ) : (
-                  selectedItems.slice(0, 3).map((item) => (
-                    <span
-                      key={item.id}
-                      className="inline-flex items-center gap-1 px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs"
-                    >
-                      {item.type === "category" ? (
-                        <Folder className="h-3 w-3 text-blue-500" />
-                      ) : (
-                        <Tag className="h-3 w-3 text-green-500" />
-                      )}
-                      {item.name}
-                      <X
-                        className="h-3 w-3 cursor-pointer hover:text-destructive"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeItem(item.id);
-                        }}
-                      />
-                    </span>
-                  ))
+                  ""
+                  // selectedItems.slice(0, 3).map((item) => (
+                  //   <span
+                  //     key={item.id}
+                  //     className="inline-flex items-center gap-1 px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs"
+                  //   >
+                  //     {item.type === "category" ? (
+                  //       <Hash className="h-3 w-3 text-blue-500" />
+                  //     ) : (
+                  //       <Tag className="h-3 w-3 text-green-500" />
+                  //     )}
+                  //     {item.name}
+                  //     <X
+                  //       className="h-3 w-3 cursor-pointer hover:text-destructive"
+                  //       onClick={(e) => {
+                  //         e.stopPropagation();
+                  //         removeItem(item.id);
+                  //       }}
+                  //     />
+                  //   </span>
+                  // ))
                 )}
-                {selectedItems.length > 3 && (
+                {selectedItems.length > 0 && (
                   <span className="text-xs text-muted-foreground">
-                    +{selectedItems.length - 3} more
+                    {selectedItems.length} selected
                   </span>
                 )}
               </div>
@@ -381,7 +382,7 @@ export default function FormConfigure() {
                         </div>
                         <div className="flex items-center gap-1">
                           {option.type === "category" ? (
-                            <Folder className="h-3 w-3 text-blue-500" />
+                            <Hash className="h-3 w-3 text-blue-500" />
                           ) : (
                             <Tag className="h-3 w-3 text-green-500" />
                           )}
@@ -408,7 +409,7 @@ export default function FormConfigure() {
                 className="inline-flex items-center gap-1 px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs"
               >
                 {item.type === "category" ? (
-                  <Folder className="h-3 w-3 text-blue-500" />
+                  <Hash className="h-3 w-3 text-blue-500" />
                 ) : (
                   <Tag className="h-3 w-3 text-green-500" />
                 )}
@@ -611,7 +612,9 @@ export default function FormConfigure() {
         )}
 
         {/* Mandatory Form & Next Button */}
-        {(formType === "PopUp" || formType === "Floating" || formType === "Gated") && (
+        {(formType === "PopUp" ||
+          formType === "Floating" ||
+          formType === "Gated") && (
           <div className="flex justify-between items-center pt-2">
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5">

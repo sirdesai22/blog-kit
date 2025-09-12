@@ -1,4 +1,4 @@
-import MainLayout from '@/modules/blogs/components/forms-cta/form-dashboard/main-layout';
+import MainLayout from "@/modules/blogs/components/forms-cta/form-dashboard/main-layout";
 
 interface PageProps {
   params: Promise<{
