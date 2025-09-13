@@ -19,7 +19,7 @@ import {
   useFloatingLinkInsertState,
 } from '@platejs/link/react';
 import { cva } from 'class-variance-authority';
-import { Check, ExternalLink, Link, Trash2, Unlink } from 'lucide-react';
+import { ExternalLink, Link, Text, Unlink } from 'lucide-react';
 import { KEYS } from 'platejs';
 import {
   useEditorRef,
@@ -34,120 +34,44 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { normalizeUrl } from '@/lib/url-utils';
 
 const popoverVariants = cva(
-  'z-50 w-auto rounded-md border bg-popover p-2 text-popover-foreground shadow-md outline-hidden'
+  'z-50 w-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md outline-hidden'
 );
 
 const inputVariants = cva(
-  'flex h-[32px] w-full rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
+  'flex h-[28px] w-full rounded-md border-none bg-transparent px-1.5 py-1 text-base placeholder:text-muted-foreground focus-visible:ring-transparent focus-visible:outline-none md:text-sm'
 );
 
-// Enhanced URL input that normalizes URLs
-function EnhancedUrlInput({
-  className,
-  placeholder,
-  ...props
-}: React.InputHTMLAttributes<HTMLInputElement>) {
-  const editor = useEditorRef();
-  const [internalValue, setInternalValue] = React.useState('');
-
-  const handleChange = React.useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setInternalValue(value);
-      // Call the original onChange if it exists
-      if (props.onChange) {
-        props.onChange(e);
-      }
-    },
-    [props]
-  );
+// Enhanced FloatingLinkUrlInput that normalizes URLs
+function EnhancedFloatingLinkUrlInput(props: any) {
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   const handleKeyDown = React.useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-        // Normalize URL before submitting
-        const normalizedUrl = normalizeUrl(internalValue);
-        if (normalizedUrl !== internalValue) {
-          // Update the input value with normalized URL
-          const syntheticEvent = {
-            ...e,
-            target: { ...e.target, value: normalizedUrl },
-          } as React.ChangeEvent<HTMLInputElement>;
-          if (props.onChange) {
-            props.onChange(syntheticEvent);
+      if (e.key === 'Enter' && inputRef.current) {
+        const currentValue = inputRef.current.value;
+        if (currentValue.trim()) {
+          const normalizedUrl = normalizeUrl(currentValue);
+          if (normalizedUrl !== currentValue) {
+            // Update the input value with normalized URL before submission
+            inputRef.current.value = normalizedUrl;
+
+            // Trigger input event to update PlateJS's internal state
+            const inputEvent = new Event('input', { bubbles: true });
+            inputRef.current.dispatchEvent(inputEvent);
           }
         }
       }
-      // Call the original onKeyDown if it exists
-      if (props.onKeyDown) {
-        props.onKeyDown(e);
-      }
     },
-    [internalValue, props]
+    []
   );
 
   return (
-    <input
+    <FloatingLinkUrlInput
       {...props}
-      className={className}
-      placeholder={placeholder}
-      onChange={handleChange}
+      ref={inputRef}
+      placeholder="Google.com"
       onKeyDown={handleKeyDown}
-      value={internalValue || props.value || ''}
     />
-  );
-}
-
-// Custom nofollow manager
-function NofollowManager() {
-  const editor = useEditorRef();
-  const [nofollow, setNofollow] = React.useState(false);
-
-  // Check current link's nofollow status
-  React.useEffect(() => {
-    const entry = editor.api.node<TLinkElement>({
-      match: { type: editor.getType(KEYS.link) },
-    });
-    if (entry) {
-      const [element] = entry;
-      const attrs = getLinkAttributes(editor, element);
-      setNofollow(attrs.rel?.includes('nofollow') || false);
-    }
-  }, [editor]);
-
-  const handleNofollowChange = React.useCallback(
-    (checked: boolean) => {
-      setNofollow(checked);
-
-      // Update existing link immediately
-      const entry = editor.api.node<TLinkElement>({
-        match: { type: editor.getType(KEYS.link) },
-      });
-      if (entry) {
-        const [, path] = entry;
-        editor.tf.setNodes(
-          { rel: checked ? 'nofollow' : undefined },
-          { at: path }
-        );
-      }
-    },
-    [editor]
-  );
-
-  return (
-    <div className="flex items-center space-x-2 mt-2">
-      <Checkbox
-        id="nofollow"
-        checked={nofollow}
-        onCheckedChange={handleNofollowChange}
-      />
-      <label
-        htmlFor="nofollow"
-        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-      >
-        Mark as nofollow
-      </label>
-    </div>
   );
 }
 
@@ -211,26 +135,36 @@ export function CustomLinkFloatingToolbar({
   if (hidden) return null;
 
   const input = (
-    <div className="flex flex-col gap-3 min-w-[300px]" {...inputProps}>
-      {/* URL Input Row */}
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-2 flex-1">
-          <Link className="h-4 w-4 text-muted-foreground" />
-          <FloatingLinkUrlInput
-            className={inputVariants()}
-            placeholder="Google.com"
-            data-plate-focus
-          />
+    <div className="flex w-[330px] flex-col" {...inputProps}>
+      <div className="flex items-center">
+        <div className="flex items-center pr-1 pl-2 text-muted-foreground">
+          <Link className="size-4" />
         </div>
 
-        {/* Save indicator - we'll let PlateJS handle the actual saving */}
-        <div className="flex items-center text-xs text-muted-foreground">
-          Press Enter to save
-        </div>
+        {/* Use enhanced FloatingLinkUrlInput that normalizes URLs */}
+        <EnhancedFloatingLinkUrlInput
+          className={inputVariants()}
+          data-plate-focus
+        />
       </div>
 
-      {/* Nofollow checkbox */}
-      <NofollowManager />
+      <Separator className="my-1" />
+
+      <div className="flex items-center">
+        <div className="flex items-center pr-1 pl-2 text-muted-foreground">
+          <Text className="size-4" />
+        </div>
+        <input
+          className={inputVariants()}
+          placeholder="Text to display"
+          data-plate-focus
+          {...textInputProps}
+        />
+      </div>
+
+      {/* Add nofollow checkbox */}
+      <Separator className="my-1" />
+      <NofollowCheckbox />
     </div>
   );
 
@@ -278,21 +212,109 @@ export function CustomLinkFloatingToolbar({
   );
 }
 
+function NofollowCheckbox() {
+  const editor = useEditorRef();
+  const [nofollow, setNofollow] = React.useState(false);
+
+  // Monitor for new links being created
+  React.useEffect(() => {
+    const handleNofollowForNewLinks = () => {
+      if (nofollow) {
+        // Small delay to ensure link is created first
+        setTimeout(() => {
+          const entry = editor.api.node<TLinkElement>({
+            match: { type: editor.getType(KEYS.link) },
+          });
+          if (entry) {
+            const [element] = entry;
+            const attrs = getLinkAttributes(editor, element);
+            // Only add nofollow if it doesn't already have it
+            if (!attrs.rel?.includes('nofollow')) {
+              const [, path] = entry;
+              editor.tf.setNodes({ rel: 'nofollow' }, { at: path });
+            }
+          }
+        }, 50);
+      }
+    };
+
+    // Listen for editor changes (when links are created)
+    editor.addEventListener?.('change', handleNofollowForNewLinks);
+
+    return () => {
+      editor.removeEventListener?.('change', handleNofollowForNewLinks);
+    };
+  }, [editor, nofollow]);
+
+  // Check current link's nofollow status when component mounts or selection changes
+  React.useEffect(() => {
+    const entry = editor.api.node<TLinkElement>({
+      match: { type: editor.getType(KEYS.link) },
+    });
+    if (entry) {
+      const [element] = entry;
+      const attrs = getLinkAttributes(editor, element);
+      setNofollow(attrs.rel?.includes('nofollow') || false);
+    } else {
+      // Reset when no link is selected
+      setNofollow(false);
+    }
+  }, [editor]);
+
+  const handleNofollowChange = React.useCallback(
+    (checked: boolean) => {
+      setNofollow(checked);
+
+      // Update existing link immediately
+      const entry = editor.api.node<TLinkElement>({
+        match: { type: editor.getType(KEYS.link) },
+      });
+      if (entry) {
+        const [, path] = entry;
+        editor.tf.setNodes(
+          { rel: checked ? 'nofollow' : undefined },
+          { at: path }
+        );
+      }
+    },
+    [editor]
+  );
+
+  return (
+    <div className="flex items-center space-x-2 px-2">
+      <Checkbox
+        id="nofollow"
+        checked={nofollow}
+        onCheckedChange={handleNofollowChange}
+      />
+      <label
+        htmlFor="nofollow"
+        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+      >
+        Mark as nofollow
+      </label>
+    </div>
+  );
+}
+
 function LinkOpenButton() {
   const editor = useEditorRef();
   const selection = useEditorSelection();
 
-  const attributes = React.useMemo(() => {
-    const entry = editor.api.node<TLinkElement>({
-      match: { type: editor.getType(KEYS.link) },
-    });
-    if (!entry) {
-      return {};
-    }
-    const [element] = entry;
-    return getLinkAttributes(editor, element);
+  const attributes = React.useMemo(
+    () => {
+      const entry = editor.api.node<TLinkElement>({
+        match: { type: editor.getType(KEYS.link) },
+      });
+      if (!entry) {
+        return {};
+      }
+      const [element] = entry;
+      return getLinkAttributes(editor, element);
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editor, selection]);
+    [editor, selection]
+  );
 
   return (
     <a
