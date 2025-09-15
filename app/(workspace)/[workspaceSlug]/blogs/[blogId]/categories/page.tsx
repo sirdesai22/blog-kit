@@ -1,21 +1,21 @@
-import { Suspense } from "react";
-import { notFound } from "next/navigation";
-import { getPageById } from "@/modules/workspace/actions/workspace-actions";
-import { CategoriesAndTagsView } from "./_components/categories-and-tags-view";
+import { Suspense } from 'react';
+import { notFound } from 'next/navigation';
+import { getPageById } from '@/modules/workspace/actions/workspace-actions';
+import { CategoriesAndTagsView } from './_components/categories-and-tags-view';
 import {
   CategoryTableSkeleton,
   TagTableSkeleton,
-} from "@/components/skeleton/table-skeleton";
-import { getWorkspaceCategoriesWithStats } from "@/modules/blogs/actions/category-actions";
-import { getWorkspaceTagsWithStats } from "@/modules/blogs/actions/tag-actions-new";
-import { BlogCategoriesView } from "./_components/blog-categories-view";
-import { BlogTagsView } from "./_components/tags-view";
+} from '@/components/skeleton/table-skeleton';
+import { getWorkspaceCategoriesWithStats } from '@/modules/blogs/actions/category-actions';
+import { getWorkspaceTagsWithStats } from '@/modules/blogs/actions/tag-actions-new';
+import { BlogCategoriesView } from './_components/blog-categories-view';
+import { BlogTagsView } from './_components/tags-view';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     workspaceSlug: string;
     blogId: string;
-  };
+  }>;
 }
 
 // Data fetching component for Categories
@@ -60,7 +60,7 @@ async function TagsData({
 }
 
 export default async function CategoriesPage({ params }: PageProps) {
-  const { workspaceSlug, blogId } = params;
+  const { workspaceSlug, blogId } = await params;
 
   const page = await getPageById(workspaceSlug, blogId);
   if (!page) notFound();
