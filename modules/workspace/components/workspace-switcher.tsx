@@ -23,41 +23,33 @@ export function WorkSpaceSwitcher() {
   const router = useRouter();
   const workspaceSlug = params.workspaceSlug as string;
 
-  
   const { data: userWorkspaces, isLoading: workspacesLoading } =
     useUserWorkspaces();
 
-  
   const { data: currentWorkspace, isLoading: currentWorkspaceLoading } =
     useCurrentWorkspace(workspaceSlug);
 
-  
   const { currentWorkspace: storeCurrentWorkspace } = useWorkspaceStore();
 
   const handleWorkspaceSwitch = (slug: string) => {
-    if (slug !== workspaceSlug) {
-      router.push(`/${slug}`);
-    }
+    // if (slug !== workspaceSlug) {
+    router.push(`/${slug}`);
+    // }
   };
 
   const handleCreateWorkspace = () => {
     router.push('/onboarding');
   };
 
-  
   const displayWorkspace = currentWorkspace || storeCurrentWorkspace;
   const isLoading = workspacesLoading || currentWorkspaceLoading;
 
-  
-  
-  
   if (isLoading) {
     return (
       <div className="flex h-8 w-16 mx-2 items-center rounded-md bg-muted animate-pulse" />
     );
   }
 
-  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -98,9 +90,12 @@ export function WorkSpaceSwitcher() {
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={handleCreateWorkspace} className="cursor-pointer">
+        <DropdownMenuItem
+          onSelect={handleCreateWorkspace}
+          className="cursor-pointer"
+        >
           <Plus className="mr-2 h-4 w-4" />
-          <span className='text-normal'>Create workspace</span>
+          <span className="text-normal">Create workspace</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

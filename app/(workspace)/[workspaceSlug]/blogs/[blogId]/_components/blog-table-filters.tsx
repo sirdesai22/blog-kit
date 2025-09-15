@@ -1,8 +1,8 @@
 // @ts-ignore
 // @ts-nocheck
-"use client";
+'use client';
 
-import { Input } from "@/components/ui/input";
+import { Input } from '@/components/ui/input';
 import {
   Search,
   Hash,
@@ -11,12 +11,14 @@ import {
   Tag,
   FilterIcon,
   Filter,
-} from "lucide-react";
-import { ActiveFiltersBar, ActiveFilter } from "./active-filter-chip";
-import { useBlogFilterOptions } from "@/modules/blogs/hooks/use-blog-filter-options";
-import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import { BlogTableSortButton } from "./blog-table-sort-button";
-import { BlogPostSort } from "@/modules/blogs/actions/blog-table-actions";
+  Loader2, // Add this import
+} from 'lucide-react';
+import { ActiveFiltersBar, ActiveFilter } from './active-filter-chip';
+import { useBlogFilterOptions } from '@/modules/blogs/hooks/use-blog-filter-options';
+import { MultiSelectFilter } from '@/components/ui/multi-select-filter';
+import { BlogTableSortButton } from './blog-table-sort-button';
+import { BlogPostSort } from '@/modules/blogs/actions/blog-table-actions';
+import { cn } from '@/lib/utils'; // Add this import
 
 interface BlogTableFiltersProps {
   searchTerm: string;
@@ -30,18 +32,19 @@ interface BlogTableFiltersProps {
   authorFilters: string[];
   setAuthorFilters: (values: string[]) => void;
   postsCount: number;
-  loading?: boolean;
+  loading?: boolean; // For disabling inputs during initial load
+  fetching?: boolean; // Add this new prop for showing loading indicators during refetch
   workspaceSlug: string;
   pageId: string;
   sortConfig: BlogPostSort;
-  onSort: (field: BlogPostSort["field"]) => void;
+  onSort: (field: BlogPostSort['field']) => void;
 }
 
 const statusOptions = [
-  { id: "PUBLISHED", name: "Published", label: "Published" },
-  { id: "DRAFT", name: "Draft", label: "Draft" },
-  { id: "SCHEDULED", name: "Scheduled", label: "Scheduled" },
-  { id: "ARCHIVED", name: "Archived", label: "Archived" },
+  { id: 'PUBLISHED', name: 'Published', label: 'Published' },
+  { id: 'DRAFT', name: 'Draft', label: 'Draft' },
+  { id: 'SCHEDULED', name: 'Scheduled', label: 'Scheduled' },
+  { id: 'ARCHIVED', name: 'Archived', label: 'Archived' },
 ];
 
 export function BlogTableFilters({
@@ -57,6 +60,7 @@ export function BlogTableFilters({
   setAuthorFilters,
   postsCount,
   loading = false,
+  fetching = false, // Add this parameter
   workspaceSlug,
   pageId,
   sortConfig,
@@ -94,8 +98,8 @@ export function BlogTableFilters({
 
   if (searchTerm) {
     activeFilters.push({
-      id: "search",
-      type: "search",
+      id: 'search',
+      type: 'search',
       label: `"${searchTerm}"`,
       value: searchTerm,
     });
@@ -106,7 +110,7 @@ export function BlogTableFilters({
     const statusOption = statusOptions.find((s) => s.id === statusId);
     activeFilters.push({
       id: `status-${statusId}`,
-      type: "statuses",
+      type: 'statuses',
       label: statusOption?.label || statusId,
       value: statusId,
     });
@@ -116,7 +120,7 @@ export function BlogTableFilters({
     const category = categories.find((c) => c.id === categoryId);
     activeFilters.push({
       id: `category-${categoryId}`,
-      type: "categories",
+      type: 'categories',
       label: category?.name || categoryId,
       value: categoryId,
     });
@@ -126,7 +130,7 @@ export function BlogTableFilters({
     const tag = tags.find((t) => t.id === tagId);
     activeFilters.push({
       id: `tag-${tagId}`,
-      type: "tags",
+      type: 'tags',
       label: tag?.name || tagId,
       value: tagId,
     });
@@ -136,7 +140,7 @@ export function BlogTableFilters({
     const author = authors.find((a) => a.id === authorId);
     activeFilters.push({
       id: `author-${authorId}`,
-      type: "authors",
+      type: 'authors',
       label: author?.name || authorId,
       value: authorId,
     });
@@ -144,27 +148,27 @@ export function BlogTableFilters({
 
   const handleRemoveFilter = (filterId: string) => {
     // Extract type and value from filterId
-    if (filterId === "search") {
-      setSearchTerm("");
-    } else if (filterId.startsWith("status-")) {
-      const statusId = filterId.replace("status-", "");
+    if (filterId === 'search') {
+      setSearchTerm('');
+    } else if (filterId.startsWith('status-')) {
+      const statusId = filterId.replace('status-', '');
       setStatusFilters((prev: string[]) =>
         prev.filter((id) => id !== statusId)
       ); // ✅ Fixed type
-    } else if (filterId.startsWith("category-")) {
-      const categoryId = filterId.replace("category-", "");
+    } else if (filterId.startsWith('category-')) {
+      const categoryId = filterId.replace('category-', '');
       setCategoryFilters((prev) => prev.filter((id) => id !== categoryId));
-    } else if (filterId.startsWith("tag-")) {
-      const tagId = filterId.replace("tag-", "");
+    } else if (filterId.startsWith('tag-')) {
+      const tagId = filterId.replace('tag-', '');
       setTagFilters((prev) => prev.filter((id) => id !== tagId));
-    } else if (filterId.startsWith("author-")) {
-      const authorId = filterId.replace("author-", "");
+    } else if (filterId.startsWith('author-')) {
+      const authorId = filterId.replace('author-', '');
       setAuthorFilters((prev) => prev.filter((id) => id !== authorId));
     }
   };
 
   const handleClearAll = () => {
-    setSearchTerm("");
+    setSearchTerm('');
     setStatusFilters([]);
     setCategoryFilters([]);
     setTagFilters([]);
@@ -177,8 +181,11 @@ export function BlogTableFilters({
         {/* Left side (count, search, filters) */}
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-4 mr-2">
-            <div className="text-normal font-medium">
+            <div className="text-normal font-medium flex items-center gap-2">
               {postsCount} <span className="text-small">Posts</span>
+              {fetching && (
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              )}
             </div>
             <div className="relative">
               <Input
@@ -186,9 +193,14 @@ export function BlogTableFilters({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="h-8 w-64 pr-10 text-small"
-                disabled={loading}
+                disabled={loading} // Only disable during initial loading, not refetching
               />
-              <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Search
+                className={cn(
+                  'absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2',
+                  fetching ? 'text-blue-500' : 'text-gray-400'
+                )}
+              />
             </div>
           </div>
 

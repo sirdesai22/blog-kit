@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState, ReactNode } from "react";
-import { Button } from "@/components/ui/button";
-import { Heading } from "@/components/ui/heading";
-import { Plus } from "lucide-react";
+import { useState, ReactNode } from 'react';
+import { Button } from '@/components/ui/button';
+import { Heading } from '@/components/ui/heading';
+import { Plus } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -11,14 +11,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { createCategory } from "@/modules/blogs/actions/category-actions";
-import { createTag } from "@/modules/blogs/actions/tag-actions-new";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { createCategory } from '@/modules/blogs/actions/category-actions';
+import { createTag } from '@/modules/blogs/actions/tag-actions-new';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { useCreateCategory } from '@/modules/blogs/hooks/use-categories';
+import { useCreateTag } from '@/modules/blogs/hooks/use-tags';
 
 interface CategoriesAndTagsViewProps {
   workspaceSlug: string;
@@ -34,63 +36,55 @@ export function CategoriesAndTagsView({
   tagsView,
 }: CategoriesAndTagsViewProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"categories" | "tags">(
-    "categories"
+  const [activeTab, setActiveTab] = useState<'categories' | 'tags'>(
+    'categories'
   );
   const [isAddCategoryDialogOpen, setIsAddCategoryDialogOpen] = useState(false);
   const [isAddTagDialogOpen, setIsAddTagDialogOpen] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState("");
-  const [newCategoryDescription, setNewCategoryDescription] = useState("");
-  const [newTagName, setNewTagName] = useState("");
-  const [newTagDescription, setNewTagDescription] = useState("");
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryDescription, setNewCategoryDescription] = useState('');
+  const [newTagName, setNewTagName] = useState('');
+  const [newTagDescription, setNewTagDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // ✅ Use the create mutation
+  const createCategoryMutation = useCreateCategory(workspaceSlug, blogId);
+  const createTagMutation = useCreateTag(workspaceSlug, blogId);
 
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) return;
 
-    setIsLoading(true);
-    try {
-      await createCategory(workspaceSlug, blogId, {
+    createCategoryMutation.mutate(
+      {
         name: newCategoryName.trim(),
         description: newCategoryDescription.trim() || undefined,
-      });
-
-      toast.success("Category created successfully!");
-      setIsAddCategoryDialogOpen(false);
-      setNewCategoryName("");
-      setNewCategoryDescription("");
-      router.refresh();
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to create category"
-      );
-    } finally {
-      setIsLoading(false);
-    }
+      },
+      {
+        onSuccess: () => {
+          setIsAddCategoryDialogOpen(false);
+          setNewCategoryName('');
+          setNewCategoryDescription('');
+        },
+      }
+    );
   };
 
   const handleAddTag = async () => {
     if (!newTagName.trim()) return;
 
-    setIsLoading(true);
-    try {
-      await createTag(workspaceSlug, blogId, {
+    createTagMutation.mutate(
+      {
         name: newTagName.trim(),
         description: newTagDescription.trim() || undefined,
-      });
-
-      toast.success("Tag created successfully!");
-      setIsAddTagDialogOpen(false);
-      setNewTagName("");
-      setNewTagDescription("");
-      router.refresh();
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to create tag"
-      );
-    } finally {
-      setIsLoading(false);
-    }
+      },
+      {
+        onSuccess: () => {
+          setIsAddTagDialogOpen(false);
+          setNewTagName('');
+          setNewTagDescription('');
+        },
+      }
+    );
   };
 
   return (
@@ -104,25 +98,25 @@ export function CategoriesAndTagsView({
                 {/* Tab Navigation */}
                 <div className="flex items-center bg-muted p-1 rounded-lg w-fit">
                   <Button
-                    variant={activeTab === "categories" ? "default" : "ghost"}
+                    variant={activeTab === 'categories' ? 'default' : 'ghost'}
                     size="sm"
-                    onClick={() => setActiveTab("categories")}
+                    onClick={() => setActiveTab('categories')}
                     className={`w-28 flex items-center justify-center gap-2 text-normal transition-all duration-200 rounded-md  ${
-                      activeTab === "categories"
-                        ? "bg-card shadow-sm hover:bg-card/80"
-                        : "bg-transparent hover:bg-accent cursor-pointer"
+                      activeTab === 'categories'
+                        ? 'bg-card shadow-sm hover:bg-card/80'
+                        : 'bg-transparent hover:bg-accent cursor-pointer'
                     }`}
                   >
                     <p className="text-main">Categories</p>
                   </Button>
                   <Button
-                    variant={activeTab === "tags" ? "default" : "ghost"}
+                    variant={activeTab === 'tags' ? 'default' : 'ghost'}
                     size="sm"
-                    onClick={() => setActiveTab("tags")}
+                    onClick={() => setActiveTab('tags')}
                     className={`w-28 flex items-center justify-center gap-2 text-normal transition-all duration-200 rounded-md ${
-                      activeTab === "tags"
-                        ? "bg-card  shadow-sm hover:bg-card"
-                        : " bg-transparent hover:bg-accent cursor-pointer"
+                      activeTab === 'tags'
+                        ? 'bg-card  shadow-sm hover:bg-card'
+                        : ' bg-transparent hover:bg-accent cursor-pointer'
                     }`}
                   >
                     <p className="text-main">Tags</p>
@@ -192,14 +186,19 @@ export function CategoriesAndTagsView({
                         variant="outline"
                         onClick={() => {
                           setIsAddCategoryDialogOpen(false);
-                          setNewCategoryName("");
-                          setNewCategoryDescription("");
+                          setNewCategoryName('');
+                          setNewCategoryDescription('');
                         }}
                       >
                         Cancel
                       </Button>
-                      <Button onClick={handleAddCategory} disabled={isLoading}>
-                        {isLoading ? "Creating..." : "Create"}
+                      <Button
+                        onClick={handleAddCategory}
+                        disabled={createCategoryMutation.isPending}
+                      >
+                        {createCategoryMutation.isPending
+                          ? 'Creating...'
+                          : 'Create Category'}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -244,14 +243,19 @@ export function CategoriesAndTagsView({
                         variant="outline"
                         onClick={() => {
                           setIsAddTagDialogOpen(false);
-                          setNewTagName("");
-                          setNewTagDescription("");
+                          setNewTagName('');
+                          setNewTagDescription('');
                         }}
                       >
                         Cancel
                       </Button>
-                      <Button onClick={handleAddTag} disabled={isLoading}>
-                        {isLoading ? "Creating..." : "Create"}
+                      <Button
+                        onClick={handleAddTag}
+                        disabled={createTagMutation.isPending}
+                      >
+                        {createTagMutation.isPending
+                          ? 'Creating...'
+                          : 'Create Tag'}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -264,7 +268,7 @@ export function CategoriesAndTagsView({
 
       {/* Tab Content */}
       <div className="">
-        {activeTab === "categories" ? categoriesView : tagsView}
+        {activeTab === 'categories' ? categoriesView : tagsView}
       </div>
     </div>
   );

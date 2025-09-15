@@ -23,8 +23,12 @@ export function BlogSwitcher() {
   const blogId = params.blogId as string;
 
   // Fetch blogs for user in current workspace
-  const { data: userBlogs, isLoading: blogsLoading } = useUserBlogs(workspaceSlug);
-  const { data: currentBlog, isLoading: currentBlogLoading } = useCurrentBlog(blogId);
+  const { data: userBlogs, isLoading: blogsLoading } =
+    useUserBlogs(workspaceSlug);
+  const { data: currentBlog, isLoading: currentBlogLoading } = useCurrentBlog(
+    blogId,
+    workspaceSlug
+  );
   const { currentBlog: storeCurrentBlog } = useBlogStore();
 
   const handleBlogSwitch = (id: string) => {
@@ -74,18 +78,19 @@ export function BlogSwitcher() {
               </div>
               <div className="flex flex-col">
                 <span className="text-normal ">{blog.title}</span>
-                <span className="text-small ">
-                  {blog.status || 'draft'}
-                </span>
+                <span className="text-small ">{blog.status || 'draft'}</span>
               </div>
             </div>
             {blog.id === blogId && <Check className="ml-auto h-4 w-4" />}
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={handleCreateBlog} className="cursor-pointer">
+        <DropdownMenuItem
+          // onSelect={handleCreateBlog}
+          className="cursor-pointer"
+        >
           <Plus className="mr-2 h-4 w-4" />
-          <span className='text-normal'>Create new blog</span>
+          <span className="text-normal">Create new page</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

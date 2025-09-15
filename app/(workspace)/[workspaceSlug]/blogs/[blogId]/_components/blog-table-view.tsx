@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react'; // Add useRef
 import { BlogTableHeader } from './blog-table-header';
 import { BlogTableFilters } from './blog-table-filters';
 import { BlogTableContent } from './blog-table-content';
@@ -10,7 +10,7 @@ import {
   BlogTableProvider,
   useBlogTable,
 } from '@/modules/blogs/contexts/BlogTableContext';
-import { useBlogPostsTable } from '@/modules/blogs/hooks/use-blog-posts-table-enhanced'; // Updated import
+import { useBlogPostsTable } from '@/modules/blogs/hooks/use-blog-posts-table-enhanced';
 import {
   BlogPostFilters,
   BlogPostSort,
@@ -25,14 +25,9 @@ interface BlogTableViewProps {
     title: string;
     type: string;
   };
-  initialPosts?: BlogPost[];
 }
 
-function BlogTable({
-  workspaceSlug,
-  currentPage,
-  initialPosts = [],
-}: BlogTableViewProps) {
+function BlogTable({ workspaceSlug, currentPage }: BlogTableViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
@@ -45,8 +40,11 @@ function BlogTable({
     direction: 'desc',
   });
 
-  // Debounce search to avoid too many re-computations
-  const debouncedSearch = useDebounce(searchTerm, 300); // Reduced from 500ms since it's client-side
+  // Track if we've ever had successful data
+  const hasEverLoadedData = useRef(false);
+
+  // Debounce search to avoid too many API calls
+  const debouncedSearch = useDebounce(searchTerm, 500);
 
   const { pinnedIds } = useBlogTable();
 
@@ -90,7 +88,7 @@ function BlogTable({
     [currentPageNum, pageSize]
   );
 
-  // Fetch data with enhanced hook (client-side processing)
+  // Fetch data with the new API-based hook
   const {
     data: queryResult,
     isLoading,
@@ -104,6 +102,13 @@ function BlogTable({
     pagination,
   });
 
+  // Update the ref when we successfully get data
+  useEffect(() => {
+    if (queryResult?.success) {
+      hasEverLoadedData.current = true;
+    }
+  }, [queryResult?.success]);
+
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPageNum(1);
@@ -115,18 +120,18 @@ function BlogTable({
     authorFilters,
   ]);
 
-  const blogPosts = useMemo(() => {
-    return queryResult?.success ? queryResult.blogPosts || [] : initialPosts;
-  }, [queryResult?.success, queryResult?.blogPosts, initialPosts]);
-
+  const blogPosts = queryResult?.success ? queryResult.blogPosts || [] : [];
   const paginationInfo = queryResult?.pagination;
+
+  // More robust loading state logic
+  const isInitialLoading = isLoading && !hasEverLoadedData.current;
+  const isRefetching = isFetching && hasEverLoadedData.current;
 
   const processedPosts = useMemo(() => {
     return blogPosts.map((post) => ({
       ...post,
       pinned: pinnedIds.has(post.id) || post.pinned,
     }));
-    // Remove the additional sort since sorting is now handled in the hook
   }, [blogPosts, pinnedIds]);
 
   const handlePageChange = (page: number) => {
@@ -147,7 +152,7 @@ function BlogTable({
     setCurrentPageNum(1);
   };
 
-  if (error) {
+  if (error && !hasEverLoadedData.current) {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
@@ -182,7 +187,8 @@ function BlogTable({
           authorFilters={authorFilters}
           setAuthorFilters={setAuthorFilters}
           postsCount={paginationInfo?.totalCount || blogPosts.length}
-          loading={isLoading} // Only show loading on initial load, not on isFetching
+          loading={isInitialLoading} // Only disable inputs during true initial loading
+          fetching={isRefetching} // Show loading indicators during refetch
           workspaceSlug={workspaceSlug}
           pageId={currentPage.id}
           sortConfig={sortConfig}
@@ -194,7 +200,7 @@ function BlogTable({
             posts={processedPosts}
             workspaceSlug={workspaceSlug}
             currentPageId={currentPage.id}
-            loading={isLoading} // Only show loading on initial load
+            loading={isInitialLoading} // Only show skeleton during true initial loading
             onSort={handleSort}
             sortConfig={sortConfig}
           />
@@ -205,7 +211,7 @@ function BlogTable({
             pagination={paginationInfo}
             onPageChange={handlePageChange}
             onPageSizeChange={handlePageSizeChange}
-            loading={isLoading} // Only show loading on initial load
+            loading={isInitialLoading} // Only disable pagination during true initial loading
           />
         )}
       </div>
