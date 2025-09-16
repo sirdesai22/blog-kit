@@ -299,7 +299,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleEditClick(author)}
+                                onClick={() => handleEditClick(author as any)}
                                 className="text-normal-muted"
                               >
                                 Edit
@@ -316,7 +316,9 @@ export default function AuthorsPage(props: AuthorsPageProps) {
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem
                                     className="text-destructive"
-                                    onClick={() => handleDeleteClick(author)}
+                                    onClick={() =>
+                                      handleDeleteClick(author as any)
+                                    }
                                   >
                                     <Trash2 className="h-4 w-4 mr-2" />
                                     Delete

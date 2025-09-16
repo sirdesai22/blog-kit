@@ -35,7 +35,7 @@ async function CategoriesData({
     <BlogCategoriesView
       workspaceSlug={workspaceSlug}
       blogId={blogId}
-      categories={categoriesData.categories}
+      // categories={categoriesData.categories as any}
     />
   );
 }
@@ -54,7 +54,7 @@ async function TagsData({
     <BlogTagsView
       workspaceSlug={workspaceSlug}
       blogId={blogId}
-      tags={tagsData.tags}
+      // tags={tagsData.tags}
     />
   );
 }
