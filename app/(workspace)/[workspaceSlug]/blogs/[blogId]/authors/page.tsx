@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useEffect, useState, use } from "react";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { use } from 'react';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -10,15 +10,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 
-import { MoreHorizontal, Plus, Trash2, ExternalLink } from "lucide-react";
+import { MoreHorizontal, Plus, Trash2, ExternalLink } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -26,17 +26,19 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Heading } from "@/components/ui/heading";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+} from '@/components/ui/dialog';
+import { Heading } from '@/components/ui/heading';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { AuthorDialog } from './_components/author-dialog';
+
+// ✅ Use the new hooks
 import {
-  getWorkspaceAuthors,
-  addAuthor,
-  updateAuthor,
-  deleteAuthor,
-} from "@/modules/workspace/actions/workspace-actions";
-import { AuthorDialog } from "./_components/author-dialog";
-import { AuthorTableSkeleton } from "@/components/skeleton/table-skeleton";
+  useAuthors,
+  useCreateAuthor,
+  useUpdateAuthor,
+  useDeleteAuthor,
+} from '@/modules/blogs/hooks/use-authors';
+import { useState } from 'react';
 
 interface Author {
   id: string;
@@ -69,37 +71,28 @@ interface AuthorsPageProps {
 
 export default function AuthorsPage(props: AuthorsPageProps) {
   const params = use(props.params);
-  const [authors, setAuthors] = useState<Author[]>([]);
+
+  // ✅ Use TanStack Query hooks
+  const {
+    data: authorsData,
+    isLoading,
+    error,
+  } = useAuthors(params.workspaceSlug);
+  const createAuthorMutation = useCreateAuthor(params.workspaceSlug);
+  const updateAuthorMutation = useUpdateAuthor(params.workspaceSlug);
+  const deleteAuthorMutation = useDeleteAuthor(params.workspaceSlug);
+
+  // Local state for dialogs
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedAuthor, setSelectedAuthor] = useState<Author | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-  // Load authors data
-  const loadAuthors = async () => {
-    try {
-      const result = await getWorkspaceAuthors(params.workspaceSlug);
-      if (result) {
-        setAuthors(result.authors as unknown as Author[]);
-      }
-    } catch (error) {
-      console.error("Failed to load authors:", error);
-    } finally {
-      setIsInitialLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadAuthors();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.workspaceSlug]);
+  const authors = authorsData?.authors || [];
 
   const handleAddAuthor = async (formData: AuthorFormData) => {
-    setIsLoading(true);
-    try {
-      await addAuthor(params.workspaceSlug, {
+    createAuthorMutation.mutate(
+      {
         name: formData.name.trim(),
         bio: formData.bio.trim() || undefined,
         email: formData.email.trim() || undefined,
@@ -109,56 +102,51 @@ export default function AuthorsPage(props: AuthorsPageProps) {
           Object.keys(formData.socialLinks).length > 0
             ? formData.socialLinks
             : undefined,
-      });
-      setIsAddDialogOpen(false);
-      await loadAuthors();
-    } catch (error) {
-      console.error("Failed to add author:", error);
-    } finally {
-      setIsLoading(false);
-    }
+      },
+      {
+        onSuccess: () => {
+          setIsAddDialogOpen(false);
+        },
+      }
+    );
   };
 
   const handleEditAuthor = async (formData: AuthorFormData) => {
     if (!selectedAuthor) return;
 
-    setIsLoading(true);
-    try {
-      await updateAuthor(params.workspaceSlug, selectedAuthor.id, {
-        name: formData.name.trim(),
-        bio: formData.bio.trim() || undefined,
-        email: formData.email.trim() || undefined,
-        website: formData.website.trim() || undefined,
-        image: formData.image.trim() || undefined,
-        socialLinks:
-          Object.keys(formData.socialLinks).length > 0
-            ? formData.socialLinks
-            : undefined,
-      });
-      setIsEditDialogOpen(false);
-      setSelectedAuthor(null);
-      await loadAuthors();
-    } catch (error) {
-      console.error("Failed to update author:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    updateAuthorMutation.mutate(
+      {
+        authorId: selectedAuthor.id,
+        data: {
+          name: formData.name.trim(),
+          bio: formData.bio.trim() || undefined,
+          email: formData.email.trim() || undefined,
+          website: formData.website.trim() || undefined,
+          image: formData.image.trim() || undefined,
+          socialLinks:
+            Object.keys(formData.socialLinks).length > 0
+              ? formData.socialLinks
+              : undefined,
+        },
+      },
+      {
+        onSuccess: () => {
+          setIsEditDialogOpen(false);
+          setSelectedAuthor(null);
+        },
+      }
+    );
   };
 
   const handleDeleteAuthor = async () => {
     if (!selectedAuthor) return;
 
-    setIsLoading(true);
-    try {
-      await deleteAuthor(params.workspaceSlug, selectedAuthor.id);
-      setIsDeleteDialogOpen(false);
-      setSelectedAuthor(null);
-      await loadAuthors();
-    } catch (error) {
-      console.error("Failed to delete author:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    deleteAuthorMutation.mutate(selectedAuthor.id, {
+      onSuccess: () => {
+        setIsDeleteDialogOpen(false);
+        setSelectedAuthor(null);
+      },
+    });
   };
 
   const handleEditClick = (author: Author) => {
@@ -175,13 +163,17 @@ export default function AuthorsPage(props: AuthorsPageProps) {
   const editData: AuthorFormData | undefined = selectedAuthor
     ? {
         name: selectedAuthor.name,
-        bio: selectedAuthor.bio || "",
-        email: selectedAuthor.email || "",
-        website: selectedAuthor.website || "",
-        image: selectedAuthor.image || "",
+        bio: selectedAuthor.bio || '',
+        email: selectedAuthor.email || '',
+        website: selectedAuthor.website || '',
+        image: selectedAuthor.image || '',
         socialLinks: selectedAuthor.socialLinks || {},
       }
     : undefined;
+
+  if (error) {
+    return <div>Error loading authors</div>;
+  }
 
   return (
     <div className="bg-background">
@@ -197,7 +189,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
               className="text-primary"
               subtitle={
                 <p className="max-w-xl text-small">
-                  Manage authors who can write and be attributed to posts.{" "}
+                  Manage authors who can write and be attributed to posts.{' '}
                   <br />
                   <span className="cursor-pointer text-small hover:underline">
                     Learn more
@@ -232,8 +224,43 @@ export default function AuthorsPage(props: AuthorsPageProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isInitialLoading ? (
-                  <AuthorTableSkeleton row={5} />
+                {isLoading ? (
+                  // ✅ Skeleton rows (not complete table)
+                  <>
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <TableRow key={`loading-${index}`}>
+                        <TableCell className="pl-lg">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-muted animate-pulse rounded-full" />
+                            <div className="flex items-center space-x-2">
+                              <div className="h-5 w-24 bg-muted animate-pulse rounded" />
+                              <div className="h-6 w-6 bg-muted animate-pulse rounded" />
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center justify-between">
+                            <div className="h-5 w-8 bg-muted animate-pulse rounded" />
+                            <div className="flex items-center gap-2">
+                              <div className="h-8 w-24 bg-muted animate-pulse rounded" />
+                              <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+                              <div className="h-8 w-8 bg-muted animate-pulse rounded" />
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </>
+                ) : authors.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={2}
+                      className="py-12 text-center text-muted-foreground"
+                    >
+                      No authors yet. Create your first author to start
+                      attributing posts.
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   <>
                     {authors.map((author) => (
@@ -241,7 +268,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
                         <TableCell className="pl-lg">
                           <div className="flex items-center space-x-3">
                             <Avatar className="w-8 h-8">
-                              <AvatarImage src={author.image || ""} />
+                              <AvatarImage src={author.image || ''} />
                               <AvatarFallback className="text-sm">
                                 {author.name[0].toUpperCase()}
                               </AvatarFallback>
@@ -272,7 +299,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleEditClick(author)}
+                                onClick={() => handleEditClick(author as any)}
                                 className="text-normal-muted"
                               >
                                 Edit
@@ -289,7 +316,9 @@ export default function AuthorsPage(props: AuthorsPageProps) {
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem
                                     className="text-destructive"
-                                    onClick={() => handleDeleteClick(author)}
+                                    onClick={() =>
+                                      handleDeleteClick(author as any)
+                                    }
                                   >
                                     <Trash2 className="h-4 w-4 mr-2" />
                                     Delete
@@ -314,7 +343,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
         onSubmit={handleAddAuthor}
-        isLoading={isLoading}
+        isLoading={createAuthorMutation.isPending}
       />
 
       {/* Edit Author Dialog */}
@@ -329,7 +358,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
         onSubmit={handleEditAuthor}
         initialData={editData}
         isEdit={true}
-        isLoading={isLoading}
+        isLoading={updateAuthorMutation.isPending}
       />
 
       {/* Delete Dialog */}
@@ -356,9 +385,9 @@ export default function AuthorsPage(props: AuthorsPageProps) {
             <Button
               variant="destructive"
               onClick={handleDeleteAuthor}
-              disabled={isLoading}
+              disabled={deleteAuthorMutation.isPending}
             >
-              {isLoading ? "Deleting..." : "Delete Author"}
+              {deleteAuthorMutation.isPending ? 'Deleting...' : 'Delete Author'}
             </Button>
           </DialogFooter>
         </DialogContent>

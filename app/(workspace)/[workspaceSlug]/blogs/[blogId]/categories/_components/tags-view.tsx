@@ -1,10 +1,9 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -12,15 +11,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -28,16 +27,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  deleteBlogTag,
-  reorderBlogTags,
-  updateBlogTag,
-} from "@/modules/blogs/actions/tag-actions";
+} from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
 
 // Icons
-import { ExternalLink, MoreVertical, Trash2 } from "lucide-react";
+import { ExternalLink, MoreVertical, Trash2 } from 'lucide-react';
 
 // Drag and Drop
 import {
@@ -48,28 +42,44 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-} from "@dnd-kit/core";
+} from '@dnd-kit/core';
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { TagTableSkeleton } from "@/components/skeleton/table-skeleton";
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
-interface TagType {
+// ✅ Use the new hooks instead of direct actions
+import {
+  useTags,
+  useUpdateTag,
+  useDeleteTag,
+  useReorderTags,
+} from '@/modules/blogs/hooks/use-tags';
+
+// Types
+interface TagWithStats {
+  id: string;
   name: string;
+  slug: string;
+  description?: string;
+  color?: string;
+  workspaceId: string;
+  pageId: string;
   posts: number;
   traffic: number;
   leads: number;
+  usageCount: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface BlogTagsViewProps {
   workspaceSlug: string;
   blogId: string;
-  tags: TagType[];
 }
 
 // Redesigned Sortable Row Component for Tags
@@ -78,9 +88,9 @@ function SortableTableRow({
   onEdit,
   onDelete,
 }: {
-  tag: TagType;
-  onEdit: (tag: TagType) => void;
-  onDelete: (tag: TagType) => void;
+  tag: TagWithStats;
+  onEdit: (tag: TagWithStats) => void;
+  onDelete: (tag: TagWithStats) => void;
 }) {
   const {
     attributes,
@@ -89,13 +99,13 @@ function SortableTableRow({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: tag.name });
+  } = useSortable({ id: tag.id }); // ✅ Use tag.id instead of tag.name
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 10 : "auto",
+    zIndex: isDragging ? 10 : 'auto',
   };
 
   return (
@@ -107,7 +117,7 @@ function SortableTableRow({
     >
       <TableCell className="font-medium pl-lg" {...listeners}>
         <Link
-          href={`/blog/tags/${tag.name}`}
+          href={`/blog/tags/${tag.slug}`} // ✅ Use tag.slug instead of tag.name
           passHref
           className="flex items-center gap-1.5 hover:underline"
           onClick={(e) => e.stopPropagation()}
@@ -116,15 +126,9 @@ function SortableTableRow({
         </Link>
       </TableCell>
       <TableCell>{tag.posts}</TableCell>
-      {/* <TableCell>{tag.traffic.toLocaleString()} <span className="rounded bg-red-50 px-1 text-xs font-medium text-red-600">
-          {Math.floor(Math.random() * 60)}%
-        </span></TableCell>
-      <TableCell>{tag.leads} <span className="rounded bg-green-50 px-1 text-xs font-medium text-green-600">
-          {Math.floor(Math.random() * 60)}%
-        </span></TableCell> */}
       <TableCell
         className="sticky right-0 bg-background group-hover:bg-accent/50"
-        onClick={(e) => e.stopPropagation()} // Prevents drag from firing on button clicks
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-end gap-2">
           <Button variant="outline" size="sm" className="text-normal-muted">
@@ -161,18 +165,21 @@ function SortableTableRow({
   );
 }
 
-export function BlogTagsView({
-  workspaceSlug,
-  tags: initialTags,
-}: BlogTagsViewProps) {
-  const router = useRouter();
-  const [tags, setTags] = useState(initialTags);
+export function BlogTagsView({ workspaceSlug, blogId }: BlogTagsViewProps) {
+  // ✅ Use TanStack Query hooks
+  const { data: tagsData, isLoading, error } = useTags(workspaceSlug, blogId);
+  const updateTagMutation = useUpdateTag(workspaceSlug, blogId);
+  const deleteTagMutation = useDeleteTag(workspaceSlug, blogId);
+  const reorderTagsMutation = useReorderTags(workspaceSlug, blogId);
+
+  // Local state for dialogs
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedTag, setSelectedTag] = useState<TagType | null>(null);
-  const [editTagName, setEditTagName] = useState("");
-  const [editTagDescription, setEditTagDescription] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<TagWithStats | null>(null);
+  const [editTagName, setEditTagName] = useState('');
+  const [editTagDescription, setEditTagDescription] = useState('');
+
+  const tags = tagsData?.tags || [];
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -184,50 +191,47 @@ export function BlogTagsView({
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
-      const oldIndex = tags.findIndex((t) => t.name === active.id);
-      const newIndex = tags.findIndex((t) => t.name === over.id);
+      const oldIndex = tags.findIndex((t) => t.id === active.id);
+      const newIndex = tags.findIndex((t) => t.id === over.id);
       const newTags = arrayMove(tags, oldIndex, newIndex);
-      setTags(newTags);
 
-      try {
-        await reorderBlogTags(
-          workspaceSlug,
-          newTags.map((tag) => tag.name)
-        );
-      } catch (error) {
-        console.error("Failed to update tag order:", error);
-        setTags(tags); // Revert on failure
-      }
+      const reorderedTagIds = newTags.map((tag) => tag.id);
+      reorderTagsMutation.mutate(reorderedTagIds);
     }
   };
 
   const handleEditTag = async () => {
     if (!selectedTag || !editTagName.trim()) return;
-    setIsLoading(true);
-    try {
-      await updateBlogTag(workspaceSlug, selectedTag.name, editTagName.trim());
-      setIsEditDialogOpen(false);
-      router.refresh();
-    } catch (error) {
-      console.error("Failed to update tag:", error);
-    } finally {
-      setIsLoading(false);
-    }
+
+    updateTagMutation.mutate(
+      {
+        tagId: selectedTag.id,
+        data: {
+          name: editTagName.trim(),
+          description: editTagDescription.trim() || undefined,
+        },
+      },
+      {
+        onSuccess: () => {
+          setIsEditDialogOpen(false);
+        },
+      }
+    );
   };
 
   const handleDeleteTag = async () => {
     if (!selectedTag) return;
-    setIsLoading(true);
-    try {
-      await deleteBlogTag(workspaceSlug, selectedTag.name);
-      setIsDeleteDialogOpen(false);
-      router.refresh();
-    } catch (error) {
-      console.error("Failed to delete tag:", error);
-    } finally {
-      setIsLoading(false);
-    }
+
+    deleteTagMutation.mutate(selectedTag.id, {
+      onSuccess: () => {
+        setIsDeleteDialogOpen(false);
+      },
+    });
   };
+
+  if (error) {
+    return <div>Error loading tags</div>;
+  }
 
   return (
     <>
@@ -246,16 +250,14 @@ export function BlogTagsView({
                 <TableRow className="bg-muted/50 hover:bg-muted/50">
                   <TableHead className="pl-lg w-full">Tag</TableHead>
                   <TableHead className="min-w-[200px]">Posts</TableHead>
-                  {/* <TableHead>Traffic</TableHead>
-                  <TableHead>Leads</TableHead> */}
-                  <TableHead className="sticky right-0 w-12  text-center"></TableHead>
+                  <TableHead className="sticky right-0 w-12 text-center"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tags.length === 0 ? (
+                {tags.length === 0 && !isLoading ? (
                   <TableRow>
                     <TableCell
-                      colSpan={5}
+                      colSpan={3}
                       className="py-12 text-center text-muted-foreground"
                     >
                       No tags yet. Create your first tag to organize your blog
@@ -263,20 +265,39 @@ export function BlogTagsView({
                     </TableCell>
                   </TableRow>
                 ) : isLoading ? (
-                  <TagTableSkeleton row={5} />
+                  // ✅ Skeleton rows (not complete table)
+                  <>
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <TableRow key={`loading-${index}`} className="group">
+                        <TableCell className="pl-lg">
+                          <div className="h-5 w-32 bg-muted animate-pulse rounded" />
+                        </TableCell>
+                        <TableCell>
+                          <div className="h-5 w-8 bg-muted animate-pulse rounded" />
+                        </TableCell>
+                        <TableCell className="sticky right-0 bg-background">
+                          <div className="flex items-center justify-end gap-2">
+                            <div className="h-8 w-24 bg-muted animate-pulse rounded" />
+                            <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+                            <div className="h-8 w-8 bg-muted animate-pulse rounded" />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </>
                 ) : (
                   <SortableContext
-                    items={tags.map((tag) => tag.name)}
+                    items={tags.map((tag) => tag.id)}
                     strategy={verticalListSortingStrategy}
                   >
                     {tags.map((tag) => (
                       <SortableTableRow
-                        key={tag.name}
+                        key={tag.id}
                         tag={tag}
                         onEdit={(t) => {
                           setSelectedTag(t);
                           setEditTagName(t.name);
-                          setEditTagDescription("");
+                          setEditTagDescription(t.description || '');
                           setIsEditDialogOpen(true);
                         }}
                         onDelete={(t) => {
@@ -325,8 +346,11 @@ export function BlogTagsView({
             >
               Cancel
             </Button>
-            <Button onClick={handleEditTag} disabled={isLoading}>
-              {isLoading ? "Updating..." : "Save Changes"}
+            <Button
+              onClick={handleEditTag}
+              disabled={updateTagMutation.isPending}
+            >
+              {updateTagMutation.isPending ? 'Updating...' : 'Save Changes'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -352,9 +376,9 @@ export function BlogTagsView({
             <Button
               variant="destructive"
               onClick={handleDeleteTag}
-              disabled={isLoading}
+              disabled={deleteTagMutation.isPending}
             >
-              {isLoading ? "Deleting..." : "Delete Tag"}
+              {deleteTagMutation.isPending ? 'Deleting...' : 'Delete Tag'}
             </Button>
           </DialogFooter>
         </DialogContent>

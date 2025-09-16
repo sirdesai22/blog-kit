@@ -413,13 +413,14 @@ export default function FormsManagementPage() {
                               <div className="flex items-center gap-2">
                                 {form.isGlobal ? (
                                   <Badge variant="secondary">Global</Badge>
-                                ) : form.category ? (
+                                ) : form.categories &&
+                                  form.categories.length > 0 ? (
                                   <>
                                     <Badge variant="outline">
-                                      {form.category.slug}
+                                      {form.categories[0].slug}
                                     </Badge>
                                     <span className="text-sm text-muted-foreground">
-                                      {form.category.name}
+                                      {form.categories[0].name}
                                     </span>
                                   </>
                                 ) : (
