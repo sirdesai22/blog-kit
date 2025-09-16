@@ -1,25 +1,24 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { Card, CardContent, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import React, { useState } from "react";
+import Link from "next/link";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -27,11 +26,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 
 // Icons
-import { ExternalLink, MoreVertical, Trash2 } from 'lucide-react';
+// ✅ Import the 'Plus' icon for the "New Tag" button
+import { MoreVertical, Plus, Trash2 } from "lucide-react";
 
 // Drag and Drop
 import {
@@ -42,15 +42,15 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 // ✅ Use the new hooks instead of direct actions
 import {
@@ -58,7 +58,11 @@ import {
   useUpdateTag,
   useDeleteTag,
   useReorderTags,
-} from '@/modules/blogs/hooks/use-tags';
+} from "@/modules/blogs/hooks/use-tags";
+
+// ✅ Import the ConfirmationDialog and Heading components
+import { ConfirmationDialog } from "@/components/models/confirmation-dialog";
+import { Heading } from "@/components/ui/heading";
 
 // Types
 interface TagWithStats {
@@ -82,7 +86,7 @@ interface BlogTagsViewProps {
   blogId: string;
 }
 
-// Redesigned Sortable Row Component for Tags
+// Redesigned Sortable Row Component for Tags (No changes here)
 function SortableTableRow({
   tag,
   onEdit,
@@ -105,7 +109,7 @@ function SortableTableRow({
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 10 : 'auto',
+    zIndex: isDragging ? 10 : "auto",
   };
 
   return (
@@ -175,9 +179,11 @@ export function BlogTagsView({ workspaceSlug, blogId }: BlogTagsViewProps) {
   // Local state for dialogs
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  // ✅ Add state for the new tag dialog to enable the "New Tag" button
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<TagWithStats | null>(null);
-  const [editTagName, setEditTagName] = useState('');
-  const [editTagDescription, setEditTagDescription] = useState('');
+  const [editTagName, setEditTagName] = useState("");
+  const [editTagDescription, setEditTagDescription] = useState("");
 
   const tags = tagsData?.tags || [];
 
@@ -225,6 +231,8 @@ export function BlogTagsView({ workspaceSlug, blogId }: BlogTagsViewProps) {
     deleteTagMutation.mutate(selectedTag.id, {
       onSuccess: () => {
         setIsDeleteDialogOpen(false);
+        // ✅ Clear the selected tag after deletion to avoid stale data
+        setSelectedTag(null);
       },
     });
   };
@@ -254,18 +262,31 @@ export function BlogTagsView({ workspaceSlug, blogId }: BlogTagsViewProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
+                {/* ✅ Updated "No Tags" state to provide a better user experience */}
                 {tags.length === 0 && !isLoading ? (
                   <TableRow>
-                    <TableCell
-                      colSpan={3}
-                      className="py-12 text-center text-muted-foreground"
-                    >
-                      No tags yet. Create your first tag to organize your blog
-                      posts.
+                    <TableCell colSpan={3}>
+                      <div className="py-12 flex flex-col items-center justify-center text-center">
+                        <Heading
+                          level="h3"
+                          variant="default"
+                          subtitle="Get started by creating your first tag."
+                          subtitleVariant="muted"
+                        >
+                          No Tags Yet
+                        </Heading>
+                        <Button
+                          onClick={() => setIsAddDialogOpen(true)}
+                          className="mt-3"
+                        >
+                          <Plus className="mr-2 h-4 w-4" />
+                          New Tag
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : isLoading ? (
-                  // ✅ Skeleton rows (not complete table)
+                  // Skeleton rows (no changes here)
                   <>
                     {Array.from({ length: 3 }).map((_, index) => (
                       <TableRow key={`loading-${index}`} className="group">
@@ -297,7 +318,7 @@ export function BlogTagsView({ workspaceSlug, blogId }: BlogTagsViewProps) {
                         onEdit={(t) => {
                           setSelectedTag(t);
                           setEditTagName(t.name);
-                          setEditTagDescription(t.description || '');
+                          setEditTagDescription(t.description || "");
                           setIsEditDialogOpen(true);
                         }}
                         onDelete={(t) => {
@@ -314,7 +335,7 @@ export function BlogTagsView({ workspaceSlug, blogId }: BlogTagsViewProps) {
         </div>
       </div>
 
-      {/* Edit Dialog */}
+      {/* Edit Dialog (No changes here) */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
@@ -350,39 +371,23 @@ export function BlogTagsView({ workspaceSlug, blogId }: BlogTagsViewProps) {
               onClick={handleEditTag}
               disabled={updateTagMutation.isPending}
             >
-              {updateTagMutation.isPending ? 'Updating...' : 'Save Changes'}
+              {updateTagMutation.isPending ? "Updating..." : "Save Changes"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Tag</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete &quot;{selectedTag?.name}&quot;?
-              This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsDeleteDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteTag}
-              disabled={deleteTagMutation.isPending}
-            >
-              {deleteTagMutation.isPending ? 'Deleting...' : 'Delete Tag'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* ✅ Replaced the old Dialog with the more consistent ConfirmationDialog */}
+      <ConfirmationDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={handleDeleteTag}
+        title="Delete Tag"
+        description={`Are you sure you want to delete "${selectedTag?.name}"? This action cannot be undone.`}
+        confirmButtonLabel="Delete Tag"
+        theme="danger"
+        isConfirming={deleteTagMutation.isPending}
+      />
     </>
   );
 }

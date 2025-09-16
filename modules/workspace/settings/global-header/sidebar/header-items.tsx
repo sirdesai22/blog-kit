@@ -55,9 +55,7 @@ export default function HeaderItems() {
     theme,
   } = useContext(HeaderContext);
 
-  const {
-    darkModeEnabled
-  } = useContext(BrandContext);
+  const { darkModeEnabled } = useContext(BrandContext);
 
   // Modal States
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -226,7 +224,7 @@ export default function HeaderItems() {
                 </Button>
               </div>
               <div
-                className="w-full ml-2 h-28 flex items-center justify-center border-2 border-dashed rounded-lg cursor-pointer"
+                className="w-52 ml-2 h-28 flex items-center justify-center border-2 border-dashed rounded-lg cursor-pointer"
                 onClick={() => fileInputRef.current?.click()}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => {

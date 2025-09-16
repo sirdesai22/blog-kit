@@ -36,10 +36,10 @@ export function ConfirmationDialog({
 }: ConfirmationDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[300px] p-4">
+      <DialogContent className="w-[350px] p-4">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+          <DialogDescription>{description} </DialogDescription>
         </DialogHeader>
         <DialogFooter className="sm:justify-end">
           <DialogClose asChild>
@@ -53,8 +53,8 @@ export function ConfirmationDialog({
             variant={theme === "danger" ? "destructive" : "default"}
             disabled={isConfirming}
           >
-            {isConfirming && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {confirmButtonLabel}
+            {isConfirming && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           </Button>
         </DialogFooter>
       </DialogContent>

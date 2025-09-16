@@ -33,6 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, ChevronsUpDown, X as CloseIcon } from "lucide-react";
 import Image from "next/image";
 import CountryField from "./country-field";
+import PhoneField from "./Phone-field";
 
 // --- Custom Field Rendering Logic ---
 const renderField = (
@@ -106,19 +107,25 @@ const renderField = (
       );
 
     case "Country":
-      return <CountryField />;
+      return (
+        <CountryField
+          defaultValue={value}
+          onChange={(newValue) => onChange(field.id, newValue)}
+          className={cn(errors[field.id] ? "border-red-500" : "")}
+        />
+      );
 
     case "Phone":
-      const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const number = e.target.value.replace(/\D/g, ""); // Allow only digits
-        onChange(field.id, `${phoneCountry.phone}${number}`);
-      };
-      const currentNumber = value ? value.replace(phoneCountry.phone, "") : "";
-
       return (
-        <div className="flex items-center">
-          <PhoneInput country={"us"} onChange={(phone) => console.log(phone)} />
-        </div>
+        <PhoneField
+          value={value}
+          onChange={(newValue) => onChange(field.id, newValue)}
+          className={cn(
+            errors[field.id]
+              ? "!border-red-500 ring-2 ring-red-500 ring-offset-2"
+              : ""
+          )}
+        />
       );
 
     case "MultiSelect":
@@ -258,10 +265,21 @@ export default function DynamicForm() {
     sortedFields.forEach((field) => {
       const plainLabel = field.label.replace(/\*$/, "").trim();
       const value = formValues[field.id];
-      const isMissing = !value || (Array.isArray(value) && value.length === 0);
+
+      // Updated validation logic for phone and other fields
+      let isMissing = !value;
+      if (field.type === "Phone") {
+        isMissing = !value || !value.phoneNumber;
+      } else if (Array.isArray(value)) {
+        isMissing = value.length === 0;
+      }
 
       if (field.isRequired && isMissing) {
-        newErrors[field.id] = `${plainLabel} is required.`;
+        if (field.type === "Country" || field.type === "Phone") {
+          newErrors[field.id] = `${plainLabel} is required.`;
+        } else {
+          newErrors[field.id] = `${plainLabel} is required.`;
+        }
       }
       if (field.type === "Email" && value) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

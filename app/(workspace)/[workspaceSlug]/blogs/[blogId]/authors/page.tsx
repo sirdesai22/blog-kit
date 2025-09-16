@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { use } from 'react';
-import { Card, CardContent, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { use } from "react";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -10,15 +10,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 
-import { MoreHorizontal, Plus, Trash2, ExternalLink } from 'lucide-react';
+import { MoreHorizontal, Plus, Trash2, ExternalLink } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -26,10 +26,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Heading } from '@/components/ui/heading';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { AuthorDialog } from './_components/author-dialog';
+} from "@/components/ui/dialog";
+import { Heading } from "@/components/ui/heading";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { AuthorDialog } from "./_components/author-dialog";
 
 // ✅ Use the new hooks
 import {
@@ -37,8 +37,9 @@ import {
   useCreateAuthor,
   useUpdateAuthor,
   useDeleteAuthor,
-} from '@/modules/blogs/hooks/use-authors';
-import { useState } from 'react';
+} from "@/modules/blogs/hooks/use-authors";
+import { useState } from "react";
+import { ConfirmationDialog } from "@/components/models/confirmation-dialog";
 
 interface Author {
   id: string;
@@ -163,10 +164,10 @@ export default function AuthorsPage(props: AuthorsPageProps) {
   const editData: AuthorFormData | undefined = selectedAuthor
     ? {
         name: selectedAuthor.name,
-        bio: selectedAuthor.bio || '',
-        email: selectedAuthor.email || '',
-        website: selectedAuthor.website || '',
-        image: selectedAuthor.image || '',
+        bio: selectedAuthor.bio || "",
+        email: selectedAuthor.email || "",
+        website: selectedAuthor.website || "",
+        image: selectedAuthor.image || "",
         socialLinks: selectedAuthor.socialLinks || {},
       }
     : undefined;
@@ -189,7 +190,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
               className="text-primary"
               subtitle={
                 <p className="max-w-xl text-small">
-                  Manage authors who can write and be attributed to posts.{' '}
+                  Manage authors who can write and be attributed to posts.{" "}
                   <br />
                   <span className="cursor-pointer text-small hover:underline">
                     Learn more
@@ -253,12 +254,24 @@ export default function AuthorsPage(props: AuthorsPageProps) {
                   </>
                 ) : authors.length === 0 ? (
                   <TableRow>
-                    <TableCell
-                      colSpan={2}
-                      className="py-12 text-center text-muted-foreground"
-                    >
-                      No authors yet. Create your first author to start
-                      attributing posts.
+                    <TableCell colSpan={2}>
+                      <div className="py-12 flex flex-col items-center justify-center text-center">
+                        <Heading
+                          level="h3"
+                          variant="default"
+                          subtitle="Get started by creating your first author."
+                          subtitleVariant="muted"
+                        >
+                          No Authors Yet
+                        </Heading>
+                        <Button
+                          onClick={() => setIsAddDialogOpen(true)}
+                          className="mt-3"
+                        >
+                          <Plus className="mr-2 h-4 w-4" />
+                          New Author
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -268,7 +281,7 @@ export default function AuthorsPage(props: AuthorsPageProps) {
                         <TableCell className="pl-lg">
                           <div className="flex items-center space-x-3">
                             <Avatar className="w-8 h-8">
-                              <AvatarImage src={author.image || ''} />
+                              <AvatarImage src={author.image || ""} />
                               <AvatarFallback className="text-sm">
                                 {author.name[0].toUpperCase()}
                               </AvatarFallback>
@@ -362,36 +375,16 @@ export default function AuthorsPage(props: AuthorsPageProps) {
       />
 
       {/* Delete Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Author</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "{selectedAuthor?.name}"? This
-              action cannot be undone. The author will be removed from all
-              associated blog posts.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsDeleteDialogOpen(false);
-                setSelectedAuthor(null);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteAuthor}
-              disabled={deleteAuthorMutation.isPending}
-            >
-              {deleteAuthorMutation.isPending ? 'Deleting...' : 'Delete Author'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmationDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={handleDeleteAuthor}
+        title="Delete Author"
+        description={`Are you sure you want to delete "${selectedAuthor?.name}"? This action cannot be undone. The author will be removed from all associated blog posts.`}
+        confirmButtonLabel="Delete Author"
+        theme="danger"
+        isConfirming={deleteAuthorMutation.isPending}
+      />
     </div>
   );
 }

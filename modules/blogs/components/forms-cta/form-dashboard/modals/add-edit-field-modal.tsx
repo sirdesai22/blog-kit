@@ -220,7 +220,7 @@ export default function AddEditFieldModal({ isOpen, setIsOpen, field }: Props) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Email">Email</SelectItem>
-                <SelectItem value="Password">Password</SelectItem>
+                {/* <SelectItem value="Password">Password</SelectItem> */}
                 <SelectItem value="ShortText">Short Text</SelectItem>
                 <SelectItem value="LongText">Long Text</SelectItem>
                 <SelectItem value="Phone">Phone</SelectItem>

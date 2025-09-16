@@ -1,25 +1,24 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import React, { useState } from "react";
+import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -27,11 +26,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 
 // Icons
-import { ExternalLink, GripVertical, MoreVertical, Trash2 } from 'lucide-react';
+import {
+  ExternalLink,
+  GripVertical,
+  MoreVertical,
+  Plus,
+  Trash2,
+} from "lucide-react"; // ✅ Import Plus icon
 
 // Drag and Drop
 import {
@@ -42,15 +47,15 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 // ✅ Use the new hooks
 import {
@@ -58,7 +63,11 @@ import {
   useUpdateCategory,
   useDeleteCategory,
   useReorderCategories,
-} from '@/modules/blogs/hooks/use-categories';
+} from "@/modules/blogs/hooks/use-categories";
+
+// ✅ Import the required components
+import { ConfirmationDialog } from "@/components/models/confirmation-dialog";
+import { Heading } from "@/components/ui/heading";
 
 // Types
 interface CategoryWithStats {
@@ -80,7 +89,7 @@ interface BlogCategoriesViewProps {
   blogId: string;
 }
 
-// Sortable Row Component
+// Sortable Row Component remains the same...
 function SortableTableRow({
   category,
   onEdit,
@@ -103,7 +112,7 @@ function SortableTableRow({
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 10 : 'auto',
+    zIndex: isDragging ? 10 : "auto",
   };
 
   return (
@@ -186,10 +195,12 @@ export function BlogCategoriesView({
   // Local state for dialogs
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  // ✅ Add state for the new category dialog to match the author page functionality
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryWithStats | null>(null);
-  const [editCategoryName, setEditCategoryName] = useState('');
-  const [editCategoryDescription, setEditCategoryDescription] = useState('');
+  const [editCategoryName, setEditCategoryName] = useState("");
+  const [editCategoryDescription, setEditCategoryDescription] = useState("");
 
   const categories = categoriesData?.categories || [];
 
@@ -243,6 +254,7 @@ export function BlogCategoriesView({
     deleteCategoryMutation.mutate(selectedCategory.id, {
       onSuccess: () => {
         setIsDeleteDialogOpen(false);
+        setSelectedCategory(null); // Clear selection on success
       },
     });
   };
@@ -273,18 +285,31 @@ export function BlogCategoriesView({
                 </TableRow>
               </TableHeader>
               <TableBody>
+                {/* ✅ Updated "No Categories" state to match the Author page */}
                 {categories.length === 0 && !isLoading ? (
                   <TableRow>
-                    <TableCell
-                      colSpan={4}
-                      className="py-12 text-center text-muted-foreground"
-                    >
-                      No categories yet. Create your first category to organize
-                      your blog posts.
+                    <TableCell colSpan={4}>
+                      <div className="py-12 flex flex-col items-center justify-center text-center">
+                        <Heading
+                          level="h3"
+                          variant="default"
+                          subtitle="Get started by creating your first category."
+                          subtitleVariant="muted"
+                        >
+                          No Categories Yet
+                        </Heading>
+                        <Button
+                          onClick={() => setIsAddDialogOpen(true)} // This state needs to be created
+                          className="mt-3"
+                        >
+                          <Plus className="mr-2 h-4 w-4" />
+                          New Category
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : isLoading ? (
-                  // ✅ Skeleton rows (not complete table)
+                  // Skeleton rows remain the same
                   <>
                     {Array.from({ length: 3 }).map((_, index) => (
                       <TableRow key={`loading-${index}`} className="group">
@@ -325,7 +350,7 @@ export function BlogCategoriesView({
                         onEdit={(cat) => {
                           setSelectedCategory(cat);
                           setEditCategoryName(cat.name);
-                          setEditCategoryDescription(cat.description || '');
+                          setEditCategoryDescription(cat.description || "");
                           setIsEditDialogOpen(true);
                         }}
                         onDelete={(cat) => {
@@ -342,7 +367,7 @@ export function BlogCategoriesView({
         </div>
       </div>
 
-      {/* Edit Dialog */}
+      {/* Edit Dialog remains the same */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
@@ -379,42 +404,24 @@ export function BlogCategoriesView({
               disabled={updateCategoryMutation.isPending}
             >
               {updateCategoryMutation.isPending
-                ? 'Updating...'
-                : 'Save Changes'}
+                ? "Updating..."
+                : "Save Changes"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Category</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete &quot;{selectedCategory?.name}
-              &quot;? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsDeleteDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteCategory}
-              disabled={deleteCategoryMutation.isPending}
-            >
-              {deleteCategoryMutation.isPending
-                ? 'Deleting...'
-                : 'Delete Category'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* ✅ Replaced the old Dialog with the ConfirmationDialog component */}
+      <ConfirmationDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={handleDeleteCategory}
+        title="Delete Category"
+        description={`Are you sure you want to delete "${selectedCategory?.name}"? This action cannot be undone.`}
+        confirmButtonLabel="Delete Category"
+        theme="danger"
+        isConfirming={deleteCategoryMutation.isPending}
+      />
     </>
   );
 }

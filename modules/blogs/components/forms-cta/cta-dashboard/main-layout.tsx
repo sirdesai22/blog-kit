@@ -23,7 +23,13 @@ const SidebarContent = ({ activeTab }: { activeTab: string }) => {
   }
 };
 
-const CtaDashboard = ({ activeTab }: { activeTab: string }) => {
+const CtaDashboard = ({
+  activeTab,
+  setActiveTab,
+}: {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+}) => {
   const {
     ctaState,
     setCustomCodeEnabled,
@@ -40,6 +46,12 @@ const CtaDashboard = ({ activeTab }: { activeTab: string }) => {
     return () => openSidebar();
   }, [closeSidebar, openSidebar]);
 
+  // ✅ 1. Create a unified handler to exit custom code view and switch tabs.
+  const handleExitCustomCode = () => {
+    setCustomCodeEnabled(false);
+    setActiveTab("configure");
+  };
+
   const handleOverlayClick = () => {
     setIsCtaVisible(false);
   };
@@ -51,12 +63,12 @@ const CtaDashboard = ({ activeTab }: { activeTab: string }) => {
       <aside className="w-[380px] bg-background border-r p-0 pl-1 flex flex-col h-full">
         <div className="flex-1 overflow-y-auto p-4">
           {isCustomCodeActive ? (
-            <CustomCode onBack={() => setCustomCodeEnabled(false)} />
+            <CustomCode onBack={handleExitCustomCode} />
           ) : (
             <SidebarContent activeTab={activeTab} />
           )}
         </div>
-        {activeTab === "configure" && !isCustomCodeActive && (
+        {activeTab === "cta" && !isCustomCodeActive && (
           <div className="mt-auto border-t px-5 py-3">
             <div className="flex items-center justify-between">
               <span className="text-normal">Custom Code &lt;/&gt;</span>
@@ -66,7 +78,14 @@ const CtaDashboard = ({ activeTab }: { activeTab: string }) => {
                 </p>
                 <Switch
                   checked={isCustomCodeActive}
-                  onCheckedChange={setCustomCodeEnabled}
+                  // ✅ 4. Update the Switch to use the handler when toggled.
+                  onCheckedChange={(isChecked) => {
+                    if (isChecked) {
+                      setCustomCodeEnabled(true);
+                    } else {
+                      handleExitCustomCode();
+                    }
+                  }}
                 />
               </div>
             </div>
@@ -150,7 +169,7 @@ const LayoutContent = ({
         onBack={onBack}
         isDisabled={isCustomCodeActive}
       />
-      <CtaDashboard activeTab={activeTab} />
+      <CtaDashboard activeTab={activeTab} setActiveTab={setActiveTab} />
     </>
   );
 };

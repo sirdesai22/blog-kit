@@ -1,8 +1,8 @@
 // @ts-ignore
 // @ts-nocheck
-'use client';
+"use client";
 
-import { Input } from '@/components/ui/input';
+import { Input } from "@/components/ui/input";
 import {
   Search,
   Hash,
@@ -12,13 +12,17 @@ import {
   FilterIcon,
   Filter,
   Loader2, // Add this import
-} from 'lucide-react';
-import { ActiveFiltersBar, ActiveFilter } from './active-filter-chip';
-import { useBlogFilterOptions } from '@/modules/blogs/hooks/use-blog-filter-options';
-import { MultiSelectFilter } from '@/components/ui/multi-select-filter';
-import { BlogTableSortButton } from './blog-table-sort-button';
-import { BlogPostSort } from '@/modules/blogs/actions/blog-table-actions';
-import { cn } from '@/lib/utils'; // Add this import
+  RefreshCw, // Add refresh icon
+} from "lucide-react";
+import { ActiveFiltersBar, ActiveFilter } from "./active-filter-chip";
+import { useBlogFilterOptions } from "@/modules/blogs/hooks/use-blog-filter-options";
+import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
+import { BlogTableSortButton } from "./blog-table-sort-button";
+import { BlogPostSort } from "@/modules/blogs/actions/blog-table-actions";
+import { cn } from "@/lib/utils"; // Add this import
+import { Button } from "@/components/ui/button";
+import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 interface BlogTableFiltersProps {
   searchTerm: string;
@@ -37,14 +41,15 @@ interface BlogTableFiltersProps {
   workspaceSlug: string;
   pageId: string;
   sortConfig: BlogPostSort;
-  onSort: (field: BlogPostSort['field']) => void;
+  onSort: (field: BlogPostSort["field"]) => void;
+  onRefresh?: () => void; // Add optional refresh callback
 }
 
 const statusOptions = [
-  { id: 'PUBLISHED', name: 'Published', label: 'Published' },
-  { id: 'DRAFT', name: 'Draft', label: 'Draft' },
-  { id: 'SCHEDULED', name: 'Scheduled', label: 'Scheduled' },
-  { id: 'ARCHIVED', name: 'Archived', label: 'Archived' },
+  { id: "PUBLISHED", name: "Published", label: "Published" },
+  { id: "DRAFT", name: "Draft", label: "Draft" },
+  { id: "SCHEDULED", name: "Scheduled", label: "Scheduled" },
+  { id: "ARCHIVED", name: "Archived", label: "Archived" },
 ];
 
 export function BlogTableFilters({
@@ -60,11 +65,12 @@ export function BlogTableFilters({
   setAuthorFilters,
   postsCount,
   loading = false,
-  fetching = false, // Add this parameter
+  fetching = false,
   workspaceSlug,
   pageId,
   sortConfig,
   onSort,
+  onRefresh,
 }: BlogTableFiltersProps) {
   const {
     categories,
@@ -72,6 +78,9 @@ export function BlogTableFilters({
     authors,
     isLoading: optionsLoading,
   } = useBlogFilterOptions(workspaceSlug, pageId);
+
+  const queryClient = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const categoryOptions = categories.map((cat) => ({
     id: cat.id,
@@ -98,8 +107,8 @@ export function BlogTableFilters({
 
   if (searchTerm) {
     activeFilters.push({
-      id: 'search',
-      type: 'search',
+      id: "search",
+      type: "search",
       label: `"${searchTerm}"`,
       value: searchTerm,
     });
@@ -110,7 +119,7 @@ export function BlogTableFilters({
     const statusOption = statusOptions.find((s) => s.id === statusId);
     activeFilters.push({
       id: `status-${statusId}`,
-      type: 'statuses',
+      type: "statuses",
       label: statusOption?.label || statusId,
       value: statusId,
     });
@@ -120,7 +129,7 @@ export function BlogTableFilters({
     const category = categories.find((c) => c.id === categoryId);
     activeFilters.push({
       id: `category-${categoryId}`,
-      type: 'categories',
+      type: "categories",
       label: category?.name || categoryId,
       value: categoryId,
     });
@@ -130,7 +139,7 @@ export function BlogTableFilters({
     const tag = tags.find((t) => t.id === tagId);
     activeFilters.push({
       id: `tag-${tagId}`,
-      type: 'tags',
+      type: "tags",
       label: tag?.name || tagId,
       value: tagId,
     });
@@ -140,7 +149,7 @@ export function BlogTableFilters({
     const author = authors.find((a) => a.id === authorId);
     activeFilters.push({
       id: `author-${authorId}`,
-      type: 'authors',
+      type: "authors",
       label: author?.name || authorId,
       value: authorId,
     });
@@ -148,31 +157,68 @@ export function BlogTableFilters({
 
   const handleRemoveFilter = (filterId: string) => {
     // Extract type and value from filterId
-    if (filterId === 'search') {
-      setSearchTerm('');
-    } else if (filterId.startsWith('status-')) {
-      const statusId = filterId.replace('status-', '');
+    if (filterId === "search") {
+      setSearchTerm("");
+    } else if (filterId.startsWith("status-")) {
+      const statusId = filterId.replace("status-", "");
       setStatusFilters((prev: string[]) =>
         prev.filter((id) => id !== statusId)
       ); // ✅ Fixed type
-    } else if (filterId.startsWith('category-')) {
-      const categoryId = filterId.replace('category-', '');
+    } else if (filterId.startsWith("category-")) {
+      const categoryId = filterId.replace("category-", "");
       setCategoryFilters((prev) => prev.filter((id) => id !== categoryId));
-    } else if (filterId.startsWith('tag-')) {
-      const tagId = filterId.replace('tag-', '');
+    } else if (filterId.startsWith("tag-")) {
+      const tagId = filterId.replace("tag-", "");
       setTagFilters((prev) => prev.filter((id) => id !== tagId));
-    } else if (filterId.startsWith('author-')) {
-      const authorId = filterId.replace('author-', '');
+    } else if (filterId.startsWith("author-")) {
+      const authorId = filterId.replace("author-", "");
       setAuthorFilters((prev) => prev.filter((id) => id !== authorId));
     }
   };
 
   const handleClearAll = () => {
-    setSearchTerm('');
+    setSearchTerm("");
     setStatusFilters([]);
     setCategoryFilters([]);
     setTagFilters([]);
     setAuthorFilters([]);
+  };
+
+  const handleRefresh = async () => {
+    if (isRefreshing) return; // Prevent multiple clicks
+
+    setIsRefreshing(true);
+
+    try {
+      // Invalidate all relevant queries to trigger a refetch
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["blog-posts-table", workspaceSlug, pageId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["blog-posts-base", workspaceSlug, pageId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["workspace-categories", workspaceSlug, pageId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["workspace-tags", workspaceSlug, pageId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["workspace-authors", workspaceSlug],
+        }),
+      ]);
+
+      // Call optional refresh callback if provided
+      if (onRefresh) {
+        onRefresh();
+      }
+    } finally {
+      // Add a small delay to show the loading state
+      setTimeout(() => {
+        setIsRefreshing(false);
+      }, 500);
+    }
   };
 
   return (
@@ -183,9 +229,9 @@ export function BlogTableFilters({
           <div className="flex items-center gap-4 mr-2">
             <div className="text-normal font-medium flex items-center gap-2">
               {postsCount} <span className="text-small">Posts</span>
-              {fetching && (
+              {/* {fetching && (
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-              )}
+              )} */}
             </div>
             <div className="relative">
               <Input
@@ -197,8 +243,8 @@ export function BlogTableFilters({
               />
               <Search
                 className={cn(
-                  'absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2',
-                  fetching ? 'text-blue-500' : 'text-gray-400'
+                  "absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2",
+                  fetching ? "text-blue-500" : "text-gray-400"
                 )}
               />
             </div>
@@ -250,6 +296,26 @@ export function BlogTableFilters({
               onSelectionChange={setAuthorFilters}
               loading={loading || optionsLoading}
             />
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={loading || isRefreshing}
+              className={cn(
+                "h-8 px-3 text-normal font-medium",
+                "hover:bg-muted/50 transition-colors",
+                isRefreshing && "cursor-not-allowed"
+              )}
+            >
+              <RefreshCw
+                className={cn(
+                  " size-3",
+                  (isRefreshing || fetching) && "animate-spin"
+                )}
+              />
+              Refresh
+            </Button>
           </div>
         </div>
         <div className="flex items-center gap-2">

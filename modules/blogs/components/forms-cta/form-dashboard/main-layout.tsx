@@ -49,14 +49,14 @@ const ConfirmationMessage = () => {
   };
 
   const confirmationClasses = cn(
-    "p-4 rounded-lg flex flex-col items-center justify-center gap-2 w-full max-w-[400px] mx-auto shadow-xl text-center",
+    "px-10 py-6 rounded-lg flex flex-col items-center justify-center gap-2 w-full max-w-[400px] mx-auto shadow-xl text-center",
     isDark ? "bg-zinc-800 text-gray-200" : "bg-white text-gray-800"
   );
 
   return (
     <div className={confirmationClasses}>
       <h2 className="text-header">{confirmation.heading}</h2>
-      <p className="text-normal">{parse(confirmation.description)}</p>
+      <p className="text-head">{parse(confirmation.description)}</p>
       <Button onClick={handleButtonClick} className="mt-4">
         {confirmation.buttonText}
       </Button>
@@ -64,7 +64,13 @@ const ConfirmationMessage = () => {
   );
 };
 
-const FormDashboard = ({ activeTab }: { activeTab: string }) => {
+const FormDashboard = ({
+  activeTab,
+  setActiveTab, // This prop is essential
+}: {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+}) => {
   const {
     device,
     formState,
@@ -83,6 +89,13 @@ const FormDashboard = ({ activeTab }: { activeTab: string }) => {
     return () => openSidebar();
   }, [closeSidebar, openSidebar]);
 
+  // ✅ 1. Create a single, reusable function to exit the custom code view
+  // This function will disable the feature AND switch to the 'configure' tab.
+  const handleExitCustomCode = () => {
+    setCustomCodeEnabled(false);
+    setActiveTab("configure");
+  };
+
   const handleOverlayClick = () => {
     if (!isMandatory && setIsFormAndConfirmationVisible) {
       setIsFormAndConfirmationVisible(false);
@@ -97,12 +110,13 @@ const FormDashboard = ({ activeTab }: { activeTab: string }) => {
       <aside className="w-[380px] bg-background border-r p-0 pl-1 flex flex-col h-full">
         <div className="flex-1 overflow-y-auto p-4">
           {isCustomCodeActive ? (
-            <CustomCode onBack={() => setCustomCodeEnabled(false)} />
+            <CustomCode onBack={handleExitCustomCode} />
           ) : (
             <SidebarContent activeTab={activeTab} />
           )}
         </div>
-        {activeTab === "configure" && !isCustomCodeActive && (
+
+        {activeTab === "form" && !isCustomCodeActive && (
           <div className="mt-auto border-t px-5 py-3">
             <div className="flex items-center justify-between">
               <span className="text-normal">Embed Form &lt;/&gt;</span>
@@ -112,7 +126,13 @@ const FormDashboard = ({ activeTab }: { activeTab: string }) => {
                 </p>
                 <Switch
                   checked={formState.customCode.isEnabled}
-                  onCheckedChange={setCustomCodeEnabled}
+                  onCheckedChange={(isChecked) => {
+                    if (isChecked) {
+                      setCustomCodeEnabled(true);
+                    } else {
+                      handleExitCustomCode();
+                    }
+                  }}
                 />
               </div>
             </div>
@@ -216,7 +236,7 @@ const LayoutContent = ({
         saveError={saveError}
         isDisabled={isCustomCodeActive}
       />
-      <FormDashboard activeTab={activeTab} />
+      <FormDashboard activeTab={activeTab} setActiveTab={setActiveTab} />
     </>
   );
 };
