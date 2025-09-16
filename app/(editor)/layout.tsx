@@ -1,5 +1,5 @@
-import { SiteHeader } from '@/components/layout/header';
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { SiteHeader } from "@/components/layout/header";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export default function BlogEditorLayout({
   children,
@@ -8,7 +8,6 @@ export default function BlogEditorLayout({
 }) {
   return (
     <div className="[--header-height:calc(--spacing(12))] w-full">
-      {/* <SiteHeader /> */}
       <SidebarProvider className="flex flex-col">
         <SiteHeader />
         <div className="flex flex-1 ">

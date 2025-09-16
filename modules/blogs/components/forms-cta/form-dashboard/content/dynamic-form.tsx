@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import { countries, Country } from "@/lib/countries";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 import parse from "html-react-parser";
 import {
   Select,
@@ -29,6 +31,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, ChevronsUpDown, X as CloseIcon } from "lucide-react";
+import Image from "next/image";
+import CountryField from "./country-field";
 
 // --- Custom Field Rendering Logic ---
 const renderField = (
@@ -102,26 +106,7 @@ const renderField = (
       );
 
     case "Country":
-      return (
-        <Select
-          onValueChange={(val) => onChange(field.id, val)}
-          value={value || ""}
-        >
-          <SelectTrigger className={cn("w-full", errorClasses)}>
-            <SelectValue
-              placeholder={field.placeholder || "Select a country"}
-            />
-          </SelectTrigger>
-          <SelectContent>
-            {countryOptions.map((country) => (
-              <SelectItem key={country.code} value={country.name}>
-                <span className="mr-2">{country.flag}</span>
-                {country.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      );
+      return <CountryField />;
 
     case "Phone":
       const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,34 +117,7 @@ const renderField = (
 
       return (
         <div className="flex items-center">
-          <Select
-            onValueChange={(code) =>
-              setPhoneCountry(
-                countries.find((c) => c.code === code) || countries[0]
-              )
-            }
-            defaultValue={phoneCountry.code}
-          >
-            <SelectTrigger
-              className={cn("w-[80px] rounded-r-none", errorClasses)}
-            >
-              <SelectValue>{phoneCountry.flag}</SelectValue>
-            </SelectTrigger>
-            <SelectContent className="max-h-[200px]">
-              {countries.map((c) => (
-                <SelectItem key={c.code} value={c.code}>
-                  {c.flag} {c.phone}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Input
-            type="tel"
-            placeholder={field.placeholder}
-            className={cn("rounded-l-none", errorClasses)}
-            value={currentNumber}
-            onChange={handlePhoneChange}
-          />
+          <PhoneInput country={"us"} onChange={(phone) => console.log(phone)} />
         </div>
       );
 
@@ -353,6 +311,7 @@ export default function DynamicForm() {
           </p>
         )}
       </div>
+
       <div className="w-full space-y-4">
         {sortedFields.map((field) => (
           <div key={field.id} className="w-full text-left">
