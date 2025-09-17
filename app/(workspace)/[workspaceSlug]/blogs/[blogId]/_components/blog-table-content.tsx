@@ -438,27 +438,6 @@ export function BlogTableContent({
     }
   }, [selectedCount]);
 
-  if (!loading && posts.length === 0) {
-    return (
-      <div className="py-12 text-center">
-        <div className="mx-auto">
-          <Heading
-            level="h3"
-            variant="default"
-            subtitle="Get started by creating your first blog post."
-            subtitleVariant="muted"
-          >
-            No blog posts found
-          </Heading>
-          <Button onClick={newPage} className="mt-3">
-            <Plus className="mr-2 h-4 w-4" />
-            New Post
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="overflow-hidden">
       <div className="relative overflow-x-auto">
@@ -497,6 +476,25 @@ export function BlogTableContent({
           <TableBody>
             {loading ? (
               <PostTableSkeleton row={5} />
+            ) : posts.length === 0 ? (
+              <TableRow>
+                <td colSpan={9} className="text-center py-12">
+                  <div className="mx-auto">
+                    <Heading
+                      level="h3"
+                      variant="default"
+                      subtitle="Get started by creating your first blog post."
+                      subtitleVariant="muted"
+                    >
+                      No blog posts found
+                    </Heading>
+                    <Button onClick={newPage} className="mt-3">
+                      <Plus className="mr-2 h-4 w-4" />
+                      New Post
+                    </Button>
+                  </div>
+                </td>
+              </TableRow>
             ) : (
               posts.map((post) => (
                 <BlogTableRow
