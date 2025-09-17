@@ -14,17 +14,19 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 
-interface CountrySelectProps {
+interface CountryFieldProps {
   className?: string;
   defaultValue?: string;
   onChange?: (value: string | undefined) => void;
+  placeholder?: string; // Add placeholder prop
 }
 
-export default function CountrySelect({
+export default function CountryField({
   className,
   defaultValue,
   onChange,
-}: CountrySelectProps) {
+  placeholder, // Destructure placeholder
+}: CountryFieldProps) {
   const [selectedCode, setSelectedCode] = useState<string | undefined>(
     defaultValue
   );
@@ -64,23 +66,20 @@ export default function CountrySelect({
       onOpenChange={setIsOpen}
     >
       <SelectTrigger className={cn("w-full", className)}>
-        <SelectValue>
-          <div className="flex items-center gap-2">
-            {selectedCountry ? (
-              <>
-                <Image
-                  src={`/flags/${selectedCountry.code.toLowerCase()}.svg`}
-                  alt={selectedCountry.name}
-                  width={20}
-                  height={15}
-                  className="object-contain"
-                />
-                <span>{selectedCountry.name}</span>
-              </>
-            ) : (
-              "Select a country"
-            )}
-          </div>
+        {/* Use the dynamic placeholder prop with a fallback */}
+        <SelectValue placeholder={placeholder || "Select a country"}>
+          {selectedCountry && (
+            <div className="flex items-center gap-2">
+              <Image
+                src={`/flags/${selectedCountry.code.toLowerCase()}.svg`}
+                alt={selectedCountry.name}
+                width={20}
+                height={15}
+                className="object-contain"
+              />
+              <span>{selectedCountry.name}</span>
+            </div>
+          )}
         </SelectValue>
       </SelectTrigger>
 

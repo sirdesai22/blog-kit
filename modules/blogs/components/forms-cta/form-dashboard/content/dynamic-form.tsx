@@ -112,6 +112,7 @@ const renderField = (
           defaultValue={value}
           onChange={(newValue) => onChange(field.id, newValue)}
           className={cn(errors[field.id] ? "border-red-500" : "")}
+          placeholder={field.placeholder}
         />
       );
 

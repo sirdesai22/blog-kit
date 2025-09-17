@@ -109,7 +109,7 @@ export default function PhoneField({
         open={isOpen}
         onOpenChange={setIsOpen}
       >
-        <SelectTrigger className="h-full w-auto border-0 bg-transparent py-2 pl-3 pr-2 shadow-none focus:ring-0">
+        <SelectTrigger className="h-full w-auto border-0 bg-transparent py-2 pl-3 pr-2 shadow-none focus:ring-0 focus-visible:ring-0">
           <SelectValue>
             <div className="flex items-center gap-2">
               {selectedCountry && (
@@ -168,9 +168,9 @@ export default function PhoneField({
       <Input
         type="tel"
         placeholder="Phone number"
-        className="h-full flex-1 border-0 bg-transparent p-0 shadow-none focus-visible:ring-0"
+        className="h-full flex-1 border-0 bg-transparent p-0 shadow-none focus-visible:ring-0 "
         value={phoneNumber}
-        onChange={handlePhoneNumberChange} // Use the new handler
+        onChange={handlePhoneNumberChange}
       />
     </div>
   );
