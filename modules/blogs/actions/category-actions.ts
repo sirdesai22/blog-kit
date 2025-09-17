@@ -233,20 +233,7 @@ export async function deleteCategory(
     throw new Error('Access denied');
   }
 
-  // Check if category is used by any posts
-  const postsUsingCategory = await db.blogPost.count({
-    where: {
-      workspaceId: workspace.id,
-      categories: { some: { id: categoryId } },
-    },
-  });
-
-  if (postsUsingCategory > 0) {
-    throw new Error(
-      `Cannot delete category. It's being used by ${postsUsingCategory} post(s).`
-    );
-  }
-
+  // Note: Deleting category will automatically remove it from associated posts due to many-to-many relation
   await db.category.delete({
     where: { id: categoryId, workspaceId: workspace.id },
   });

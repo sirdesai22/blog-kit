@@ -32,6 +32,11 @@ import { useBlogTable } from "@/modules/blogs/contexts/BlogTableContext";
 import { cn } from "@/lib/utils";
 import { TooltipArrow } from "@radix-ui/react-tooltip";
 import { formatDate } from "@/utils/date";
+import { useState } from "react";
+import { ConfirmationDialog } from "@/components/models/confirmation-dialog";
+import { bulkDeletePosts } from "@/modules/blogs/actions/post-bulk-actions";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface BlogTableRowProps {
   post: BlogPost;
@@ -42,6 +47,10 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
   const { pinnedIds, togglePin, selectedIds, toggleSelection } = useBlogTable();
   const isPinned = pinnedIds.has(post.id) || post.pinned;
   const isSelected = selectedIds.has(post.id);
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const queryClient = useQueryClient();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -82,191 +91,233 @@ export function BlogTableRow({ post, workspaceSlug }: BlogTableRowProps) {
   const hasAuthor = !!post.author;
   const totalAuthors = (hasAuthor ? 1 : 0) + coAuthorsCount;
 
-  return (
-    <TableRow
-      className={cn(
-        "group hover:bg-muted/50",
-        isSelected && "bg-blue-50 hover:bg-blue-50"
-      )}
-    >
-      <TableCell className="pl-lg">
-        <Checkbox
-          checked={isSelected}
-          onCheckedChange={() => toggleSelection(post.id)}
-          aria-label={`Select ${post.title}`}
-        />
-      </TableCell>
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    const toastId = toast.loading("Deleting post...");
 
-      <TableCell>
-        <div className="flex items-center gap-2">
-          {/* {isPinned && (
+    try {
+      const result = await bulkDeletePosts(workspaceSlug, [post.id]);
+
+      if (result.success) {
+        toast.success(result.message || "Post deleted successfully", {
+          id: toastId,
+        });
+        // Invalidate the blog posts query to refresh the table
+        queryClient.invalidateQueries({
+          queryKey: ["blog-posts-table", workspaceSlug, post.pageId],
+        });
+        setShowDeleteConfirm(false);
+      } else {
+        toast.error(result.error || "Failed to delete post", { id: toastId });
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred", { id: toastId });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  return (
+    <>
+      <TableRow
+        className={cn(
+          "group hover:bg-muted/50",
+          isSelected && "bg-blue-50 hover:bg-blue-50"
+        )}
+      >
+        <TableCell className="pl-lg">
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={() => toggleSelection(post.id)}
+            aria-label={`Select ${post.title}`}
+          />
+        </TableCell>
+
+        <TableCell>
+          <div className="flex items-center gap-2">
+            {/* {isPinned && (
             <Pin className="h-4 w-4 fill-current text-muted-foreground" />
           )} */}
-          <Link
-            href={`/${workspaceSlug}/blogs/${post.pageId}/${post.id}/edit`}
-            className="cursor-pointer group inline-flex  items-center gap-1 text-normal text-foreground hover:text-primary"
+            <Link
+              href={`/${workspaceSlug}/blogs/${post.pageId}/${post.id}/edit`}
+              className="cursor-pointer group inline-flex  items-center gap-1 text-normal text-foreground hover:text-primary"
+            >
+              {post.title}
+              <ExternalLink className="ml-2 h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Edit className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </Link>
+          </div>
+        </TableCell>
+
+        <TableCell>
+          <span
+            className={`inline-flex items-center rounded-xl px-2 py-0.5 text-normal ${getStatusColor(
+              post.status
+            )}`}
           >
-            {post.title}
-            <ExternalLink className="ml-2 h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <Edit className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </Link>
-        </div>
-      </TableCell>
+            <span className="text-[8px] mr-1  leading-none">●</span>
+            {getStatusLabel(post.status)}
+          </span>
+        </TableCell>
 
-      <TableCell>
-        <span
-          className={`inline-flex items-center rounded-xl px-2 py-0.5 text-normal ${getStatusColor(
-            post.status
-          )}`}
-        >
-          <span className="text-[8px] mr-1  leading-none">●</span>
-          {getStatusLabel(post.status)}
-        </span>
-      </TableCell>
-
-      <TableCell>
-        {post.categories && post.categories.length > 0 ? (
-          <div className="flex items-center gap-1">
-            {post.categories.length > 1 ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center gap-1">
-                    <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-0.5 text-normal-muted">
-                      {post.categories[0].name}
-                    </span>
-                    {post.categories.length > 1 && (
-                      <span className="text-small">
-                        +{post.categories.length - 1}
-                      </span>
-                    )}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent
-                  sideOffset={5}
-                  className="flex flex-col gap-1 p-2 bg-popover border border-border rounded-md shadow-lg"
-                >
-                  {post.categories.map((category, index) => (
-                    <span key={index} className=" text-normal-muted">
-                      {category.name}
-                    </span>
-                  ))}
-                </TooltipContent>
-              </Tooltip>
-            ) : (
-              <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-0.5 text-normal-muted">
-                {post.categories[0].name}
-              </span>
-            )}
-          </div>
-        ) : (
-          <span className="text-xs text-muted-foreground"></span>
-        )}
-      </TableCell>
-
-      <TableCell>
-        {post.tags && post.tags.length > 0 ? (
-          <div className="flex items-center gap-1">
-            {post.tags.length > 1 ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center gap-1">
-                    <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-0.5 text-normal-muted">
-                      {post.tags[0].name}
-                    </span>
-                    {post.tags.length > 1 && (
-                      <span className="text-normal-muted">
-                        +{post.tags.length - 1}
-                      </span>
-                    )}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent
-                  sideOffset={5}
-                  className="flex flex-col gap-1 p-2 bg-popover border border-border rounded-md shadow-lg"
-                >
-                  {post.tags.map((tag, index) => (
-                    <span key={index} className="text-normal-muted">
-                      {tag.name}
-                    </span>
-                  ))}
-                </TooltipContent>
-              </Tooltip>
-            ) : (
-              <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                {post.tags[0].name}
-              </span>
-            )}
-          </div>
-        ) : (
-          <span className="text-xs text-muted-foreground"></span>
-        )}
-      </TableCell>
-
-      <TableCell>
-        <div className="flex items-center space-x-2">
-          {post.author ? (
+        <TableCell>
+          {post.categories && post.categories.length > 0 ? (
             <div className="flex items-center gap-1">
-              <Avatar className="h-6 w-6 border border-border">
-                <AvatarImage src={post.author.image || ""} />
-                <AvatarFallback className="bg-muted text-xs text-muted-foreground">
-                  {post.author.name ? post.author.name[0].toUpperCase() : "A"}
-                </AvatarFallback>
-              </Avatar>
-              {totalAuthors > 1 && (
-                <span className="text-xs text-muted-foreground">
-                  +{totalAuthors - 1}
+              {post.categories.length > 1 ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1">
+                      <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-0.5 text-normal-muted">
+                        {post.categories[0].name}
+                      </span>
+                      {post.categories.length > 1 && (
+                        <span className="text-small">
+                          +{post.categories.length - 1}
+                        </span>
+                      )}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    sideOffset={5}
+                    className="flex flex-col gap-1 p-2 bg-popover border border-border rounded-md shadow-lg"
+                  >
+                    {post.categories.map((category, index) => (
+                      <span key={index} className=" text-normal-muted">
+                        {category.name}
+                      </span>
+                    ))}
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-0.5 text-normal-muted">
+                  {post.categories[0].name}
                 </span>
               )}
             </div>
           ) : (
             <span className="text-xs text-muted-foreground"></span>
           )}
-        </div>
-      </TableCell>
+        </TableCell>
 
-      <TableCell>
-        <div className="text-xs text-muted-foreground">
-          {post.publishedAt ? formatDate(post.publishedAt) : ""}
-        </div>
-      </TableCell>
-      <TableCell>
-        <div className="text-xs text-muted-foreground">
-          {formatDate(post.updatedAt)}
-        </div>
-      </TableCell>
+        <TableCell>
+          {post.tags && post.tags.length > 0 ? (
+            <div className="flex items-center gap-1">
+              {post.tags.length > 1 ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1">
+                      <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-0.5 text-normal-muted">
+                        {post.tags[0].name}
+                      </span>
+                      {post.tags.length > 1 && (
+                        <span className="text-normal-muted">
+                          +{post.tags.length - 1}
+                        </span>
+                      )}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    sideOffset={5}
+                    className="flex flex-col gap-1 p-2 bg-popover border border-border rounded-md shadow-lg"
+                  >
+                    {post.tags.map((tag, index) => (
+                      <span key={index} className="text-normal-muted">
+                        {tag.name}
+                      </span>
+                    ))}
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <span className="inline-flex rounded-xl border border-border bg-muted/50 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                  {post.tags[0].name}
+                </span>
+              )}
+            </div>
+          ) : (
+            <span className="text-xs text-muted-foreground"></span>
+          )}
+        </TableCell>
 
-      <TableCell className="text-center ">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-6 w-6 p-0">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem asChild>
-              <Link
-                href={`/${workspaceSlug}/blogs/${post.pageId}/${post.id}/edit`}
-              >
-                <Edit2 className="mr-2 h-4 w-4" />
-                Edit Post
-              </Link>
-            </DropdownMenuItem>
-            {/* <DropdownMenuItem onClick={() => togglePin(post.id)}>
+        <TableCell>
+          <div className="flex items-center space-x-2">
+            {post.author ? (
+              <div className="flex items-center gap-1">
+                <Avatar className="h-6 w-6 border border-border">
+                  <AvatarImage src={post.author.image || ""} />
+                  <AvatarFallback className="bg-muted text-xs text-muted-foreground">
+                    {post.author.name ? post.author.name[0].toUpperCase() : "A"}
+                  </AvatarFallback>
+                </Avatar>
+                {totalAuthors > 1 && (
+                  <span className="text-xs text-muted-foreground">
+                    +{totalAuthors - 1}
+                  </span>
+                )}
+              </div>
+            ) : (
+              <span className="text-xs text-muted-foreground"></span>
+            )}
+          </div>
+        </TableCell>
+
+        <TableCell>
+          <div className="text-xs text-muted-foreground">
+            {post.publishedAt ? formatDate(post.publishedAt) : ""}
+          </div>
+        </TableCell>
+        <TableCell>
+          <div className="text-xs text-muted-foreground">
+            {formatDate(post.updatedAt)}
+          </div>
+        </TableCell>
+
+        <TableCell className="text-center ">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-6 w-6 p-0">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem asChild>
+                <Link
+                  href={`/${workspaceSlug}/blogs/${post.pageId}/${post.id}/edit`}
+                >
+                  <Edit2 className="mr-2 h-4 w-4" />
+                  Edit Post
+                </Link>
+              </DropdownMenuItem>
+              {/* <DropdownMenuItem onClick={() => togglePin(post.id)}>
               <Pin className="mr-2 h-4 w-4" />
               {isPinned ? "Unpin" : "Pin"}
             </DropdownMenuItem> */}
-            <DropdownMenuItem>
-              <Copy className="mr-2 h-4 w-4" />
-              Duplicate
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-600">
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </TableCell>
-    </TableRow>
+              <DropdownMenuItem>
+                <Copy className="mr-2 h-4 w-4" />
+                Duplicate
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-red-600"
+                onClick={() => setShowDeleteConfirm(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </TableCell>
+      </TableRow>
+
+      <ConfirmationDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        onConfirm={handleDelete}
+        title="Delete Post"
+        description={`Are you sure you want to delete "${post.title}"? This action cannot be undone.`}
+        confirmButtonLabel="Delete Post"
+        theme="danger"
+        isConfirming={isDeleting}
+      />
+    </>
   );
 }

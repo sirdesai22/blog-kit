@@ -126,7 +126,7 @@ function BulkActions({
 
   const refreshTable = () => {
     queryClient.invalidateQueries({
-      queryKey: ["blog-posts-base", workspaceSlug, currentPageId],
+      queryKey: ["blog-posts-table", workspaceSlug, currentPageId],
     });
     queryClient.invalidateQueries({
       queryKey: ["workspace-categories", workspaceSlug, currentPageId],

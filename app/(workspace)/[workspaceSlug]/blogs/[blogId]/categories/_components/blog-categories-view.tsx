@@ -251,8 +251,13 @@ export function BlogCategoriesView({
   const handleDeleteCategory = async () => {
     if (!selectedCategory) return;
 
+    console.log(
+      "handleDeleteCategory: Calling delete for category",
+      selectedCategory.id
+    );
     deleteCategoryMutation.mutate(selectedCategory.id, {
       onSuccess: () => {
+        console.log("handleDeleteCategory: onSuccess - Closing dialog");
         setIsDeleteDialogOpen(false);
         setSelectedCategory(null); // Clear selection on success
       },

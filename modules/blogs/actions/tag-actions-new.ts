@@ -207,20 +207,7 @@ export async function deleteTag(workspaceSlug: string, tagId: string) {
     throw new Error('Access denied');
   }
 
-  // Check if tag is used by any posts
-  const postsUsingTag = await db.blogPost.count({
-    where: {
-      workspaceId: workspace.id,
-      tags: { some: { id: tagId } },
-    },
-  });
-
-  if (postsUsingTag > 0) {
-    throw new Error(
-      `Cannot delete tag. It's being used by ${postsUsingTag} post(s).`
-    );
-  }
-
+  // Note: Deleting tag will automatically remove it from associated posts due to many-to-many relation
   await db.tag.delete({
     where: { id: tagId, workspaceId: workspace.id },
   });

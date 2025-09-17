@@ -186,6 +186,7 @@ export function useDeleteCategory(workspaceSlug: string, blogId: string) {
 
     // Optimistic update
     onMutate: async (categoryId) => {
+      console.log('useDeleteCategory: onMutate - Deleting category', categoryId);
       const queryKey = ['categories', workspaceSlug, blogId];
 
       await queryClient.cancelQueries({ queryKey });
@@ -206,6 +207,7 @@ export function useDeleteCategory(workspaceSlug: string, blogId: string) {
     },
 
     onError: (err, categoryId, context) => {
+      console.log('useDeleteCategory: onError - Failed to delete category', categoryId, err);
       if (context?.previousData) {
         queryClient.setQueryData(
           ['categories', workspaceSlug, blogId],
@@ -216,6 +218,7 @@ export function useDeleteCategory(workspaceSlug: string, blogId: string) {
     },
 
     onSuccess: () => {
+      console.log('useDeleteCategory: onSuccess - Category deleted successfully');
       queryClient.invalidateQueries({
         queryKey: ['categories', workspaceSlug, blogId],
       });

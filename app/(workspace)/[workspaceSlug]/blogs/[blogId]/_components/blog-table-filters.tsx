@@ -196,9 +196,6 @@ export function BlogTableFilters({
           queryKey: ["blog-posts-table", workspaceSlug, pageId],
         }),
         queryClient.invalidateQueries({
-          queryKey: ["blog-posts-base", workspaceSlug, pageId],
-        }),
-        queryClient.invalidateQueries({
           queryKey: ["workspace-categories", workspaceSlug, pageId],
         }),
         queryClient.invalidateQueries({
