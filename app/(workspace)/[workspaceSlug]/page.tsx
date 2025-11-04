@@ -1,8 +1,8 @@
-import { Suspense } from 'react';
-import { notFound } from 'next/navigation';
-import { getWorkspaceWithPages } from '@/lib/actions/workspace-actions';
-import { PageCard } from '../_components/page-card';
-import { NewPageButton } from '../_components/new-page-button';
+import { Suspense } from "react";
+import { notFound } from "next/navigation";
+import { getWorkspaceWithPages } from "@/modules/workspace/actions/workspace-actions";
+import { PageCard } from "../_components/page-card";
+import { NewPageButton } from "../_components/new-page-button";
 
 // Loading component
 function PagesLoading() {
@@ -32,17 +32,17 @@ async function PagesContent({ workspaceSlug }: { workspaceSlug: string }) {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-lg">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">My Pages</h1>
+        <p className="text-header">My Pages</p>
         <NewPageButton workspaceSlug={workspaceSlug} />
       </div>
 
       {/* Pages Grid */}
       {workspace.pages.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="max-w-md mx-auto">
+        <div className="text-center  py-12">
+          <div className=" mx-auto">
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               No pages yet
             </h3>
@@ -64,11 +64,9 @@ async function PagesContent({ workspaceSlug }: { workspaceSlug: string }) {
 }
 
 // Main page component
-export default async function WorkspacePage(
-  props: {
-    params: Promise<{ workspaceSlug: string }>;
-  }
-) {
+export default async function WorkspacePage(props: {
+  params: Promise<{ workspaceSlug: string }>;
+}) {
   const params = await props.params;
   return (
     <Suspense fallback={<PagesLoading />}>

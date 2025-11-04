@@ -23,6 +23,8 @@ model User {
   pageAuthorships PageAuthor[]
   sessions        Session[]
   memberships     WorkspaceMember[]
+  sentInvitations WorkspaceInvitation[]
+  notifications   Notification[]
 }
 
 model Account {
@@ -69,9 +71,17 @@ model Workspace {
   updatedAt DateTime          @updatedAt
   authors   Author[]
   pages     Page[]
+  blogPosts BlogPost[]      
   config    WorkspaceConfig?
   domain    WorkspaceDomain?
   members   WorkspaceMember[]
+  categories Category[]
+  tags       Tag[]
+  invitations WorkspaceInvitation[]
+  notifications Notification[]
+  
+  // ✅ ADD THIS LINE - Missing opposite relation field
+  formSubmissions FormSubmission[]
 }
 
 model WorkspaceDomain {
@@ -123,6 +133,8 @@ model WorkspaceConfig {
   workspace          Workspace  @relation(fields: [workspaceId], references: [id])
 }
 
+// BLOG PAGE
+
 model Page {
   id              String           @id @default(cuid())
   title           String
@@ -142,7 +154,19 @@ model Page {
   updatedById     String?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
-  blogPost        BlogPost?
+  
+  //  FORMS CONFIGURATION
+  formsConfig     Json?            // Array of all forms for this page
+  categoryFormMapping Json?        // { "Tech": "form-123", "Marketing": "form-456" }
+  globalDefaultFormId String?      // Fallback form ID if no category match
+  
+  //  CTA CONFIGURATION 
+  ctasConfig      Json?            // Array of all CTAs for this page
+  categoryCtaMapping Json?         // { "Tech": "cta-123", "Marketing": "cta-456" }
+  globalDefaultCtaId String?       // Fallback CTA ID if no category match
+  
+  // ... existing relations ...
+  blogPosts       BlogPost[] 
   changelogEntry  ChangelogEntry?
   helpdeskArticle HelpdeskArticle?
   createdBy       User             @relation("CreatedPages", fields: [createdById], references: [id])
@@ -150,7 +174,12 @@ model Page {
   workspace       Workspace        @relation(fields: [workspaceId], references: [id])
   authors         PageAuthor[]
   pageAuthors     Author[]         @relation("AuthorToPage")
-
+  categories      Category[]
+  tags            Tag[]
+  
+  //  ADD THIS LINE - Missing opposite relation field
+  formSubmissions FormSubmission[]
+  
   @@unique([slug, workspaceId])
 }
 
@@ -167,6 +196,7 @@ model Author {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   pages       Page[]    @relation("AuthorToPage")
+  blogPosts   BlogPost[] 
 
   @@unique([name, workspaceId])
 }
@@ -183,12 +213,76 @@ model PageAuthor {
 
 model BlogPost {
   id                String   @id @default(cuid())
-  pageId            String   @unique
-  tags              String[]
-  categories        String[]
+  
+  // Core Content
+  title             String
+  slug              String
+  content           Json     // PlateJS content
+  htmlContent       String?  // Rendered HTML for faster display
+  excerpt           String?  // Short summary
+  mdx               String?
+  // Publishing
+  status            PostStatus @default(DRAFT)
+  publishedAt       DateTime?
+  scheduledFor      DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  // SEO
+  metaTitle         String?
+  metaDescription   String?
+  canonicalUrl      String?
+  
+  // Media
+  featuredImage     String?
+  featuredImageAlt  String?
+  gallery           String[] // Additional images
+  
+  // Page
+  featuredInCategories String[] 
+  featuredOrder     Int?     
+ 
+  featuredCategoryOrders Json? 
+  featured          Boolean  @default(false)
+  pinned            Boolean  @default(false)
+  
+  // Analytics
+  views             Int      @default(0)
+  readTime          Int?     // Estimated read time in minutes
+  
+  // Author & Workspace Relations
+  authorId          String? 
+  coAuthorIds       String[]
+  workspaceId       String
+  
+ 
+  pageId            String   
+  estimatedReadTime Int?   
   authorBio         String?
-  estimatedReadTime Int?
-  page              Page     @relation(fields: [pageId], references: [id])
+  
+  // Relations
+  page              Page      @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  author            Author?   @relation(fields: [authorId], references: [id])
+  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  categories        Category[] @relation("PostCategories")
+  tags              Tag[]      @relation("PostTags")
+  
+  //  ADD THIS LINE - Missing opposite relation field
+  formSubmissions   FormSubmission[]
+  
+  //FORM CONFIGURATION - Keep only selectedFormId
+  selectedFormId    String?          // Override: use specific form ID
+  formEnabled       Boolean  @default(true) // Enable/disable form for this post
+  
+  // CTA CONFIGURATION 
+  selectedCtaId     String?          // Override: use specific CTA ID
+  ctaEnabled        Boolean  @default(true) // Enable/disable CTA for this post
+  
+  @@unique([slug, workspaceId]) 
+  @@index([status, publishedAt])
+  @@index([workspaceId, status])
+  @@index([authorId])
+  @@index([pageId]) 
 }
 
 model HelpdeskArticle {
@@ -209,6 +303,45 @@ model ChangelogEntry {
   changeType  ChangeType[]
   breaking    Boolean      @default(false)
   page        Page         @relation(fields: [pageId], references: [id])
+}
+
+model WorkspaceInvitation {
+  id          String            @id @default(cuid())
+  email       String
+  role        Role
+  status      InvitationStatus  @default(PENDING)
+  token       String            @unique
+  workspaceId String
+  invitedById String
+  expiresAt   DateTime
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invitedBy   User      @relation(fields: [invitedById], references: [id])
+  
+  @@unique([email, workspaceId])
+  @@index([token])
+  @@index([email])
+}
+
+model Notification {
+  id          String            @id @default(cuid())
+  type        NotificationType
+  title       String
+  message     String
+  data        Json?             // Additional data like workspace info, invitation details, etc.
+  read        Boolean           @default(false)
+  userId      String
+  workspaceId String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace?        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, read])
+  @@index([createdAt])
 }
 
 enum DomainType {
@@ -282,3 +415,114 @@ enum ChangeType {
   BREAKING
   DEPRECATED
 }
+
+// Add PostStatus enum
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+  ARCHIVED
+  DELETED
+}
+
+// NEW MODELS
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    
+  description String?
+  color       String?
+  icon        String?
+  order       Int       @default(0)
+  workspaceId String
+  pageId      String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+ 
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  page        Page      @relation(fields: [pageId], references: [id])
+ 
+  blogPosts   BlogPost[] @relation("PostCategories")
+  
+  @@unique([name, pageId])
+}
+
+model Tag {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String
+  description String?
+  color       String?
+  workspaceId String
+  pageId      String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+ 
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  page        Page      @relation(fields: [pageId], references: [id])
+ 
+  blogPosts   BlogPost[] @relation("PostTags")
+  
+  @@unique([name, pageId])
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+enum NotificationType {
+  TEAM_INVITATION
+  TEAM_INVITATION_ACCEPTED
+  TEAM_INVITATION_DECLINED
+  TEAM_MEMBER_ADDED
+  TEAM_MEMBER_REMOVED
+  TEAM_ROLE_CHANGED
+  WORKSPACE_CREATED
+  GENERAL
+}
+
+// Add this model
+model FormSubmission {
+  id              String   @id @default(cuid())
+  formId          String   // Form identifier from JSON config
+  pageId          String
+  postId          String?
+  workspaceId     String
+  
+  // Submission data
+  data            Json     // Form data
+  metadata        Json?    // Browser info, etc.
+  
+  // Status
+  status          SubmissionStatus @default(PENDING)
+  processedAt     DateTime?
+  errorMessage    String?
+  
+  // Relations
+  page            Page      @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  blogPost        BlogPost? @relation(fields: [postId], references: [id], onDelete: SetNull)
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([formId, pageId, createdAt])
+  @@index([pageId, status])
+  @@index([workspaceId, createdAt])
+}
+
+// Add this enum
+enum SubmissionStatus {
+  PENDING
+  PROCESSED
+  FAILED
+  SPAM
+}
+
+
+

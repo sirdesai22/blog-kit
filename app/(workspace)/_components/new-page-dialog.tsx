@@ -149,7 +149,7 @@ export function NewPageDialog({
       onOpenChange(false);
 
       // Navigate to edit page
-      router.push(`/${workspaceSlug}/pages/${data.page.id}`);
+      router.push(`/${workspaceSlug}/blogs/${data.page.id}`);
     },
     onError: (error) => {
       console.error('Error creating page:', error);

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useState, use } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { use } from "react";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -10,14 +10,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { MoreHorizontal, Plus, Trash2, ExternalLink } from 'lucide-react';
+} from "@/components/ui/table";
+
+import { MoreHorizontal, Plus, Trash2, ExternalLink } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -25,16 +26,20 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Heading } from '@/components/ui/heading';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+} from "@/components/ui/dialog";
+import { Heading } from "@/components/ui/heading";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { AuthorDialog } from "./_components/author-dialog";
+
+// ✅ Use the new hooks
 import {
-  getWorkspaceAuthors,
-  addAuthor,
-  updateAuthor,
-  deleteAuthor,
-} from '@/lib/actions/workspace-actions';
-import { AuthorDialog } from './_components/author-dialog';
+  useAuthors,
+  useCreateAuthor,
+  useUpdateAuthor,
+  useDeleteAuthor,
+} from "@/modules/blogs/hooks/use-authors";
+import { useState } from "react";
+import { ConfirmationDialog } from "@/components/models/confirmation-dialog";
 
 interface Author {
   id: string;
@@ -67,37 +72,28 @@ interface AuthorsPageProps {
 
 export default function AuthorsPage(props: AuthorsPageProps) {
   const params = use(props.params);
-  const [authors, setAuthors] = useState<Author[]>([]);
+
+  // ✅ Use TanStack Query hooks
+  const {
+    data: authorsData,
+    isLoading,
+    error,
+  } = useAuthors(params.workspaceSlug);
+  const createAuthorMutation = useCreateAuthor(params.workspaceSlug);
+  const updateAuthorMutation = useUpdateAuthor(params.workspaceSlug);
+  const deleteAuthorMutation = useDeleteAuthor(params.workspaceSlug);
+
+  // Local state for dialogs
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedAuthor, setSelectedAuthor] = useState<Author | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-  // Load authors data
-  const loadAuthors = async () => {
-    try {
-      const result = await getWorkspaceAuthors(params.workspaceSlug);
-      if (result) {
-        setAuthors(result.authors);
-      }
-    } catch (error) {
-      console.error('Failed to load authors:', error);
-    } finally {
-      setIsInitialLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadAuthors();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.workspaceSlug]);
+  const authors = authorsData?.authors || [];
 
   const handleAddAuthor = async (formData: AuthorFormData) => {
-    setIsLoading(true);
-    try {
-      await addAuthor(params.workspaceSlug, {
+    createAuthorMutation.mutate(
+      {
         name: formData.name.trim(),
         bio: formData.bio.trim() || undefined,
         email: formData.email.trim() || undefined,
@@ -107,56 +103,51 @@ export default function AuthorsPage(props: AuthorsPageProps) {
           Object.keys(formData.socialLinks).length > 0
             ? formData.socialLinks
             : undefined,
-      });
-      setIsAddDialogOpen(false);
-      await loadAuthors();
-    } catch (error) {
-      console.error('Failed to add author:', error);
-    } finally {
-      setIsLoading(false);
-    }
+      },
+      {
+        onSuccess: () => {
+          setIsAddDialogOpen(false);
+        },
+      }
+    );
   };
 
   const handleEditAuthor = async (formData: AuthorFormData) => {
     if (!selectedAuthor) return;
 
-    setIsLoading(true);
-    try {
-      await updateAuthor(params.workspaceSlug, selectedAuthor.id, {
-        name: formData.name.trim(),
-        bio: formData.bio.trim() || undefined,
-        email: formData.email.trim() || undefined,
-        website: formData.website.trim() || undefined,
-        image: formData.image.trim() || undefined,
-        socialLinks:
-          Object.keys(formData.socialLinks).length > 0
-            ? formData.socialLinks
-            : undefined,
-      });
-      setIsEditDialogOpen(false);
-      setSelectedAuthor(null);
-      await loadAuthors();
-    } catch (error) {
-      console.error('Failed to update author:', error);
-    } finally {
-      setIsLoading(false);
-    }
+    updateAuthorMutation.mutate(
+      {
+        authorId: selectedAuthor.id,
+        data: {
+          name: formData.name.trim(),
+          bio: formData.bio.trim() || undefined,
+          email: formData.email.trim() || undefined,
+          website: formData.website.trim() || undefined,
+          image: formData.image.trim() || undefined,
+          socialLinks:
+            Object.keys(formData.socialLinks).length > 0
+              ? formData.socialLinks
+              : undefined,
+        },
+      },
+      {
+        onSuccess: () => {
+          setIsEditDialogOpen(false);
+          setSelectedAuthor(null);
+        },
+      }
+    );
   };
 
   const handleDeleteAuthor = async () => {
     if (!selectedAuthor) return;
 
-    setIsLoading(true);
-    try {
-      await deleteAuthor(params.workspaceSlug, selectedAuthor.id);
-      setIsDeleteDialogOpen(false);
-      setSelectedAuthor(null);
-      await loadAuthors();
-    } catch (error) {
-      console.error('Failed to delete author:', error);
-    } finally {
-      setIsLoading(false);
-    }
+    deleteAuthorMutation.mutate(selectedAuthor.id, {
+      onSuccess: () => {
+        setIsDeleteDialogOpen(false);
+        setSelectedAuthor(null);
+      },
+    });
   };
 
   const handleEditClick = (author: Author) => {
@@ -173,170 +164,199 @@ export default function AuthorsPage(props: AuthorsPageProps) {
   const editData: AuthorFormData | undefined = selectedAuthor
     ? {
         name: selectedAuthor.name,
-        bio: selectedAuthor.bio || '',
-        email: selectedAuthor.email || '',
-        website: selectedAuthor.website || '',
-        image: selectedAuthor.image || '',
+        bio: selectedAuthor.bio || "",
+        email: selectedAuthor.email || "",
+        website: selectedAuthor.website || "",
+        image: selectedAuthor.image || "",
         socialLinks: selectedAuthor.socialLinks || {},
       }
     : undefined;
 
-  if (isInitialLoading) {
-    return (
-      <div className="px-4">
-        <div className="max-w-7xl mx-auto py-6">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-48 mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded w-96 mb-6"></div>
-            <div className="bg-white border rounded-lg p-6">
-              <div className="h-6 bg-gray-200 rounded w-32 mb-4"></div>
-              <div className="space-y-3">
-                <div className="h-12 bg-gray-200 rounded"></div>
-                <div className="h-12 bg-gray-200 rounded"></div>
-                <div className="h-12 bg-gray-200 rounded"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  if (error) {
+    return <div>Error loading authors</div>;
   }
 
   return (
-    <div className="px-4">
+    <div className="bg-background">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="w-full">
-          <div className="max-w-7xl mx-auto py-6">
-            <div className="flex items-start w-full justify-between">
-              <div>
-                <Heading
-                  level="h1"
-                  variant="default"
-                  subtitleVariant="muted"
-                  subtitleSize="xs"
-                  subtitle=
-                  {
-                    <div className=" ml-1">
-                      <p className="text-xs">Manage authors who can write and be attributed</p>
-                      <p className="text-xs">to blog posts in your workspace.</p>
-                    </div>
-                  }
-                >
-                  Authors
-                </Heading>
-              </div>
-              <Button onClick={() => setIsAddDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                New Author
-              </Button>
-            </div>
+      <div className="p-lg">
+        <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-start">
+          <div>
+            <Heading
+              level="h1"
+              variant="default"
+              subtitleVariant="muted"
+              subtitleSize="xs"
+              className="text-primary"
+              subtitle={
+                <p className="max-w-xl text-small">
+                  Manage authors who can write and be attributed to posts.{" "}
+                  <br />
+                  <span className="cursor-pointer text-small hover:underline">
+                    Learn more
+                  </span>
+                </p>
+              }
+            >
+              <p className="text-header">Authors</p>
+            </Heading>
           </div>
+          <Button onClick={() => setIsAddDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Author
+          </Button>
         </div>
       </div>
 
       {/* Authors Table */}
-       <CardTitle className="flex items-center justify-between mb-2 ml-1">
-            <span>{authors.length} Authors</span>
-          </CardTitle>
-      <Card className='p-0'>
-       
-        <CardContent className='p-0'>
-          <Table>
-            <TableHeader>
-              <TableRow className='bg-muted'>
-                <TableHead>Author</TableHead>
-                <TableHead>Posts</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {authors.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={2}
-                    className="text-center py-8 text-gray-500"
-                  >
-                    No authors yet. Create your first author to start
-                    attributing blog posts.
-                  </TableCell>
+      <div>
+        <CardTitle className="flex items-center justify-between ml-lg mb-sm">
+          <span className="text-normal">
+            {authors.length} <span className="text-small">Authors</span>
+          </span>
+        </CardTitle>
+        <Card className="p-0 shadow-none border-none">
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted">
+                  <TableHead className="pl-lg">Author</TableHead>
+                  <TableHead>Posts</TableHead>
                 </TableRow>
-              ) : (
-                authors.map((author) => (
-                  <TableRow key={author.id}>
-                    <TableCell>
-                      <div className="flex items-center space-x-3">
-                        <Avatar className="w-8 h-8">
-                          <AvatarImage src={author.image || ''} />
-                          <AvatarFallback className="text-sm">
-                            {author.name[0].toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex items-center space-x-2">
-                          <span className="font-medium">{author.name}</span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">
-                          {author.posts} Posts
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="rounded-xl text-gray-600 hover:text-gray-800"
-                          >
-                            View Posts
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="rounded-xl text-gray-600 hover:text-gray-800"
-                            onClick={() => handleEditClick(author)}
-                          >
-                            Edit
-                          </Button>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                className="text-destructive"
-                                onClick={() => handleDeleteClick(author)}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  // ✅ Skeleton rows (not complete table)
+                  <>
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <TableRow key={`loading-${index}`}>
+                        <TableCell className="pl-lg">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-muted animate-pulse rounded-full" />
+                            <div className="flex items-center space-x-2">
+                              <div className="h-5 w-24 bg-muted animate-pulse rounded" />
+                              <div className="h-6 w-6 bg-muted animate-pulse rounded" />
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center justify-between">
+                            <div className="h-5 w-8 bg-muted animate-pulse rounded" />
+                            <div className="flex items-center gap-2">
+                              <div className="h-8 w-24 bg-muted animate-pulse rounded" />
+                              <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+                              <div className="h-8 w-8 bg-muted animate-pulse rounded" />
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </>
+                ) : authors.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={2}>
+                      <div className="py-12 flex flex-col items-center justify-center text-center">
+                        <Heading
+                          level="h3"
+                          variant="default"
+                          subtitle="Get started by creating your first author."
+                          subtitleVariant="muted"
+                        >
+                          No Authors Yet
+                        </Heading>
+                        <Button
+                          onClick={() => setIsAddDialogOpen(true)}
+                          className="mt-3"
+                        >
+                          <Plus className="mr-2 h-4 w-4" />
+                          New Author
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                ) : (
+                  <>
+                    {authors.map((author) => (
+                      <TableRow key={author.id}>
+                        <TableCell className="pl-lg">
+                          <div className="flex items-center space-x-3">
+                            <Avatar className="w-8 h-8">
+                              <AvatarImage src={author.image || ""} />
+                              <AvatarFallback className="text-sm">
+                                {author.name[0].toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex items-center space-x-2">
+                              <span className="font-medium">{author.name}</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+                              >
+                                <ExternalLink className="h-3 w-3 text-normal" />
+                              </Button>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium">{author.posts}</span>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-normal-muted"
+                              >
+                                View Posts
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEditClick(author as any)}
+                                className="text-normal-muted"
+                              >
+                                Edit
+                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4 text-normal-muted" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    className="text-destructive"
+                                    onClick={() =>
+                                      handleDeleteClick(author as any)
+                                    }
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Add Author Dialog */}
       <AuthorDialog
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
         onSubmit={handleAddAuthor}
-        isLoading={isLoading}
+        isLoading={createAuthorMutation.isPending}
       />
 
       {/* Edit Author Dialog */}
@@ -351,40 +371,20 @@ export default function AuthorsPage(props: AuthorsPageProps) {
         onSubmit={handleEditAuthor}
         initialData={editData}
         isEdit={true}
-        isLoading={isLoading}
+        isLoading={updateAuthorMutation.isPending}
       />
 
       {/* Delete Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Author</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "{selectedAuthor?.name}"? This
-              action cannot be undone. The author will be removed from all
-              associated blog posts.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsDeleteDialogOpen(false);
-                setSelectedAuthor(null);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteAuthor}
-              disabled={isLoading}
-            >
-              {isLoading ? 'Deleting...' : 'Delete Author'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmationDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={handleDeleteAuthor}
+        title="Delete Author"
+        description={`Are you sure you want to delete "${selectedAuthor?.name}"? This action cannot be undone. The author will be removed from all associated blog posts.`}
+        confirmButtonLabel="Delete Author"
+        theme="danger"
+        isConfirming={deleteAuthorMutation.isPending}
+      />
     </div>
   );
 }

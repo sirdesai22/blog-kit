@@ -1,5 +1,6 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "react-quill-new/dist/quill.snow.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -45,6 +46,19 @@
   --color-muted-dark: var(--muted-dark);
   --height-header: var(--header-height);
   --padding-header-horizontal: var(--header-horizontal-padding);
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+
+   --spacing-xs: var(--gap-xs);
+  --spacing-sm: var(--gap-sm);
+  --spacing-md: var(--gap-md);
+  --spacing-lg: var(--gap-lg);
+
+  --sidebar-label-gap: 0.4rem;
 }
 
 :root {
@@ -136,21 +150,59 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }
+
+  .text-header {
+    @apply text-2xl font-semibold text-foreground;
+  }
+
+  .text-main {
+    @apply text-md font-medium text-foreground;
+  }
+
+  .text-normal {
+    @apply text-sm text-foreground font-normal;
+  }
+
+  .text-small {
+    @apply text-xs text-muted-foreground font-normal;
+  }
+  
+  .text-normal-muted {
+    @apply text-sm text-muted-foreground font-normal;
+  } 
+  
+  .icon-small {
+    @apply w-3 w-4 font-normal;
+  }
+  
+  .icon-normal {
+    @apply w-8 w-8 font-normal;
+  }
 }
 
-.custom-scrollbar::-webkit-scrollbar {
+::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: transparent;
 }
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+
+::-webkit-scrollbar-thumb {
+  background: rgb(199, 199, 199);
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
   background: var(--muted-dark);
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgb(199, 199, 199);
-  border-radius: 4px;
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(199,199,199) transparent;
+}
+.dark * {
+  scrollbar-color: var(--muted-dark) transparent;
 }

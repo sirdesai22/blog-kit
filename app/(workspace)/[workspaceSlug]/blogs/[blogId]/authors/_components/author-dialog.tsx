@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { useState, useCallback, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Upload,
   Twitter,
@@ -26,15 +26,15 @@ import {
   Link,
   Facebook,
   Mail,
-} from 'lucide-react';
-import { uploadAvatarToSupabase } from '@/lib/supabase-upload';
+} from "lucide-react";
+import { uploadAvatarToSupabase } from "@/lib/supabase-upload";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 
 interface AuthorFormData {
   name: string;
@@ -56,55 +56,55 @@ interface AuthorDialogProps {
 
 const socialPlatforms = [
   {
-    key: 'website',
-    label: 'Website',
+    key: "website",
+    label: "Website",
     icon: Globe,
-    placeholder: 'https://example.com',
+    placeholder: "https://example.com",
   },
   {
-    key: 'dribble',
-    label: 'Dribble',
+    key: "dribble",
+    label: "Dribble",
     icon: Dribbble,
-    placeholder: 'https://dribble.com',
+    placeholder: "https://dribble.com",
   },
   {
-    key: 'email',
-    label: 'Email',
+    key: "email",
+    label: "Email",
     icon: Mail,
-    placeholder: 'johndoe@blogmail.com',
+    placeholder: "johndoe@blogmail.com",
   },
   {
-    key: 'twitter',
-    label: 'Twitter',
+    key: "twitter",
+    label: "Twitter",
     icon: Twitter,
-    placeholder: 'https://twitter.com/username',
+    placeholder: "https://twitter.com/username",
   },
   {
-    key: 'linkedin',
-    label: 'LinkedIn',
+    key: "linkedin",
+    label: "LinkedIn",
     icon: Linkedin,
-    placeholder: 'https://linkedin.com/in/username',
+    placeholder: "https://linkedin.com/in/username",
   },
   {
-    key: 'github',
-    label: 'GitHub',
+    key: "github",
+    label: "GitHub",
     icon: Github,
-    placeholder: 'https://github.com/username',
+    placeholder: "https://github.com/username",
   },
   {
-    key: 'facebook',
-    label: 'Facebook',
+    key: "facebook",
+    label: "Facebook",
     icon: Facebook,
-    placeholder: 'https://facebook.com/username',
+    placeholder: "https://facebook.com/username",
   },
 ];
 
 const defaultFormData: AuthorFormData = {
-  name: '',
-  bio: '',
-  email: '',
-  website: '',
-  image: '',
+  name: "",
+  bio: "",
+  email: "",
+  website: "",
+  image: "",
   socialLinks: {},
 };
 
@@ -120,7 +120,7 @@ export function AuthorDialog({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [customPlatform, setCustomPlatform] = useState('');
+  const [customPlatform, setCustomPlatform] = useState("");
 
   // Update form data when initialData changes or dialog opens
   useEffect(() => {
@@ -169,19 +169,19 @@ export function AuthorDialog({
   };
 
   const addSocialLink = (platform: string) => {
-    if (platform === 'custom') {
+    if (platform === "custom") {
       // Show a prompt or modal for custom platform name
-      const customName = prompt('Enter custom platform name:');
+      const customName = prompt("Enter custom platform name:");
       if (customName && customName.trim()) {
         const customKey = `custom_${customName
           .trim()
           .toLowerCase()
-          .replace(/\s+/g, '_')}`;
+          .replace(/\s+/g, "_")}`;
         setFormData((prev) => ({
           ...prev,
           socialLinks: {
             ...prev.socialLinks,
-            [customKey]: '',
+            [customKey]: "",
           },
         }));
       }
@@ -192,7 +192,7 @@ export function AuthorDialog({
       ...prev,
       socialLinks: {
         ...prev.socialLinks,
-        [platform]: '',
+        [platform]: "",
       },
     }));
   };
@@ -214,15 +214,15 @@ export function AuthorDialog({
     const customKey = `custom_${customPlatform
       .trim()
       .toLowerCase()
-      .replace(/\s+/g, '_')}`;
+      .replace(/\s+/g, "_")}`;
     setFormData((prev) => ({
       ...prev,
       socialLinks: {
         ...prev.socialLinks,
-        [customKey]: '',
+        [customKey]: "",
       },
     }));
-    setCustomPlatform(''); // Clear the input
+    setCustomPlatform(""); // Clear the input
   };
 
   // Get available platforms that haven't been added yet
@@ -238,13 +238,13 @@ export function AuthorDialog({
         return { ...platform, value };
       }
       // Handle custom platforms
-      if (key.startsWith('custom_')) {
-        const customLabel = key.replace('custom_', '').replace(/_/g, ' ');
+      if (key.startsWith("custom_")) {
+        const customLabel = key.replace("custom_", "").replace(/_/g, " ");
         return {
           key,
           label: customLabel.charAt(0).toUpperCase() + customLabel.slice(1),
           icon: Link, // Use globe icon for custom platforms
-          placeholder: 'Enter URL',
+          placeholder: "Enter URL",
           value,
         };
       }
@@ -263,14 +263,14 @@ export function AuthorDialog({
     if (!file) return;
 
     // Validate file type
-    if (!file.type.startsWith('image/')) {
-      setUploadError('Please select an image file');
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Please select an image file");
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      setUploadError('Image size should be less than 5MB');
+      setUploadError("Image size should be less than 5MB");
       return;
     }
 
@@ -284,13 +284,13 @@ export function AuthorDialog({
         image: imageUrl,
       }));
     } catch (error) {
-      console.error('Upload failed:', error);
-      setUploadError('Failed to upload image. Please try again.');
+      console.error("Upload failed:", error);
+      setUploadError("Failed to upload image. Please try again.");
     } finally {
       setIsUploading(false);
       // Clear the file input
       if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = "";
       }
     }
   };
@@ -298,19 +298,19 @@ export function AuthorDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-hidden p-0">
-        <DialogHeader className="px-6 pt-6 pb-2">
+        <DialogHeader className="px-5 pt-6 pb-2">
           <DialogTitle className="text-lg font-semibold">
-            {isEdit ? 'Edit Author' : 'Create Author'}
+            {isEdit ? "Edit Author" : "Create Author"}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="px-6 pb-6 overflow-y-auto max-h-[calc(90vh-210px)]">
+        <div className="px-5 pb-6 overflow-y-auto max-h-[calc(90vh-210px)]">
           {/* Profile Image */}
           <div className="flex flex-col items-center space-y-4 mb-6">
             <Avatar className="w-20 h-20">
               <AvatarImage src={formData.image} />
               <AvatarFallback className="text-xl">
-                {formData.name ? formData.name[0].toUpperCase() : 'A'}
+                {formData.name ? formData.name[0].toUpperCase() : "A"}
               </AvatarFallback>
             </Avatar>
 
@@ -429,7 +429,7 @@ export function AuthorDialog({
                         <Icon className="h-4 w-4 text-gray-500 flex-shrink-0 " />
                       </div>
                       <Input
-                        value={link.value || ''}
+                        value={link.value || ""}
                         onChange={(e) =>
                           updateSocialLink(link.key, e.target.value)
                         }
@@ -453,7 +453,7 @@ export function AuthorDialog({
           </div>
         </div>
 
-        <div className="px-6 py-4 flex items-center justify-between border-t">
+        <div className="px-5 py-4 flex items-center justify-between border-t">
           <Button
             variant="outline"
             onClick={() => handleOpenChange(false)}
@@ -468,11 +468,11 @@ export function AuthorDialog({
           >
             {isLoading
               ? isEdit
-                ? 'Updating...'
-                : 'Creating...'
+                ? "Updating..."
+                : "Creating..."
               : isEdit
-              ? 'Edit'
-              : 'Create'}
+              ? "Edit"
+              : "Create"}
           </Button>
         </div>
       </DialogContent>

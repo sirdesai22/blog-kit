@@ -1,11 +1,9 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Heading } from "@/components/ui/heading";
-import { Plus } from "lucide-react";
-import { BlogCategoriesView } from "./blog-categories-view";
-import { BlogTagsView } from "./tags-view";
+import { useState, ReactNode } from 'react';
+import { Button } from '@/components/ui/button';
+import { Heading } from '@/components/ui/heading';
+import { Plus } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -13,85 +11,80 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { addBlogCategory } from "@/lib/actions/workspace-actions";
-import { addBlogTag } from "@/lib/actions/tag-actions";
-import { useRouter } from "next/navigation";
-
-interface Category {
-  name: string;
-  posts: number;
-  traffic: number;
-  leads: number;
-}
-
-interface TagType {
-  name: string;
-  posts: number;
-  traffic: number;
-  leads: number;
-}
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { createCategory } from '@/modules/blogs/actions/category-actions';
+import { createTag } from '@/modules/blogs/actions/tag-actions-new';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { useCreateCategory } from '@/modules/blogs/hooks/use-categories';
+import { useCreateTag } from '@/modules/blogs/hooks/use-tags';
 
 interface CategoriesAndTagsViewProps {
   workspaceSlug: string;
   blogId: string;
-  categories: Category[];
-  tags: TagType[];
+  categoriesView: ReactNode;
+  tagsView: ReactNode;
 }
 
 export function CategoriesAndTagsView({
   workspaceSlug,
   blogId,
-  categories,
-  tags,
+  categoriesView,
+  tagsView,
 }: CategoriesAndTagsViewProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"categories" | "tags">(
-    "categories"
+  const [activeTab, setActiveTab] = useState<'categories' | 'tags'>(
+    'categories'
   );
   const [isAddCategoryDialogOpen, setIsAddCategoryDialogOpen] = useState(false);
   const [isAddTagDialogOpen, setIsAddTagDialogOpen] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState("");
-  const [newCategoryDescription, setNewCategoryDescription] = useState("");
-  const [newTagName, setNewTagName] = useState("");
-  const [newTagDescription, setNewTagDescription] = useState("");
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryDescription, setNewCategoryDescription] = useState('');
+  const [newTagName, setNewTagName] = useState('');
+  const [newTagDescription, setNewTagDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // ✅ Use the create mutation
+  const createCategoryMutation = useCreateCategory(workspaceSlug, blogId);
+  const createTagMutation = useCreateTag(workspaceSlug, blogId);
 
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) return;
 
-    setIsLoading(true);
-    try {
-      await addBlogCategory(workspaceSlug, newCategoryName.trim());
-      setIsAddCategoryDialogOpen(false);
-      setNewCategoryName("");
-      setNewCategoryDescription("");
-      router.refresh();
-    } catch (error) {
-      console.error("Failed to add category:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    createCategoryMutation.mutate(
+      {
+        name: newCategoryName.trim(),
+        description: newCategoryDescription.trim() || undefined,
+      },
+      {
+        onSuccess: () => {
+          setIsAddCategoryDialogOpen(false);
+          setNewCategoryName('');
+          setNewCategoryDescription('');
+        },
+      }
+    );
   };
 
   const handleAddTag = async () => {
     if (!newTagName.trim()) return;
 
-    setIsLoading(true);
-    try {
-      await addBlogTag(workspaceSlug, newTagName.trim());
-      setIsAddTagDialogOpen(false);
-      setNewTagName("");
-      setNewTagDescription("");
-      router.refresh();
-    } catch (error) {
-      console.error("Failed to add tag:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    createTagMutation.mutate(
+      {
+        name: newTagName.trim(),
+        description: newTagDescription.trim() || undefined,
+      },
+      {
+        onSuccess: () => {
+          setIsAddTagDialogOpen(false);
+          setNewTagName('');
+          setNewTagDescription('');
+        },
+      }
+    );
   };
 
   return (
@@ -100,33 +93,33 @@ export function CategoriesAndTagsView({
       <div className="flex items-center justify-between">
         <div className="w-full">
           <div className=" mx-auto">
-            <div className="flex items-start w-full justify-between flex-col md:flex-row px-4 py-6 sm:px-6 lg:px-8">
+            <div className="flex items-start w-full justify-between flex-col md:flex-row p-lg">
               <div className="space-y-4 ">
                 {/* Tab Navigation */}
                 <div className="flex items-center bg-muted p-1 rounded-lg w-fit">
                   <Button
-                    variant={activeTab === "categories" ? "default" : "ghost"}
+                    variant={activeTab === 'categories' ? 'default' : 'ghost'}
                     size="sm"
-                    onClick={() => setActiveTab("categories")}
-                    className={`w-28 flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 rounded-md ${
-                      activeTab === "categories"
-                        ? "bg-card text-secondary-foreground shadow-sm hover:bg-card/80"
-                        : "text-muted-foreground hover:text-secondary-foreground bg-transparent hover:bg-accent cursor-pointer"
+                    onClick={() => setActiveTab('categories')}
+                    className={`w-28 flex items-center justify-center gap-2 text-normal transition-all duration-200 rounded-md  ${
+                      activeTab === 'categories'
+                        ? 'bg-card shadow-sm hover:bg-card/80'
+                        : 'bg-transparent hover:bg-accent cursor-pointer'
                     }`}
                   >
-                    Categories
+                    <p className="text-main">Categories</p>
                   </Button>
                   <Button
-                    variant={activeTab === "tags" ? "default" : "ghost"}
+                    variant={activeTab === 'tags' ? 'default' : 'ghost'}
                     size="sm"
-                    onClick={() => setActiveTab("tags")}
-                    className={`w-28 flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 rounded-md ${
-                      activeTab === "tags"
-                        ? "bg-card text-secondary-foreground shadow-sm hover:bg-card"
-                        : "text-muted-foreground hover:text-secondary-foreground bg-transparent hover:bg-accent cursor-pointer"
+                    onClick={() => setActiveTab('tags')}
+                    className={`w-28 flex items-center justify-center gap-2 text-normal transition-all duration-200 rounded-md ${
+                      activeTab === 'tags'
+                        ? 'bg-card  shadow-sm hover:bg-card'
+                        : ' bg-transparent hover:bg-accent cursor-pointer'
                     }`}
                   >
-                    Tags
+                    <p className="text-main">Tags</p>
                   </Button>
                 </div>
                 <Heading
@@ -136,8 +129,12 @@ export function CategoriesAndTagsView({
                   subtitleSize="xs"
                   subtitle={
                     <div className="">
-                      <p className="text-xs">Organize your blog content with categories and tags</p>
-                      <p className="text-xs">to help readers find what they&apos;re looking for.</p>
+                      <p className="text-small">
+                        Organize your blog content with categories and tags
+                      </p>
+                      <p className="text-small">
+                        to help readers find what they&apos;re looking for.
+                      </p>
                     </div>
                   }
                 ></Heading>
@@ -159,14 +156,14 @@ export function CategoriesAndTagsView({
                     <DialogHeader>
                       <DialogTitle>Create New Category</DialogTitle>
                     </DialogHeader>
-                    <div className="grid gap-4 py-4">
+                    <div className="grid gap-4 py-lg">
                       <div className="space-y-2">
                         <Label htmlFor="category-name">Category Name</Label>
                         <Input
                           id="category-name"
                           value={newCategoryName}
                           onChange={(e) => setNewCategoryName(e.target.value)}
-                          placeholder=""
+                          placeholder="Enter category name"
                         />
                       </div>
                       <div className="space-y-2">
@@ -179,7 +176,7 @@ export function CategoriesAndTagsView({
                           onChange={(e) =>
                             setNewCategoryDescription(e.target.value)
                           }
-                          placeholder=""
+                          placeholder="Brief description of this category"
                           rows={4}
                         />
                       </div>
@@ -189,14 +186,19 @@ export function CategoriesAndTagsView({
                         variant="outline"
                         onClick={() => {
                           setIsAddCategoryDialogOpen(false);
-                          setNewCategoryName("");
-                          setNewCategoryDescription("");
+                          setNewCategoryName('');
+                          setNewCategoryDescription('');
                         }}
                       >
                         Cancel
                       </Button>
-                      <Button onClick={handleAddCategory} disabled={isLoading}>
-                        {isLoading ? "Creating..." : "Create"}
+                      <Button
+                        onClick={handleAddCategory}
+                        disabled={createCategoryMutation.isPending}
+                      >
+                        {createCategoryMutation.isPending
+                          ? 'Creating...'
+                          : 'Create Category'}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -215,14 +217,14 @@ export function CategoriesAndTagsView({
                     <DialogHeader>
                       <DialogTitle>Create New Tag</DialogTitle>
                     </DialogHeader>
-                    <div className="grid gap-4 py-4">
+                    <div className="grid gap-4 py-lg">
                       <div className="space-y-2">
                         <Label htmlFor="tag-name">Tag Name</Label>
                         <Input
                           id="tag-name"
                           value={newTagName}
                           onChange={(e) => setNewTagName(e.target.value)}
-                          placeholder=""
+                          placeholder="Enter tag name"
                         />
                       </div>
                       <div className="space-y-2">
@@ -231,7 +233,7 @@ export function CategoriesAndTagsView({
                           id="tag-description"
                           value={newTagDescription}
                           onChange={(e) => setNewTagDescription(e.target.value)}
-                          placeholder=""
+                          placeholder="Brief description of this tag"
                           rows={4}
                         />
                       </div>
@@ -241,14 +243,19 @@ export function CategoriesAndTagsView({
                         variant="outline"
                         onClick={() => {
                           setIsAddTagDialogOpen(false);
-                          setNewTagName("");
-                          setNewTagDescription("");
+                          setNewTagName('');
+                          setNewTagDescription('');
                         }}
                       >
                         Cancel
                       </Button>
-                      <Button onClick={handleAddTag} disabled={isLoading}>
-                        {isLoading ? "Creating..." : "Create"}
+                      <Button
+                        onClick={handleAddTag}
+                        disabled={createTagMutation.isPending}
+                      >
+                        {createTagMutation.isPending
+                          ? 'Creating...'
+                          : 'Create Tag'}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -261,58 +268,8 @@ export function CategoriesAndTagsView({
 
       {/* Tab Content */}
       <div className="">
-        {activeTab === "categories" ? (
-          <CategoriesContent
-            workspaceSlug={workspaceSlug}
-            blogId={blogId}
-            categories={categories}
-          />
-        ) : (
-          <TagsContent
-            workspaceSlug={workspaceSlug}
-            blogId={blogId}
-            tags={tags}
-          />
-        )}
+        {activeTab === 'categories' ? categoriesView : tagsView}
       </div>
-    </div>
-  );
-}
-
-// Categories Content Component (without header)
-function CategoriesContent({
-  workspaceSlug,
-  blogId,
-  categories,
-}: {
-  workspaceSlug: string;
-  blogId: string;
-  categories: Category[];
-}) {
-  return (
-    <div className="space-y-6">
-      <BlogCategoriesView
-        workspaceSlug={workspaceSlug}
-        blogId={blogId}
-        categories={categories}
-      />
-    </div>
-  );
-}
-
-// Tags Content Component (without header)
-function TagsContent({
-  workspaceSlug,
-  blogId,
-  tags,
-}: {
-  workspaceSlug: string;
-  blogId: string;
-  tags: TagType[];
-}) {
-  return (
-    <div className="space-y-6">
-      <BlogTagsView workspaceSlug={workspaceSlug} blogId={blogId} tags={tags} />
     </div>
   );
 }
