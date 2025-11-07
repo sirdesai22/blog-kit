@@ -1,22 +1,22 @@
-'use client';
+"use client";
 
-import { useState, useMemo, useEffect, useRef } from 'react'; // Add useRef
-import { BlogTableHeader } from './blog-table-header';
-import { BlogTableFilters } from './blog-table-filters';
-import { BlogTableContent } from './blog-table-content';
-import { BlogTablePagination } from './blog-table-pagination';
-import { BlogPost } from '@/types/blog';
+import { useState, useMemo, useEffect, useRef } from "react"; // Add useRef
+import { BlogTableHeader } from "./blog-table-header";
+import { BlogTableFilters } from "./blog-table-filters";
+import { BlogTableContent } from "./blog-table-content";
+import { BlogTablePagination } from "./blog-table-pagination";
+import { BlogPost } from "@/types/blog";
 import {
   BlogTableProvider,
   useBlogTable,
-} from '@/modules/blogs/contexts/BlogTableContext';
-import { useBlogPostsTable } from '@/modules/blogs/hooks/use-blog-posts-table-enhanced';
+} from "@/modules/blogs/contexts/BlogTableContext";
+import { useBlogPostsTable } from "@/modules/blogs/hooks/use-blog-posts-table-enhanced";
 import {
   BlogPostFilters,
   BlogPostSort,
   BlogPostPagination,
-} from '@/modules/blogs/actions/blog-table-actions';
-import { useDebounce } from '@/hooks/use-debounce';
+} from "@/modules/blogs/actions/blog-table-actions";
+import { useDebounce } from "@/hooks/use-debounce";
 
 interface BlogTableViewProps {
   workspaceSlug: string;
@@ -28,7 +28,7 @@ interface BlogTableViewProps {
 }
 
 function BlogTable({ workspaceSlug, currentPage }: BlogTableViewProps) {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
   const [tagFilters, setTagFilters] = useState<string[]>([]);
@@ -36,8 +36,8 @@ function BlogTable({ workspaceSlug, currentPage }: BlogTableViewProps) {
   const [currentPageNum, setCurrentPageNum] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sortConfig, setSortConfig] = useState<BlogPostSort>({
-    field: 'createdAt',
-    direction: 'desc',
+    field: "createdAt",
+    direction: "desc",
   });
 
   // Track if we've ever had successful data
@@ -120,7 +120,9 @@ function BlogTable({ workspaceSlug, currentPage }: BlogTableViewProps) {
     authorFilters,
   ]);
 
-  const blogPosts = queryResult?.success ? queryResult.blogPosts || [] : [];
+  const blogPosts = useMemo(() => {
+    return queryResult?.success ? queryResult.blogPosts || [] : [];
+  }, [queryResult]);
   const paginationInfo = queryResult?.pagination;
 
   // More robust loading state logic
@@ -143,11 +145,11 @@ function BlogTable({ workspaceSlug, currentPage }: BlogTableViewProps) {
     setCurrentPageNum(1);
   };
 
-  const handleSort = (field: BlogPostSort['field']) => {
+  const handleSort = (field: BlogPostSort["field"]) => {
     setSortConfig((current) => ({
       field,
       direction:
-        current.field === field && current.direction === 'asc' ? 'desc' : 'asc',
+        current.field === field && current.direction === "asc" ? "desc" : "asc",
     }));
     setCurrentPageNum(1);
   };
@@ -160,7 +162,7 @@ function BlogTable({ workspaceSlug, currentPage }: BlogTableViewProps) {
             Error loading blog posts
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
-            {error instanceof Error ? error.message : 'Something went wrong'}
+            {error instanceof Error ? error.message : "Something went wrong"}
           </p>
         </div>
       </div>
