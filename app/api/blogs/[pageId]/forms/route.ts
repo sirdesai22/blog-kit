@@ -1,24 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
-import db from '@/lib/db';
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import db from "@/lib/db";
 import {
   FormConfig,
   StoredFormConfig,
   PageFormsConfig,
-} from '@/types/form-config';
-import { z } from 'zod';
+} from "@/types/form-config";
+import { z } from "zod";
 
 // Validation schema
 const FormFieldSchema = z.object({
   id: z.string(),
   type: z.enum([
-    'Email',
-    'ShortText',
-    'LongText',
-    'Phone',
-    'Country',
-    'Select',
-    'MultiSelect',
+    "Email",
+    "ShortText",
+    "LongText",
+    "Phone",
+    "Country",
+    "Select",
+    "MultiSelect",
   ]),
   label: z.string().min(1),
   placeholder: z.string().optional(),
@@ -28,32 +28,32 @@ const FormFieldSchema = z.object({
 });
 
 const FormConfigSchema = z.object({
-  formName: z.string().min(1, 'Form name is required'),
-  heading: z.string().min(1, 'Heading is required'),
+  formName: z.string().min(1, "Form name is required"),
+  heading: z.string().min(1, "Heading is required"),
   description: z.string(),
   formType: z.enum([
-    'EndOfPost',
-    'Sidebar',
-    'InLine',
-    'PopUp',
-    'Floating',
-    'Gated',
+    "EndOfPost",
+    "Sidebar",
+    "InLine",
+    "PopUp",
+    "Floating",
+    "Gated",
   ]),
-  categories: z.array(z.string()).min(1, 'At least one category is required'),
+  categories: z.array(z.string()).min(1, "At least one category is required"),
   tags: z.array(z.string()).default([]),
-  formTrigger: z.enum(['TimeDelay', 'Scroll', 'ExitIntent']),
+  formTrigger: z.enum(["TimeDelay", "Scroll", "ExitIntent"]),
   timeDelay: z.number().min(0),
   scrollTrigger: z.number().min(0).max(100),
   isMandatory: z.boolean(),
-  fields: z.array(FormFieldSchema).min(1, 'At least one field is required'),
-  buttonText: z.string().min(1, 'Button text is required'),
+  fields: z.array(FormFieldSchema).min(1, "At least one field is required"),
+  buttonText: z.string().min(1, "Button text is required"),
   footnote: z.string(),
   isMultiStep: z.boolean(),
   confirmation: z.object({
     heading: z.string(),
     description: z.string(),
     buttonText: z.string(),
-    buttonType: z.enum(['Close', 'Link']),
+    buttonType: z.enum(["Close", "Link"]),
     url: z.string().optional(),
     openInNewTab: z.boolean().optional(),
   }),
@@ -83,7 +83,7 @@ export async function GET(
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const page = await db.page.findFirst({
@@ -102,7 +102,7 @@ export async function GET(
     });
 
     if (!page) {
-      return NextResponse.json({ error: 'Page not found' }, { status: 404 });
+      return NextResponse.json({ error: "Page not found" }, { status: 404 });
     }
 
     const formsConfig = page.formsConfig as any | null;
@@ -139,9 +139,9 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('Error fetching forms:', error);
+    console.error("Error fetching forms:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
@@ -157,7 +157,7 @@ export async function POST(
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -167,7 +167,7 @@ export async function POST(
     if (!validationResult.success) {
       return NextResponse.json(
         {
-          error: 'Validation failed',
+          error: "Validation failed",
           details: validationResult.error.issues,
         },
         { status: 400 }
@@ -184,7 +184,7 @@ export async function POST(
           members: {
             some: {
               userId: session.user.id,
-              role: { in: ['OWNER', 'ADMIN', 'EDITOR'] },
+              role: { in: ["OWNER", "ADMIN", "EDITOR"] },
             },
           },
         },
@@ -197,7 +197,7 @@ export async function POST(
 
     if (!page) {
       return NextResponse.json(
-        { error: 'Page not found or access denied' },
+        { error: "Page not found or access denied" },
         { status: 403 }
       );
     }
@@ -205,11 +205,11 @@ export async function POST(
     // Validate categories exist
     const invalidCategories = config.categories.filter(
       (catId) =>
-        catId !== 'global' && !page.categories.some((cat) => cat.id === catId)
+        catId !== "global" && !page.categories.some((cat) => cat.id === catId)
     );
     if (invalidCategories.length > 0) {
       return NextResponse.json(
-        { error: 'Invalid category IDs', details: invalidCategories },
+        { error: "Invalid category IDs", details: invalidCategories },
         { status: 400 }
       );
     }
@@ -220,7 +220,7 @@ export async function POST(
     );
     if (invalidTags.length > 0) {
       return NextResponse.json(
-        { error: 'Invalid tag IDs', details: invalidTags },
+        { error: "Invalid tag IDs", details: invalidTags },
         { status: 400 }
       );
     }
@@ -232,18 +232,18 @@ export async function POST(
     };
 
     // Create new form
+    // Create new form
     const newForm: StoredFormConfig = {
       id: `form_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       name: config.formName,
       categoryIds: config.categories, // Changed to array
       tagIds: config.tags, // Added tags array
-      config,
+      config: config as FormConfig,
       enabled: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       version: 1,
     };
-
     // Add to forms array
     const updatedFormsConfig: PageFormsConfig = {
       ...currentFormsConfig,
@@ -260,13 +260,13 @@ export async function POST(
       success: true,
       data: {
         form: newForm,
-        message: 'Form created successfully',
+        message: "Form created successfully",
       },
     });
   } catch (error) {
-    console.error('Error creating form:', error);
+    console.error("Error creating form:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
@@ -282,7 +282,7 @@ export async function PUT(
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -305,7 +305,7 @@ export async function PUT(
           members: {
             some: {
               userId: session.user.id,
-              role: { in: ['OWNER', 'ADMIN', 'EDITOR'] },
+              role: { in: ["OWNER", "ADMIN", "EDITOR"] },
             },
           },
         },
@@ -314,7 +314,7 @@ export async function PUT(
 
     if (!page) {
       return NextResponse.json(
-        { error: 'Page not found or access denied' },
+        { error: "Page not found or access denied" },
         { status: 403 }
       );
     }
@@ -332,7 +332,7 @@ export async function PUT(
         (f) => f.id === formId
       );
       if (formIndex === -1) {
-        return NextResponse.json({ error: 'Form not found' }, { status: 404 });
+        return NextResponse.json({ error: "Form not found" }, { status: 404 });
       }
 
       // Validate updated config
@@ -340,7 +340,7 @@ export async function PUT(
       if (!validationResult.success) {
         return NextResponse.json(
           {
-            error: 'Validation failed',
+            error: "Validation failed",
             details: validationResult.error.issues,
           },
           { status: 400 }
@@ -376,14 +376,14 @@ export async function PUT(
     return NextResponse.json({
       success: true,
       data: {
-        message: 'Forms configuration updated successfully',
+        message: "Forms configuration updated successfully",
         config: updatedFormsConfig,
       },
     });
   } catch (error) {
-    console.error('Error updating forms:', error);
+    console.error("Error updating forms:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
