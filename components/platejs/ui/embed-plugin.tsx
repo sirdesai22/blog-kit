@@ -21,7 +21,7 @@ export const BUTTON_VARIANTS = {
   filled: {
     label: 'Filled',
     className:
-      'bg-blue-500 text-white shadow-xs hover:bg-blue-500/90 focus-visible:ring-blue-200',
+      'bg-blue-500 text-white shadow-xs hover:bg-blue-500/90 focus-v isible:ring-blue-200',
   },
   outline: {
     label: 'Outline',

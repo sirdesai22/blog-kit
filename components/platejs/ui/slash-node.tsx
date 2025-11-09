@@ -10,6 +10,7 @@ import {
   ChevronRightIcon,
   Code2,
   Columns3Icon,
+  FilmIcon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
@@ -160,6 +161,28 @@ const groups: Group[] = [
     })),
   },
   {
+    group: 'Elements',
+    items: [
+      {
+        icon: <FilmIcon />,
+        keywords: ['embed', 'video', 'media', 'iframe'],
+        label: 'Embed',
+        value: KEYS.mediaEmbed,
+      },
+      {
+        icon: <ButtonIcon />,
+        keywords: ['button'],
+        label: 'Button',
+        value: 'button',
+      },
+    ].map((item) => ({
+      ...item,
+      onSelect: (editor, value) => {
+        insertBlock(editor, value);
+      },
+    })),
+  },
+  {
     group: 'Advanced blocks',
     items: [
       {
@@ -178,12 +201,6 @@ const groups: Group[] = [
         icon: <RadicalIcon />,
         label: 'Equation',
         value: KEYS.equation,
-      },
-      {
-        icon: <ButtonIcon />,
-        keywords: ['button'],
-        label: 'Button',
-        value: 'button',
       },
     ].map((item) => ({
       ...item,
