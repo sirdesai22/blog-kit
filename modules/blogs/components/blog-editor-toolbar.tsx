@@ -10,6 +10,7 @@ import {
   Undo2,
   Redo2,
   MoreVertical,
+  Save,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useEditorRef, useEditorSelector } from 'platejs/react';
@@ -145,6 +146,7 @@ export function BlogEditorToolbar({
 
   const handleSaveClick = async () => {
     if (onSave) {
+      console.log('Saving post');
       await onSave();
     }
   };
@@ -164,6 +166,15 @@ export function BlogEditorToolbar({
               Go back
             </Button>
           </Link>
+          <Button
+              variant="ghost"
+              size="sm"
+              className="text-gray-600 hover:text-gray-900 px-2"
+              onClick={handleSaveClick}
+            >
+              <Save className="w-4 h-4 mr-1" />
+              Save
+            </Button>
 
           <div className="text-sm text-gray-500">
             {readTime} min read | {wordCount} words
