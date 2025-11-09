@@ -42,6 +42,7 @@ import {
   InlineComboboxInput,
   InlineComboboxItem,
 } from './inline-combobox';
+import { ButtonIcon } from '@radix-ui/react-icons';
 
 type Group = {
   group: string;
@@ -177,6 +178,12 @@ const groups: Group[] = [
         icon: <RadicalIcon />,
         label: 'Equation',
         value: KEYS.equation,
+      },
+      {
+        icon: <ButtonIcon />,
+        keywords: ['button'],
+        label: 'Button',
+        value: 'button',
       },
     ].map((item) => ({
       ...item,
