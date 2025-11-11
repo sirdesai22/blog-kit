@@ -37,6 +37,7 @@ import { SuggestionKit } from '@/components/platejs/editor/plugins/suggestion-ki
 import { TableKit } from '@/components/platejs/editor/plugins/table-kit';
 import { TocKit } from '@/components/platejs/editor/plugins/toc-kit';
 import { ToggleKit } from '@/components/platejs/editor/plugins/toggle-kit';
+import { ButtonKit } from '@/components/platejs/editor/plugins/button-kit';
 
 export const EditorKit = [
   ...CopilotKit,
@@ -45,6 +46,7 @@ export const EditorKit = [
   // Elements
   ...BasicBlocksKit,
   ...CodeBlockKit,
+  ...ButtonKit,
   ...TableKit,
   ...ToggleKit,
   ...TocKit,

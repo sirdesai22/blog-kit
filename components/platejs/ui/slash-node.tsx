@@ -10,6 +10,7 @@ import {
   ChevronRightIcon,
   Code2,
   Columns3Icon,
+  FilmIcon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
@@ -42,6 +43,7 @@ import {
   InlineComboboxInput,
   InlineComboboxItem,
 } from './inline-combobox';
+import { ButtonIcon } from '@radix-ui/react-icons';
 
 type Group = {
   group: string;
@@ -150,6 +152,28 @@ const groups: Group[] = [
         keywords: ['image', 'img', 'photo', 'picture'],
         label: 'Image',
         value: KEYS.img,
+      },
+    ].map((item) => ({
+      ...item,
+      onSelect: (editor, value) => {
+        insertBlock(editor, value);
+      },
+    })),
+  },
+  {
+    group: 'Elements',
+    items: [
+      {
+        icon: <FilmIcon />,
+        keywords: ['embed', 'video', 'media', 'iframe'],
+        label: 'Embed',
+        value: KEYS.mediaEmbed,
+      },
+      {
+        icon: <ButtonIcon />,
+        keywords: ['button'],
+        label: 'Button',
+        value: 'button',
       },
     ].map((item) => ({
       ...item,

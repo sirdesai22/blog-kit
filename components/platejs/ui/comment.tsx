@@ -48,6 +48,7 @@ import {
 } from '@/components/platejs/editor/plugins/discussion-kit';
 
 import { Editor, EditorContainer } from './editor';
+import { CustomButtonElement } from './button-plugin';
 
 export interface TComment {
   id: string;
@@ -397,7 +398,10 @@ const useCommentEditor = (
   const commentEditor = usePlateEditor(
     {
       id: 'comment',
-      plugins: BasicMarksKit,
+      plugins: [CustomButtonElement, BasicMarksKit, ...plugins],
+      components: {
+        Button: CustomButtonElement,
+      },
       value: [],
       ...options,
     },

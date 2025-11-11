@@ -11,7 +11,7 @@ import {
   UnderlineIcon,
   WandSparklesIcon,
 } from 'lucide-react';
-import { KEYS } from 'platejs';
+import { KEYS, type TElement } from 'platejs';
 import {
   useEditorReadOnly,
   useEditorRef,
@@ -21,8 +21,23 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  BUTTON_RADIUS_VARIANTS,
+  BUTTON_SIZES,
+  BUTTON_VARIANTS,
+  DEFAULT_BUTTON_RADIUS_VARIANT,
+  DEFAULT_BUTTON_SIZE,
+  DEFAULT_BUTTON_VARIANT,
+  type ButtonRadiusVariant,
+  type ButtonSizeVariant,
+  type ButtonVariant,
+} from '@/components/platejs/ui/button-plugin';
 
 import { AIToolbarButton } from './ai-toolbar-button';
 import { CommentToolbarButton } from './comment-toolbar-button';
@@ -52,6 +67,19 @@ const COLOR_PALETTE = [
   '#9900FF',
   '#FF00FF',
 ];
+
+const BUTTON_RADIUS_ENTRIES = Object.entries(BUTTON_RADIUS_VARIANTS) as [
+  ButtonRadiusVariant,
+  (typeof BUTTON_RADIUS_VARIANTS)[ButtonRadiusVariant],
+][];
+const BUTTON_VARIANT_ENTRIES = Object.entries(BUTTON_VARIANTS) as [
+  ButtonVariant,
+  (typeof BUTTON_VARIANTS)[ButtonVariant],
+][];
+const BUTTON_SIZE_ENTRIES = Object.entries(BUTTON_SIZES) as [
+  ButtonSizeVariant,
+  (typeof BUTTON_SIZES)[ButtonSizeVariant],
+][];
 
 function FloatingFontColorButton() {
   const editor = useEditorRef();
@@ -149,6 +177,296 @@ function FloatingFontColorButton() {
   );
 }
 
+function ButtonStyleToolbarButton() {
+  const editor = useEditorRef();
+  const [radiusOpen, setRadiusOpen] = React.useState(false);
+  const [variantOpen, setVariantOpen] = React.useState(false);
+  const [sizeOpen, setSizeOpen] = React.useState(false);
+
+  const buttonEntry = useEditorSelector(
+    (editor) =>
+      editor.api.above<TElement>({
+        match: { type: 'button' },
+      }),
+    []
+  );
+
+  const buttonNode = buttonEntry?.[0] as Record<string, unknown> | undefined;
+
+  const radiusVariant = React.useMemo(
+    () => inferButtonRadiusVariant(buttonNode),
+    [buttonNode]
+  );
+  const buttonVariant = React.useMemo(
+    () => inferButtonVariant(buttonNode),
+    [buttonNode]
+  );
+  const buttonSize = React.useMemo(
+    () => inferButtonSize(buttonNode),
+    [buttonNode]
+  );
+
+  const setButtonProps = React.useCallback(
+    (updates: Record<string, unknown>) => {
+      const entry = editor.api.above<TElement>({
+        match: { type: 'button' },
+      });
+
+      if (!entry) return;
+
+      const [node, path] = entry;
+
+      const nextEntries = Object.entries(updates).filter(([key, value]) => {
+        return (node as any)?.[key] !== value;
+      });
+
+      if (!nextEntries.length) return;
+
+      const next = Object.fromEntries(nextEntries);
+      editor.tf.setNodes(next, { at: path });
+      editor.tf.focus();
+    },
+    [editor]
+  );
+
+  const handleRadiusChange = React.useCallback(
+    (value: string) => {
+      if (!isButtonRadiusVariant(value)) return;
+
+      setButtonProps({
+        borderRadiusStyle: value,
+        borderRadius: BUTTON_RADIUS_VARIANTS[value].radius,
+      });
+    },
+    [setButtonProps]
+  );
+
+  const handleVariantChange = React.useCallback(
+    (value: string) => {
+      if (!isButtonVariant(value)) return;
+
+      setButtonProps({ buttonVariant: value });
+    },
+    [setButtonProps]
+  );
+
+  const handleSizeChange = React.useCallback(
+    (value: string) => {
+      if (!isButtonSize(value)) return;
+
+      setButtonProps({ buttonSize: value });
+    },
+    [setButtonProps]
+  );
+
+  if (!buttonEntry) return null;
+
+  return (
+    <>
+      <DropdownMenu open={radiusOpen} onOpenChange={setRadiusOpen} modal={false}>
+        <DropdownMenuTrigger asChild>
+          <ToolbarButton
+            className="min-w-[80px]"
+            isDropdown
+            pressed={radiusOpen}
+            tooltip="Button border radius"
+          >
+            Radius
+          </ToolbarButton>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          className="ignore-click-outside/toolbar w-52 space-y-2 p-3"
+          align="start"
+          onCloseAutoFocus={(e) => {
+            e.preventDefault();
+            editor.tf.focus();
+          }}
+        >
+          <DropdownMenuLabel className="px-1 text-xs font-medium uppercase text-muted-foreground">
+            Border radius
+          </DropdownMenuLabel>
+          <DropdownMenuRadioGroup
+            value={radiusVariant}
+            onValueChange={handleRadiusChange}
+          >
+            {BUTTON_RADIUS_ENTRIES.map(([value, meta]) => (
+              <DropdownMenuRadioItem
+                key={value}
+                value={value}
+                className="justify-between"
+              >
+                {meta.label}
+                <span className="text-xs text-muted-foreground">
+                  {meta.radius}px
+                </span>
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <DropdownMenu
+        open={variantOpen}
+        onOpenChange={setVariantOpen}
+        modal={false}
+      >
+        <DropdownMenuTrigger asChild>
+          <ToolbarButton
+            className="min-w-[80px]"
+            isDropdown
+            pressed={variantOpen}
+            tooltip="Button fill style"
+          >
+            Fill
+          </ToolbarButton>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          className="ignore-click-outside/toolbar w-44 space-y-2 p-3"
+          align="start"
+          onCloseAutoFocus={(e) => {
+            e.preventDefault();
+            editor.tf.focus();
+          }}
+        >
+          <DropdownMenuLabel className="px-1 text-xs font-medium uppercase text-muted-foreground">
+            Fill
+          </DropdownMenuLabel>
+          <DropdownMenuRadioGroup
+            value={buttonVariant}
+            onValueChange={handleVariantChange}
+          >
+            {BUTTON_VARIANT_ENTRIES.map(([value, meta]) => (
+              <DropdownMenuRadioItem key={value} value={value}>
+                {meta.label}
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <DropdownMenu open={sizeOpen} onOpenChange={setSizeOpen} modal={false}>
+        <DropdownMenuTrigger asChild>
+          <ToolbarButton
+            className="min-w-[80px]"
+            isDropdown
+            pressed={sizeOpen}
+            tooltip="Button size"
+          >
+            Size
+          </ToolbarButton>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          className="ignore-click-outside/toolbar w-44 space-y-2 p-3"
+          align="start"
+          onCloseAutoFocus={(e) => {
+            e.preventDefault();
+            editor.tf.focus();
+          }}
+        >
+          <DropdownMenuLabel className="px-1 text-xs font-medium uppercase text-muted-foreground">
+            Size
+          </DropdownMenuLabel>
+          <DropdownMenuRadioGroup
+            value={buttonSize}
+            onValueChange={handleSizeChange}
+          >
+            {BUTTON_SIZE_ENTRIES.map(([value, meta]) => (
+              <DropdownMenuRadioItem key={value} value={value}>
+                {meta.label}
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
+  );
+}
+
+function inferButtonRadiusVariant(
+  node?: Record<string, unknown>
+): ButtonRadiusVariant {
+  if (!node) return DEFAULT_BUTTON_RADIUS_VARIANT;
+
+  const value = node?.borderRadiusStyle;
+  if (isButtonRadiusVariant(value)) {
+    return value;
+  }
+
+  const numericRadius = normalizeLegacyRadius(node?.borderRadius);
+  const matchedVariant = BUTTON_RADIUS_ENTRIES.find(
+    ([, meta]) => meta.radius === numericRadius
+  );
+
+  return matchedVariant?.[0] ?? DEFAULT_BUTTON_RADIUS_VARIANT;
+}
+
+function inferButtonVariant(node?: Record<string, unknown>): ButtonVariant {
+  if (!node) return DEFAULT_BUTTON_VARIANT;
+
+  const value = node?.buttonVariant;
+  if (isButtonVariant(value)) {
+    return value;
+  }
+
+  return DEFAULT_BUTTON_VARIANT;
+}
+
+function inferButtonSize(node?: Record<string, unknown>): ButtonSizeVariant {
+  if (!node) return DEFAULT_BUTTON_SIZE;
+
+  const value = node?.buttonSize;
+  if (isButtonSize(value)) {
+    return value;
+  }
+
+  return DEFAULT_BUTTON_SIZE;
+}
+
+function normalizeLegacyRadius(value: unknown) {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return clampRadius(value);
+  }
+
+  if (typeof value === 'string') {
+    const parsed = Number.parseFloat(value);
+    if (Number.isFinite(parsed)) {
+      return clampRadius(parsed);
+    }
+  }
+
+  return BUTTON_RADIUS_VARIANTS[DEFAULT_BUTTON_RADIUS_VARIANT].radius;
+}
+
+function clampRadius(value: number) {
+  return Math.min(Math.max(Math.round(value), 0), 999);
+}
+
+function isButtonRadiusVariant(
+  value: unknown
+): value is ButtonRadiusVariant {
+  return (
+    typeof value === 'string' &&
+    value in BUTTON_RADIUS_VARIANTS &&
+    (BUTTON_RADIUS_VARIANTS as Record<string, unknown>)[value] !== undefined
+  );
+}
+
+function isButtonVariant(value: unknown): value is ButtonVariant {
+  return (
+    typeof value === 'string' &&
+    value in BUTTON_VARIANTS &&
+    (BUTTON_VARIANTS as Record<string, unknown>)[value] !== undefined
+  );
+}
+
+function isButtonSize(value: unknown): value is ButtonSizeVariant {
+  return (
+    typeof value === 'string' &&
+    value in BUTTON_SIZES &&
+    (BUTTON_SIZES as Record<string, unknown>)[value] !== undefined
+  );
+}
+
 export function FloatingToolbarButtons() {
   const readOnly = useEditorReadOnly();
 
@@ -161,6 +479,10 @@ export function FloatingToolbarButtons() {
               <WandSparklesIcon />
               Ask AI
             </AIToolbarButton>
+          </ToolbarGroup>
+
+          <ToolbarGroup>
+            <ButtonStyleToolbarButton />
           </ToolbarGroup>
 
           <ToolbarGroup>

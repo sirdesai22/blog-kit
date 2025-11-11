@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import { DndPlugin, useDraggable, useDropLine } from '@platejs/dnd';
 import { expandListItemsWithChildren } from '@platejs/list';
-import { BlockSelectionPlugin } from '@platejs/selection/react';
+import { BLOCK_CONTEXT_MENU_ID, BlockMenuPlugin, BlockSelectionPlugin } from '@platejs/selection/react';
 import { GripVertical } from 'lucide-react';
 import { type TElement, getPluginByType, isType, KEYS } from 'platejs';
 import {
@@ -242,7 +242,26 @@ const DragHandle = React.memo(function DragHandle({
           className="flex size-full items-center justify-center"
           onClick={(e) => {
             e.preventDefault();
-            editor.getApi(BlockSelectionPlugin).blockSelection.focus();
+
+            const blockSelectionApi =
+              editor.getApi(BlockSelectionPlugin).blockSelection;
+
+            if (!blockSelectionApi) return;
+
+            blockSelectionApi.set(element.id as string);
+            blockSelectionApi.focus();
+
+            editor.tf.select(element);
+            editor.tf.focus();
+
+            const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+
+            editor
+              .getApi(BlockMenuPlugin)
+              .blockMenu.show(BLOCK_CONTEXT_MENU_ID, {
+                x: rect.left,
+                y: rect.bottom + 8,
+              });
           }}
           onMouseDown={(e) => {
             resetPreview();
