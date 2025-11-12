@@ -44,6 +44,7 @@ export const DEFAULT_BUTTON_RADIUS_VARIANT: ButtonRadiusVariant = 'smooth';
 export const DEFAULT_BUTTON_VARIANT: ButtonVariant = 'filled';
 export const DEFAULT_BUTTON_SIZE: ButtonSizeVariant = 'medium';
 export const DEFAULT_BUTTON_COLOR: string = '#000000';
+export const DEFAULT_BUTTON_HREF: string | null = null;
 
 export function CustomButtonElement({
   element,
@@ -58,10 +59,13 @@ export function CustomButtonElement({
   const buttonVariant = resolveButtonVariant(node);
   const buttonSize = resolveButtonSize(node);
   const buttonColor = resolveButtonColor(node);
+  const buttonHref = resolveButtonHref(node);
+
+  const asElement = buttonHref ? 'a' : 'button';
 
   return (
     <PlateElement
-      as="button"
+      as={asElement as any}
       className={cn(
         'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
         BUTTON_VARIANTS[buttonVariant].className,
@@ -72,6 +76,11 @@ export function CustomButtonElement({
         borderRadius: `${radiusValue}px`,
         backgroundColor: buttonColor,
         ...(style ?? {}),
+      }}
+      attributes={{
+        href: buttonHref ?? undefined,
+        target: buttonHref ? '_blank' : undefined,
+        rel: buttonHref ? 'noopener noreferrer' : undefined,
       }}
       element={element}
       {...rest}
@@ -137,6 +146,16 @@ function resolveButtonColor(node: Record<string, unknown>): string {
   }
 
   return DEFAULT_BUTTON_COLOR;
+}
+
+function resolveButtonHref(node: Record<string, unknown>): string | null {
+  const value = node?.buttonHref;
+
+  if (typeof value === 'string' && value.trim().length > 0) {
+    return value;
+  }
+
+  return DEFAULT_BUTTON_HREF;
 }
 function normalizeBorderRadius(value: unknown) {
   if (typeof value === 'number' && Number.isFinite(value)) {
