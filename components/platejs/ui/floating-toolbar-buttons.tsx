@@ -640,6 +640,15 @@ function isButtonColor(value: unknown): value is string {
 export function FloatingToolbarButtons() {
   const readOnly = useEditorReadOnly();
 
+  const editor = useEditorRef();
+const buttonEntry = useEditorSelector(
+  (ed) =>
+    ed.api.above<TElement>({
+      match: { type: 'button' },
+    }),
+  []
+);
+
   return (
     <>
       {!readOnly && (
@@ -661,19 +670,8 @@ export function FloatingToolbarButtons() {
           </ToolbarGroup>
 
           {/* Hide these tools when the current node is a button */}
-          {(() => {
-            // Use a selector to check if we're inside a button node
-            const editor = useEditorRef();
-            const buttonEntry = useEditorSelector(
-              (editor) =>
-                editor.api.above<TElement>({
-                  match: { type: 'button' },
-                }),
-              []
-            );
 
-            if (!buttonEntry) {
-              return (
+            {!buttonEntry && (
                 <ToolbarGroup>
                   <TurnIntoToolbarButton />
 
@@ -709,14 +707,10 @@ export function FloatingToolbarButtons() {
 
                   <LinkToolbarButton />
                 </ToolbarGroup>
-              );
-            }
-            // If a button node is active, hide this group
-            return null;
-          })()}
+            )
+          }
         </>
       )}
-
       {/* Button Color and Text Color */}
       <ToolbarGroup>
         <ButtonColorToolbarButton />
