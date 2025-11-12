@@ -11,7 +11,7 @@ import {
   Circle,
   Code2Icon,
   ItalicIcon,
-  PaintBucketIcon,
+  Link as LinkIcon,
   StrikethroughIcon,
   UnderlineIcon,
   WandSparklesIcon,
@@ -54,7 +54,9 @@ import { SuggestionToolbarButton } from './suggestion-toolbar-button';
 import { ToolbarButton, ToolbarGroup } from './toolbar';
 import { TurnIntoToolbarButton } from './turn-into-toolbar-button';
 import { AlignToolbarButton } from './align-toolbar-button';
-import { ButtonIcon } from '@radix-ui/react-icons';
+import { Input } from '@/components/ui/input';
+import { Button as UIButton } from '@/components/ui/button';
+import { normalizeUrl } from '@/lib/url-utils';
 
 // Color palette - flattened for better grid layout
 const COLOR_PALETTE = [
@@ -492,6 +494,14 @@ function ButtonColorToolbarButton() {
   );
 
   const buttonNode = buttonEntry?.[0] as Record<string, unknown> | undefined;
+  const currentColor =
+    typeof buttonNode?.buttonColor === 'string' ? (buttonNode.buttonColor as string) : undefined;
+
+  React.useEffect(() => {
+    if (open) {
+      setSelectedColor(currentColor);
+    }
+  }, [open, currentColor]);
 
   const setButtonProps = React.useCallback(
     (updates: Record<string, unknown>) => {
@@ -521,6 +531,7 @@ function ButtonColorToolbarButton() {
       if (!isButtonColor(value)) return;
 
       setButtonProps({ buttonColor: value });
+      setSelectedColor(value);
     },
     [setButtonProps]
   );
@@ -556,11 +567,128 @@ function ButtonColorToolbarButton() {
           ))}
         </div>
         <button
-            onClick={() => setSelectedColor(undefined)}
+            onClick={() => {
+              setButtonProps({ buttonColor: null });
+              setSelectedColor(undefined);
+            }}
             className="w-full text-xs py-1.5 text-muted-foreground hover:text-foreground transition-colors"
           >
             Remove color
           </button>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+function ButtonLinkToolbarButton() {
+  const [open, setOpen] = React.useState(false);
+  const [value, setValue] = React.useState('');
+
+  const editor = useEditorRef();
+  const buttonEntry = useEditorSelector(
+    (ed) =>
+      ed.api.above<TElement>({
+        match: { type: 'button' },
+      }),
+    []
+  );
+
+  const buttonNode = buttonEntry?.[0] as Record<string, unknown> | undefined;
+  const currentHref =
+    typeof buttonNode?.buttonHref === 'string' ? (buttonNode.buttonHref as string) : '';
+
+  React.useEffect(() => {
+    if (open) {
+      setValue(currentHref ?? '');
+    }
+  }, [open, currentHref]);
+
+  const setButtonProps = React.useCallback(
+    (updates: Record<string, unknown>) => {
+      const entry = editor.api.above<TElement>({
+        match: { type: 'button' },
+      });
+
+      if (!entry) return;
+
+      const [node, path] = entry;
+
+      const nextEntries = Object.entries(updates).filter(([key, updatedValue]) => {
+        return (node as any)?.[key] !== updatedValue;
+      });
+
+      if (!nextEntries.length) return;
+
+      const next = Object.fromEntries(nextEntries);
+      editor.tf.setNodes(next, { at: path });
+      editor.tf.focus();
+    },
+    [editor]
+  );
+
+  const handleApply = React.useCallback(() => {
+    const trimmed = value.trim();
+
+    if (!trimmed) {
+      setButtonProps({ buttonHref: null });
+      setOpen(false);
+      return;
+    }
+
+    const normalized = normalizeUrl(trimmed);
+    setButtonProps({ buttonHref: normalized });
+    setValue(normalized);
+    setOpen(false);
+  }, [setButtonProps, value]);
+
+  const handleRemove = React.useCallback(() => {
+    setButtonProps({ buttonHref: null });
+    setValue('');
+    setOpen(false);
+  }, [setButtonProps]);
+
+  if (!buttonEntry) return null;
+
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
+      <DropdownMenuTrigger asChild>
+        <ToolbarButton
+          tooltip={currentHref ? `Button link: ${currentHref}` : 'Set button link'}
+          pressed={open}
+        >
+          <LinkIcon className="size-4" />
+        </ToolbarButton>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        className="ignore-click-outside/toolbar w-72 space-y-3 p-3"
+        align="start"
+        onCloseAutoFocus={(event) => event.preventDefault()}
+      >
+        <form
+          className="space-y-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            handleApply();
+          }}
+        >
+          <Input
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
+            placeholder="https://example.com"
+            autoFocus
+          />
+
+          <div className="flex items-center justify-end gap-2">
+            {currentHref ? (
+              <UIButton type="button" variant="ghost" size="sm" onClick={handleRemove}>
+                Remove
+              </UIButton>
+            ) : null}
+            <UIButton type="submit" size="sm">
+              Apply
+            </UIButton>
+          </div>
+        </form>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -640,14 +768,13 @@ function isButtonColor(value: unknown): value is string {
 export function FloatingToolbarButtons() {
   const readOnly = useEditorReadOnly();
 
-  const editor = useEditorRef();
-const buttonEntry = useEditorSelector(
-  (ed) =>
-    ed.api.above<TElement>({
-      match: { type: 'button' },
-    }),
-  []
-);
+  const buttonEntry = useEditorSelector(
+    (ed) =>
+      ed.api.above<TElement>({
+        match: { type: 'button' },
+      }),
+    []
+  );
 
   return (
     <>
@@ -664,54 +791,46 @@ const buttonEntry = useEditorSelector(
             <ButtonStyleToolbarButton />
           </ToolbarGroup>
 
-          <ToolbarGroup>
-            <AlignToolbarButton />
-            <LinkToolbarButton/>
-          </ToolbarGroup>
+          {buttonEntry ? (
+            <ToolbarGroup>
+              <AlignToolbarButton />
+              <ButtonLinkToolbarButton />
+            </ToolbarGroup>
+          ) : (
+            <ToolbarGroup>
+              <TurnIntoToolbarButton />
 
-          {/* Hide these tools when the current node is a button */}
+              <MarkToolbarButton nodeType={KEYS.bold} tooltip="Bold (⌘+B)">
+                <BoldIcon />
+              </MarkToolbarButton>
 
-            {!buttonEntry && (
-                <ToolbarGroup>
-                  <TurnIntoToolbarButton />
+              <MarkToolbarButton nodeType={KEYS.italic} tooltip="Italic (⌘+I)">
+                <ItalicIcon />
+              </MarkToolbarButton>
 
-                  <MarkToolbarButton nodeType={KEYS.bold} tooltip="Bold (⌘+B)">
-                    <BoldIcon />
-                  </MarkToolbarButton>
+              <MarkToolbarButton nodeType={KEYS.underline} tooltip="Underline (⌘+U)">
+                <UnderlineIcon />
+              </MarkToolbarButton>
 
-                  <MarkToolbarButton nodeType={KEYS.italic} tooltip="Italic (⌘+I)">
-                    <ItalicIcon />
-                  </MarkToolbarButton>
+              <MarkToolbarButton
+                nodeType={KEYS.strikethrough}
+                tooltip="Strikethrough (⌘+⇧+M)"
+              >
+                <StrikethroughIcon />
+              </MarkToolbarButton>
 
-                  <MarkToolbarButton
-                    nodeType={KEYS.underline}
-                    tooltip="Underline (⌘+U)"
-                  >
-                    <UnderlineIcon />
-                  </MarkToolbarButton>
+              <MarkToolbarButton nodeType={KEYS.code} tooltip="Code (⌘+E)">
+                <Code2Icon />
+              </MarkToolbarButton>
 
-                  <MarkToolbarButton
-                    nodeType={KEYS.strikethrough}
-                    tooltip="Strikethrough (⌘+⇧+M)"
-                  >
-                    <StrikethroughIcon />
-                  </MarkToolbarButton>
+              <InlineEquationToolbarButton />
 
-                  <MarkToolbarButton nodeType={KEYS.code} tooltip="Code (⌘+E)">
-                    <Code2Icon />
-                  </MarkToolbarButton>
-
-                  <FloatingFontColorButton />
-
-                  <InlineEquationToolbarButton />
-
-                  <LinkToolbarButton />
-                </ToolbarGroup>
-            )
-          }
+              <LinkToolbarButton />
+            </ToolbarGroup>
+          )}
         </>
       )}
-      {/* Button Color and Text Color */}
+
       <ToolbarGroup>
         <ButtonColorToolbarButton />
         <FloatingFontColorButton />
