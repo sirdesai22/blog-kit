@@ -3,10 +3,15 @@
 import * as React from 'react';
 
 import {
+  AlignCenterIcon,
+  AlignLeftIcon,
+  AlignRightIcon,
   BaselineIcon,
   BoldIcon,
+  Circle,
   Code2Icon,
   ItalicIcon,
+  PaintBucketIcon,
   StrikethroughIcon,
   UnderlineIcon,
   WandSparklesIcon,
@@ -48,6 +53,8 @@ import { MoreToolbarButton } from './more-toolbar-button';
 import { SuggestionToolbarButton } from './suggestion-toolbar-button';
 import { ToolbarButton, ToolbarGroup } from './toolbar';
 import { TurnIntoToolbarButton } from './turn-into-toolbar-button';
+import { AlignToolbarButton } from './align-toolbar-button';
+import { ButtonIcon } from '@radix-ui/react-icons';
 
 // Color palette - flattened for better grid layout
 const COLOR_PALETTE = [
@@ -80,6 +87,12 @@ const BUTTON_SIZE_ENTRIES = Object.entries(BUTTON_SIZES) as [
   ButtonSizeVariant,
   (typeof BUTTON_SIZES)[ButtonSizeVariant],
 ][];
+
+const ALIGN_ENTRIES = [
+  { label: 'Left', value: 'left' },
+  { label: 'Center', value: 'center' },
+  { label: 'Right', value: 'right' }
+];
 
 function FloatingFontColorButton() {
   const editor = useEditorRef();
@@ -382,6 +395,64 @@ function ButtonStyleToolbarButton() {
   );
 }
 
+//align whole button block left, center, right, justify
+// function AlignToolbarButton() {
+//   const [open, setOpen] = React.useState(false);
+//   const editor = useEditorRef();
+
+//   const updateAlign = React.useCallback(
+//     (align: string) => {
+//       if (editor.selection) {
+//         editor.tf.select(editor.selection);
+//         editor.tf.focus();
+//         editor.tf.addMark(KEYS.align, align);
+//       }
+//     },
+//     [editor]
+//   );
+
+//   return (
+//     <DropdownMenu
+//         open={variantOpen}
+//         onOpenChange={setVariantOpen}
+//         modal={false}
+//       >
+//         <DropdownMenuTrigger asChild>
+//           <ToolbarButton
+//             className="min-w-[80px]"
+//             isDropdown
+//             pressed={variantOpen}
+//             tooltip="Button fill style"
+//           >
+//             Fill
+//           </ToolbarButton>
+//         </DropdownMenuTrigger>
+//         <DropdownMenuContent
+//           className="ignore-click-outside/toolbar w-44 space-y-2 p-3"
+//           align="start"
+//           onCloseAutoFocus={(e) => {
+//             e.preventDefault();
+//             editor.tf.focus();
+//           }}
+//         >
+//           <DropdownMenuLabel className="px-1 text-xs font-medium uppercase text-muted-foreground">
+//             Fill
+//           </DropdownMenuLabel>
+//           <DropdownMenuRadioGroup
+//             value={buttonVariant}
+//             onValueChange={handleVariantChange}
+//           >
+//             {ALIGN_ENTRIES.map(([value, meta]) => (
+//               <DropdownMenuRadioItem key={value} value={value}>
+//                 {meta.label}
+//               </DropdownMenuRadioItem>
+//             ))}
+//           </DropdownMenuRadioGroup>
+//         </DropdownMenuContent>
+//       </DropdownMenu>
+//   );
+// }
+
 function inferButtonRadiusVariant(
   node?: Record<string, unknown>
 ): ButtonRadiusVariant {
@@ -398,6 +469,101 @@ function inferButtonRadiusVariant(
   );
 
   return matchedVariant?.[0] ?? DEFAULT_BUTTON_RADIUS_VARIANT;
+}
+
+//change button color to a color picker
+function ButtonColorToolbarButton() {
+  const [open, setOpen] = React.useState(false);
+  const [selectedColor, setSelectedColor] = React.useState<string>();
+
+  const selectionDefined = useEditorSelector(
+    (editor) => !!editor.selection,
+    []
+  );
+
+  const editor = useEditorRef();;
+
+  const buttonEntry = useEditorSelector(
+    (editor) =>
+      editor.api.above<TElement>({
+        match: { type: 'button' },
+      }),
+    []
+  );
+
+  const buttonNode = buttonEntry?.[0] as Record<string, unknown> | undefined;
+
+  const setButtonProps = React.useCallback(
+    (updates: Record<string, unknown>) => {
+      const entry = editor.api.above<TElement>({
+        match: { type: 'button' },
+      });
+
+      if (!entry) return;
+
+      const [node, path] = entry;
+
+      const nextEntries = Object.entries(updates).filter(([key, value]) => {
+        return (node as any)?.[key] !== value;
+      });
+
+      if (!nextEntries.length) return;
+
+      const next = Object.fromEntries(nextEntries);
+      editor.tf.setNodes(next, { at: path });
+      editor.tf.focus();
+    },
+    [editor]
+  );
+
+  const handleButtonColorChange = React.useCallback(
+    (value: string) => {
+      if (!isButtonColor(value)) return;
+
+      setButtonProps({ buttonColor: value });
+    },
+    [setButtonProps]
+  );
+
+  if (!buttonEntry) return null;
+
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
+      <DropdownMenuTrigger asChild>
+        <ToolbarButton tooltip="Button color" pressed={open} disabled={!selectionDefined}>
+          <Circle className="w-4 h-4 rounded-full" style={{ backgroundColor: selectedColor || '#000000', }} />
+        </ToolbarButton>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent 
+        className="ignore-click-outside/toolbar w-48 p-3"
+        align="start"
+        onCloseAutoFocus={e => { e.preventDefault(); }}
+      >
+        <div className="flex flex-wrap gap-1.5 py-2">
+          {COLOR_PALETTE.map((color) => (
+            <button
+              key={color}
+              type="button"
+              className={`
+                w-6 h-6 rounded-full border-2
+                ${selectedColor === color ? "border-blue-500" : "border-transparent"}
+                focus:outline-none focus-visible:ring-2
+              `}
+              style={{ backgroundColor: color }}
+              aria-label={color}
+              onClick={() => handleButtonColorChange(color)}
+            />
+          ))}
+        </div>
+        <button
+            onClick={() => setSelectedColor(undefined)}
+            className="w-full text-xs py-1.5 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Remove color
+          </button>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
 
 function inferButtonVariant(node?: Record<string, unknown>): ButtonVariant {
@@ -467,6 +633,10 @@ function isButtonSize(value: unknown): value is ButtonSizeVariant {
   );
 }
 
+function isButtonColor(value: unknown): value is string {
+  return typeof value === 'string';
+}
+
 export function FloatingToolbarButtons() {
   const readOnly = useEditorReadOnly();
 
@@ -486,42 +656,73 @@ export function FloatingToolbarButtons() {
           </ToolbarGroup>
 
           <ToolbarGroup>
-            <TurnIntoToolbarButton />
-
-            <MarkToolbarButton nodeType={KEYS.bold} tooltip="Bold (⌘+B)">
-              <BoldIcon />
-            </MarkToolbarButton>
-
-            <MarkToolbarButton nodeType={KEYS.italic} tooltip="Italic (⌘+I)">
-              <ItalicIcon />
-            </MarkToolbarButton>
-
-            <MarkToolbarButton
-              nodeType={KEYS.underline}
-              tooltip="Underline (⌘+U)"
-            >
-              <UnderlineIcon />
-            </MarkToolbarButton>
-
-            <MarkToolbarButton
-              nodeType={KEYS.strikethrough}
-              tooltip="Strikethrough (⌘+⇧+M)"
-            >
-              <StrikethroughIcon />
-            </MarkToolbarButton>
-
-            <MarkToolbarButton nodeType={KEYS.code} tooltip="Code (⌘+E)">
-              <Code2Icon />
-            </MarkToolbarButton>
-
-            <FloatingFontColorButton />
-
-            <InlineEquationToolbarButton />
-
-            <LinkToolbarButton />
+            <AlignToolbarButton />
+            <LinkToolbarButton/>
           </ToolbarGroup>
+
+          {/* Hide these tools when the current node is a button */}
+          {(() => {
+            // Use a selector to check if we're inside a button node
+            const editor = useEditorRef();
+            const buttonEntry = useEditorSelector(
+              (editor) =>
+                editor.api.above<TElement>({
+                  match: { type: 'button' },
+                }),
+              []
+            );
+
+            if (!buttonEntry) {
+              return (
+                <ToolbarGroup>
+                  <TurnIntoToolbarButton />
+
+                  <MarkToolbarButton nodeType={KEYS.bold} tooltip="Bold (⌘+B)">
+                    <BoldIcon />
+                  </MarkToolbarButton>
+
+                  <MarkToolbarButton nodeType={KEYS.italic} tooltip="Italic (⌘+I)">
+                    <ItalicIcon />
+                  </MarkToolbarButton>
+
+                  <MarkToolbarButton
+                    nodeType={KEYS.underline}
+                    tooltip="Underline (⌘+U)"
+                  >
+                    <UnderlineIcon />
+                  </MarkToolbarButton>
+
+                  <MarkToolbarButton
+                    nodeType={KEYS.strikethrough}
+                    tooltip="Strikethrough (⌘+⇧+M)"
+                  >
+                    <StrikethroughIcon />
+                  </MarkToolbarButton>
+
+                  <MarkToolbarButton nodeType={KEYS.code} tooltip="Code (⌘+E)">
+                    <Code2Icon />
+                  </MarkToolbarButton>
+
+                  <FloatingFontColorButton />
+
+                  <InlineEquationToolbarButton />
+
+                  <LinkToolbarButton />
+                </ToolbarGroup>
+              );
+            }
+            // If a button node is active, hide this group
+            return null;
+          })()}
         </>
       )}
+
+      {/* Button Color and Text Color */}
+      <ToolbarGroup>
+        <ButtonColorToolbarButton />
+        <FloatingFontColorButton />
+      </ToolbarGroup>
+
       {/* 
       <ToolbarGroup>
         <CommentToolbarButton />
