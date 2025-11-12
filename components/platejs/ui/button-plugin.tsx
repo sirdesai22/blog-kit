@@ -43,6 +43,7 @@ export type ButtonSizeVariant = keyof typeof BUTTON_SIZES;
 export const DEFAULT_BUTTON_RADIUS_VARIANT: ButtonRadiusVariant = 'smooth';
 export const DEFAULT_BUTTON_VARIANT: ButtonVariant = 'filled';
 export const DEFAULT_BUTTON_SIZE: ButtonSizeVariant = 'medium';
+export const DEFAULT_BUTTON_COLOR: string = '#000000';
 
 export function CustomButtonElement({
   element,
@@ -56,6 +57,7 @@ export function CustomButtonElement({
   const radiusValue = resolveRadiusValue(node, radiusVariant);
   const buttonVariant = resolveButtonVariant(node);
   const buttonSize = resolveButtonSize(node);
+  const buttonColor = resolveButtonColor(node);
 
   return (
     <PlateElement
@@ -68,6 +70,7 @@ export function CustomButtonElement({
       )}
       style={{
         borderRadius: `${radiusValue}px`,
+        backgroundColor: buttonColor,
         ...(style ?? {}),
       }}
       element={element}
@@ -126,6 +129,15 @@ function resolveButtonSize(node: Record<string, unknown>): ButtonSizeVariant {
   return DEFAULT_BUTTON_SIZE;
 }
 
+function resolveButtonColor(node: Record<string, unknown>): string {
+  const value = node?.buttonColor;
+
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  return DEFAULT_BUTTON_COLOR;
+}
 function normalizeBorderRadius(value: unknown) {
   if (typeof value === 'number' && Number.isFinite(value)) {
     return clampRadius(value);
