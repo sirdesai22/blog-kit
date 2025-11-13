@@ -36,6 +36,13 @@ export const BUTTON_SIZES = {
   large: { label: 'Large', className: 'px-6 py-3 text-base' },
 } as const;
 
+export const BUTTON_ALIGNMENT_VARIANTS = {
+  left: { label: 'Left', alignment: 'left' },
+  center: { label: 'Center', alignment: 'center' },
+  right: { label: 'Right', alignment: 'right' },
+} as const;
+
+
 export type ButtonRadiusVariant = keyof typeof BUTTON_RADIUS_VARIANTS;
 export type ButtonVariant = keyof typeof BUTTON_VARIANTS;
 export type ButtonSizeVariant = keyof typeof BUTTON_SIZES;
@@ -45,6 +52,7 @@ export const DEFAULT_BUTTON_VARIANT: ButtonVariant = 'filled';
 export const DEFAULT_BUTTON_SIZE: ButtonSizeVariant = 'medium';
 export const DEFAULT_BUTTON_COLOR: string = '#000000';
 export const DEFAULT_BUTTON_HREF: string | null = null;
+export const DEFAULT_BUTTON_ALIGNMENT: string = "left";
 
 export function CustomButtonElement({
   element,
@@ -60,31 +68,45 @@ export function CustomButtonElement({
   const buttonSize = resolveButtonSize(node);
   const buttonColor = resolveButtonColor(node);
   const buttonHref = resolveButtonHref(node);
-
+  const buttonAlignment = resolveButtonAlignment(node);
   const asElement = buttonHref ? 'a' : 'button';
 
   return (
-    <PlateElement
-      as={asElement as any}
+    <div
       className={cn(
-        'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-        BUTTON_VARIANTS[buttonVariant].className,
-        BUTTON_SIZES[buttonSize].className,
-        className
+        // alignment utility
+        buttonAlignment === 'center'
+          ? 'flex justify-center'
+          : buttonAlignment === 'right'
+          ? 'flex justify-end'
+          : 'flex justify-start'
       )}
       style={{
-        borderRadius: `${radiusValue}px`,
-        backgroundColor: buttonColor,
-        ...(style ?? {}),
+        width: '100%',
       }}
-      attributes={{
-        href: buttonHref ?? undefined,
-        target: buttonHref ? '_blank' : undefined,
-        rel: buttonHref ? 'noopener noreferrer' : undefined,
-      }}
-      element={element}
-      {...rest}
-    />
+    >
+      <PlateElement
+        as={asElement as any}
+        className={cn(
+          'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+          BUTTON_VARIANTS[buttonVariant].className,
+          BUTTON_SIZES[buttonSize].className,
+          className
+        )}
+        style={{
+          borderRadius: `${radiusValue}px`,
+          backgroundColor: buttonColor,
+          ...(style ?? {}),
+        }}
+        attributes={{
+          href: buttonHref ?? undefined,
+          target: buttonHref ? '_blank' : undefined,
+          rel: buttonHref ? 'noopener noreferrer' : undefined,
+        }}
+        element={element}
+        {...rest}
+      />
+    </div>
   );
 }
 
@@ -146,6 +168,16 @@ function resolveButtonColor(node: Record<string, unknown>): string {
   }
 
   return DEFAULT_BUTTON_COLOR;
+}
+
+function resolveButtonAlignment(node: Record<string, unknown>): string {
+  const value = node?.buttonAlignment;
+
+  if (typeof value === 'string' && value in BUTTON_ALIGNMENT_VARIANTS) {
+    return value;
+  }
+
+  return 'DEFAULT_BUTTON_ALIGNMENT';
 }
 
 function resolveButtonHref(node: Record<string, unknown>): string | null {
