@@ -13,6 +13,7 @@ import {
   ItalicIcon,
   Link as LinkIcon,
   StrikethroughIcon,
+  Trash2Icon,
   UnderlineIcon,
   WandSparklesIcon,
 } from 'lucide-react';
@@ -21,6 +22,7 @@ import {
   useEditorReadOnly,
   useEditorRef,
   useEditorSelector,
+  useRemoveNodeButton,
 } from 'platejs/react';
 
 import {
@@ -55,7 +57,7 @@ import { ToolbarButton, ToolbarGroup } from './toolbar';
 import { TurnIntoToolbarButton } from './turn-into-toolbar-button';
 import { AlignToolbarButton } from './align-toolbar-button';
 import { Input } from '@/components/ui/input';
-import { Button as UIButton } from '@/components/ui/button';
+import { Button, Button as UIButton } from '@/components/ui/button';
 import { normalizeUrl } from '@/lib/url-utils';
 
 // Color palette - flattened for better grid layout
@@ -776,6 +778,8 @@ export function FloatingToolbarButtons() {
     []
   );
 
+  const { props: buttonProps } = useRemoveNodeButton({ element: buttonEntry?.[0] as TElement });
+
   return (
     <>
       {!readOnly && (
@@ -836,13 +840,12 @@ export function FloatingToolbarButtons() {
         <FloatingFontColorButton />
       </ToolbarGroup>
 
-      {/* 
+      
       <ToolbarGroup>
-        <CommentToolbarButton />
-        <SuggestionToolbarButton />
-
-        {!readOnly && <MoreToolbarButton />}
-      </ToolbarGroup> */}
+      <Button size="sm" variant="ghost" {...buttonProps}>
+              <Trash2Icon />
+            </Button>
+      </ToolbarGroup>
     </>
   );
 }
