@@ -12,7 +12,7 @@ import {
   AlignLeftIcon,
   AlignRightIcon,
 } from 'lucide-react';
-import { useEditorPlugin, useSelectionFragmentProp } from 'platejs/react';
+import { useEditorPlugin, useEditorSelector, useSelectionFragmentProp } from 'platejs/react';
 
 import {
   DropdownMenu,
@@ -23,8 +23,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import { ToolbarButton } from './toolbar';
+import { TElement } from 'platejs';
+import { BUTTON_ALIGNMENT_VARIANTS } from './button-plugin';
+import { useEditorRef } from 'platejs/react';
 
-const items = [
+const BUTTON_ALIGNMENT_ENTRIES = [
   {
     icon: AlignLeftIcon,
     value: 'left',
@@ -37,41 +40,86 @@ const items = [
     icon: AlignRightIcon,
     value: 'right',
   },
-  {
-    icon: AlignJustifyIcon,
-    value: 'justify',
-  },
 ];
 
-export function AlignToolbarButton(props: DropdownMenuProps) {
-  const { editor, tf } = useEditorPlugin(TextAlignPlugin);
-  const value =
-    useSelectionFragmentProp({
-      defaultValue: 'start',
-      getProp: (node) => node.align,
-    }) ?? 'left';
+function isButtonAlignment(value: unknown): value is string {
+  return typeof value === 'string' && Object.keys(BUTTON_ALIGNMENT_VARIANTS).includes(value);
+}
 
+export function AlignToolbarButton(props: any) {
+  const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
-  const IconValue =
-    items.find((item) => item.value === value)?.icon ?? AlignLeftIcon;
+
+  const buttonEntry = useEditorSelector(
+    (editor) =>
+      editor.api.above<TElement>({
+        match: { type: 'button' },
+      }),
+    []
+  );
+
+  const buttonNode = buttonEntry?.[0] as Record<string, unknown> | undefined;
+  const DEFAULT_BUTTON_ALIGNMENT = 'left';
+  const buttonAlignment = React.useMemo(() =>  inferButtonAlignment(buttonNode), [buttonNode]);
+    
+    function inferButtonAlignment(node?: Record<string, unknown>): string {
+      if (!node) return 'left';
+
+      const value = node?.buttonAlignment;
+      if (isButtonAlignment(value)) {
+        return value;
+      }
+
+      return DEFAULT_BUTTON_ALIGNMENT;
+    }
+
+    const setButtonProps = React.useCallback(
+      (updates: Record<string, unknown>) => {
+        const entry = editor.api.above<TElement>({
+          match: { type: 'button' },
+        });
+
+        if (!entry) return;
+  
+        const [node, path] = entry;
+  
+        const nextEntries = Object.entries(updates).filter(([key, updatedValue]) => {
+          return (node as any)?.[key] !== updatedValue;
+        });
+  
+        if (!nextEntries.length) return;
+  
+        const next = Object.fromEntries(nextEntries);
+        editor.tf.setNodes(next, { at: path });
+        editor.tf.focus();
+      },
+      [editor]
+    );
+
+    const handleValueChange = React.useCallback((value: string) => {
+      if (!BUTTON_ALIGNMENT_VARIANTS[value as keyof typeof BUTTON_ALIGNMENT_VARIANTS]) return;
+
+      setButtonProps({ buttonAlignment: value });
+      console.log("value", value);
+    }, [setButtonProps]);
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
       <DropdownMenuTrigger asChild>
         <ToolbarButton pressed={open} tooltip="Align" isDropdown>
-          <IconValue />
+          H
         </ToolbarButton>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="min-w-0" align="start">
-        <DropdownMenuRadioGroup
-          value={value}
-          onValueChange={(value) => {
-            tf.textAlign.setNodes(value as Alignment);
+      <DropdownMenuContent className="min-w-0" align="start" onCloseAutoFocus={(e) => {
+            e.preventDefault();
             editor.tf.focus();
-          }}
+          }}>
+        <DropdownMenuRadioGroup
+          value={buttonAlignment}
+          onValueChange={handleValueChange}
         >
-          {items.map(({ icon: Icon, value: itemValue }) => (
+          {BUTTON_ALIGNMENT_ENTRIES.map(({ icon: Icon, value: itemValue }) => (
             <DropdownMenuRadioItem
               key={itemValue}
               className="pl-2 data-[state=checked]:bg-accent *:first:[span]:hidden"
