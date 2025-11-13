@@ -109,9 +109,7 @@ export function AlignToolbarButton(props: any) {
         <ToolbarButton pressed={open} tooltip="Align" isDropdown>
           {
             BUTTON_ALIGNMENT_VARIANTS[buttonAlignment as keyof typeof BUTTON_ALIGNMENT_VARIANTS]?.alignment === 'left' ? <AlignLeftIcon /> :
-            BUTTON_ALIGNMENT_VARIANTS[buttonAlignment as keyof typeof BUTTON_ALIGNMENT_VARIANTS]?.alignment === 'center' ? <AlignCenterIcon /> :
-            BUTTON_ALIGNMENT_VARIANTS[buttonAlignment as keyof typeof BUTTON_ALIGNMENT_VARIANTS]?.alignment === 'right' ? <AlignRightIcon /> :
-            <AlignJustifyIcon />
+            BUTTON_ALIGNMENT_VARIANTS[buttonAlignment as keyof typeof BUTTON_ALIGNMENT_VARIANTS]?.alignment === 'center' ? <AlignCenterIcon /> : <AlignRightIcon />
           }
         </ToolbarButton>
       </DropdownMenuTrigger>
