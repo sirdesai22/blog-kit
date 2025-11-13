@@ -22,6 +22,8 @@ import {
   useSelected,
 } from 'platejs/react';
 
+import { KEYS } from 'platejs';
+
 import { Button, buttonVariants } from '@/components/ui/button';
 import {
   Popover,
@@ -30,6 +32,7 @@ import {
 } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 
+import { AltTextButton } from './alt-text';
 import { CaptionButton } from './caption';
 
 const inputVariants = cva(
@@ -69,6 +72,7 @@ export function MediaToolbar({
 
   const element = useElement();
   const { props: buttonProps } = useRemoveNodeButton({ element });
+  const isImagePlugin = plugin.key === KEYS.img;
 
   return (
     <Popover open={open} modal={false}>
@@ -94,11 +98,22 @@ export function MediaToolbar({
           </div>
         ) : (
           <div className="box-content flex items-center">
-            <FloatingMediaPrimitive.EditButton
+            {/* <FloatingMediaPrimitive.EditButton
               className={buttonVariants({ size: 'sm', variant: 'ghost' })}
             >
               Edit link
-            </FloatingMediaPrimitive.EditButton>
+            </FloatingMediaPrimitive.EditButton> */}
+
+            {isImagePlugin ? (
+              <AltTextButton
+                size="sm"
+                variant="ghost"
+                className="mx-1"
+                mediaType={plugin.key}
+              >
+                Alt text
+              </AltTextButton>
+            ) : null}
 
             <CaptionButton size="sm" variant="ghost">
               Caption
