@@ -31,7 +31,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 // Icons
 // ✅ Import the 'Plus' icon for the "New Tag" button
-import { MoreVertical, Plus, Trash2 } from "lucide-react";
+import { MoreVertical, Plus, RefreshCw, Trash2 } from "lucide-react";
 
 // Drag and Drop
 import {
@@ -63,6 +63,7 @@ import {
 // ✅ Import the ConfirmationDialog and Heading components
 import { ConfirmationDialog } from "@/components/models/confirmation-dialog";
 import { Heading } from "@/components/ui/heading";
+import { useQueryClient } from "@tanstack/react-query";
 
 // Types
 interface TagWithStats {
@@ -175,7 +176,7 @@ export function BlogTagsView({ workspaceSlug, blogId }: BlogTagsViewProps) {
   const updateTagMutation = useUpdateTag(workspaceSlug, blogId);
   const deleteTagMutation = useDeleteTag(workspaceSlug, blogId);
   const reorderTagsMutation = useReorderTags(workspaceSlug, blogId);
-
+  const queryClient = useQueryClient();
   // Local state for dialogs
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -184,7 +185,8 @@ export function BlogTagsView({ workspaceSlug, blogId }: BlogTagsViewProps) {
   const [selectedTag, setSelectedTag] = useState<TagWithStats | null>(null);
   const [editTagName, setEditTagName] = useState("");
   const [editTagDescription, setEditTagDescription] = useState("");
-
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false);
   const tags = tagsData?.tags || [];
 
   const sensors = useSensors(
@@ -237,6 +239,31 @@ export function BlogTagsView({ workspaceSlug, blogId }: BlogTagsViewProps) {
     });
   };
 
+  const handleRefresh = async () => {
+    if (isRefreshing) return; // Prevent multiple clicks
+
+    setIsRefreshing(true);
+    
+
+    try {
+      // Invalidate all relevant queries to trigger a refetch
+      // Only invalidate the tags query, since this is the tag view
+      await queryClient.invalidateQueries({
+        queryKey: ["workspace-tags", workspaceSlug, blogId],
+      });
+
+      // Call optional refresh callback if provided
+      // if (onRefresh) {
+      //   onRefresh();
+      // }
+    } finally {
+      // Add a small delay to show the loading state
+      setTimeout(() => {
+        setIsRefreshing(false);
+      }, 500);
+    }
+  };
+
   if (error) {
     return <div>Error loading tags</div>;
   }
@@ -245,6 +272,10 @@ export function BlogTagsView({ workspaceSlug, blogId }: BlogTagsViewProps) {
     <>
       <CardTitle className="text-sm ml-lg mb-sm text-normal">
         {tags.length} <span className="text-small">Tags</span>
+        <Button variant="outline" size="sm" className="text-normal-muted" onClick={handleRefresh}>
+          <RefreshCw className="h-4 w-4" />
+          Refresh
+        </Button>
       </CardTitle>
       <div className="overflow-hidden">
         <div className="relative w-full overflow-x-auto">
