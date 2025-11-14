@@ -11,6 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BlogEditorToolbar } from '@/modules/blogs/components/blog-editor-toolbar';
+import { EmbedDialogProvider } from '@/components/platejs/ui/embed-dialog-context';
+import { EmbedDialog } from '@/components/platejs/ui/embed-dialog';
 
 interface PlateEditorProps {
   initialValue?: any[];
@@ -59,15 +61,16 @@ export function PlateEditor({
     },
   ];
   return (
-    <Plate
-      editor={editor}
-      onValueChange={(newValue) => {
-        console.log('Plate onValueChange triggered with value:', newValue); // Debug log
-        if (newValue.value) {
-          onChange?.(newValue.value as any);
-        }
-      }}
-    >
+    <EmbedDialogProvider>
+      <Plate
+        editor={editor}
+        onValueChange={(newValue) => {
+          console.log('Plate onValueChange triggered with value:', newValue); // Debug log
+          if (newValue.value) {
+            onChange?.(newValue.value as any);
+          }
+        }}
+      >
       {/* Toolbar - now inside Plate context */}
       <BlogEditorToolbar
         workspaceSlug={workspaceSlug}
@@ -154,7 +157,9 @@ export function PlateEditor({
           </div>
         </div>
       </div>
+      <EmbedDialog />
     </Plate>
+    </EmbedDialogProvider>
   );
 }
 const value = [
