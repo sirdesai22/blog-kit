@@ -29,6 +29,7 @@ import {
 } from 'platejs/react';
 
 import { buttonVariants } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 
 const popoverVariants = cva(
@@ -110,8 +111,8 @@ export function LinkFloatingToolbar({
           data-plate-focus
         />
       </div>
-      <Separator className="my-1" />
-      <div className="flex items-center">
+      {/* <Separator className="my-1" /> */}
+      {/* <div className="flex items-center">
         <div className="flex items-center pr-1 pl-2 text-muted-foreground">
           <Text className="size-4" />
         </div>
@@ -121,6 +122,10 @@ export function LinkFloatingToolbar({
           data-plate-focus
           {...textInputProps}
         />
+      </div> */}
+      <Separator className="my-1" />
+      <div className="flex items-center py-1">
+        <NofollowCheckbox insertState={insertState} editState={editState} />
       </div>
     </div>
   );
@@ -166,6 +171,158 @@ export function LinkFloatingToolbar({
         {editContent}
       </div>
     </>
+  );
+}
+
+function NofollowCheckbox({
+  insertState,
+  editState,
+}: {
+  insertState: ReturnType<typeof useFloatingLinkInsertState>;
+  editState: ReturnType<typeof useFloatingLinkEditState>;
+}) {
+  const editor = useEditorRef();
+  const selection = useEditorSelection();
+  const [nofollow, setNofollow] = React.useState(false);
+  const previousLinkRef = React.useRef<string | null>(null);
+  const manuallySetRef = React.useRef(false); // Track if user manually set the checkbox
+
+  // Check current link's nofollow status when selection changes
+  // Only update from link attribute when editing an existing link
+  React.useEffect(() => {
+    // Don't overwrite manually set state during link creation
+    if (manuallySetRef.current && insertState.isOpen) {
+      return;
+    }
+
+    const entry = editor.api.node<TLinkElement>({
+      match: { type: editor.getType(KEYS.link) },
+    });
+    
+    if (entry) {
+      const [element] = entry;
+      const attrs = getLinkAttributes(editor, element);
+      const href = typeof attrs.href === 'string' ? attrs.href : '';
+      const rel = typeof attrs.rel === 'string' ? attrs.rel : '';
+      
+      // Only update state if this is a different link (to preserve state when creating new links)
+      // or if we're editing an existing link
+      if (href !== previousLinkRef.current || editState.isEditing) {
+        setNofollow(rel.includes('nofollow'));
+        previousLinkRef.current = href;
+        // Reset manual flag when we've synced with the link
+        manuallySetRef.current = false;
+      }
+    } else {
+      // When no link is selected:
+      // - If we're in insert mode, preserve the nofollow state (don't reset it)
+      // - If we're not in insert mode, reset the previous link ref but keep nofollow state
+      //   until we know we're switching to a different context
+      if (!insertState.isOpen && !editState.isEditing) {
+        // Only reset if we're completely out of link editing context
+        previousLinkRef.current = null;
+        manuallySetRef.current = false;
+      }
+      // Don't reset nofollow state here - let it persist for new link creation
+    }
+  }, [editor, selection, editState.isEditing, insertState.isOpen]);
+
+  // Handle applying nofollow to newly created links
+  // This runs when a link is selected and the checkbox is checked but the link doesn't have nofollow yet
+  React.useEffect(() => {
+    if (!nofollow) return;
+
+    const entry = editor.api.node<TLinkElement>({
+      match: { type: editor.getType(KEYS.link) },
+    });
+    
+    if (entry) {
+      const [element, path] = entry;
+      const attrs = getLinkAttributes(editor, element);
+      const href = typeof attrs.href === 'string' ? attrs.href : '';
+      const rel = typeof attrs.rel === 'string' ? attrs.rel : '';
+      
+      // Only add nofollow if it doesn't already have it
+      // And only if this is a newly created link (href not in previousLinkRef) or we're in insert mode
+      if (!rel.includes('nofollow')) {
+        // Check if this is a new link or if we're actively inserting
+        const isNewLink = href !== previousLinkRef.current || insertState.isOpen;
+        
+        if (isNewLink) {
+          const relParts = rel.split(' ').filter(Boolean);
+          relParts.push('nofollow');
+          const newRel = relParts.join(' ');
+          editor.tf.setNodes({ rel: newRel }, { at: path });
+          // Update the ref to track this link
+          previousLinkRef.current = href;
+          // Clear manual flag after applying to the link
+          manuallySetRef.current = false;
+        }
+      } else {
+        // Link already has nofollow, clear manual flag
+        if (manuallySetRef.current && href === previousLinkRef.current) {
+          manuallySetRef.current = false;
+        }
+      }
+    }
+  }, [editor, selection, nofollow, insertState.isOpen]);
+
+  const handleNofollowChange = React.useCallback(
+    (checked: boolean) => {
+      setNofollow(checked);
+      manuallySetRef.current = true; // Mark as manually set
+
+      // Update existing link immediately
+      const entry = editor.api.node<TLinkElement>({
+        match: { type: editor.getType(KEYS.link) },
+      });
+      if (entry) {
+        const [, path] = entry;
+        // Get current rel attribute and update it
+        const [element] = entry;
+        const attrs = getLinkAttributes(editor, element);
+        const href = typeof attrs.href === 'string' ? attrs.href : '';
+        const currentRel = typeof attrs.rel === 'string' ? attrs.rel : '';
+        const relParts = currentRel.split(' ').filter(Boolean);
+        
+        if (checked) {
+          // Add nofollow if not already present
+          if (!relParts.includes('nofollow')) {
+            relParts.push('nofollow');
+          }
+        } else {
+          // Remove nofollow
+          const filtered = relParts.filter((part) => part !== 'nofollow');
+          relParts.length = 0;
+          relParts.push(...filtered);
+        }
+        
+        const newRel = relParts.length > 0 ? relParts.join(' ') : undefined;
+        editor.tf.setNodes({ rel: newRel }, { at: path });
+        
+        // Update the previous link ref to prevent state reset
+        previousLinkRef.current = href;
+      }
+      // If no link exists yet (creating new link), the state is preserved
+      // and will be applied when the link is created via the second useEffect
+    },
+    [editor]
+  );
+
+  return (
+    <div className="flex items-center space-x-2 px-2">
+      <Checkbox
+        id="nofollow"
+        checked={nofollow}
+        onCheckedChange={handleNofollowChange}
+      />
+      <label
+        htmlFor="nofollow"
+        className="text-sm text-muted-foreground cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+      >
+        Mark as nofollow
+      </label>
+    </div>
   );
 }
 
