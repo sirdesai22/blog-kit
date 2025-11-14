@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { MoreHorizontal, Plus, Trash2, ExternalLink } from "lucide-react";
+import { MoreHorizontal, Plus, Trash2, ExternalLink, RefreshCw } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +40,7 @@ import {
 } from "@/modules/blogs/hooks/use-authors";
 import { useState } from "react";
 import { ConfirmationDialog } from "@/components/models/confirmation-dialog";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Author {
   id: string;
@@ -88,7 +89,9 @@ export default function AuthorsPage(props: AuthorsPageProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedAuthor, setSelectedAuthor] = useState<Author | null>(null);
-
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
   const authors = authorsData?.authors || [];
 
   const handleAddAuthor = async (formData: AuthorFormData) => {
@@ -160,6 +163,25 @@ export default function AuthorsPage(props: AuthorsPageProps) {
     setIsDeleteDialogOpen(true);
   };
 
+  const handleRefresh = async () => {
+    if (isRefreshing) return; // Prevent multiple clicks
+
+    setIsRefreshing(true);
+    
+
+    try {
+      // Invalidate all relevant queries to trigger a refetch
+      await queryClient.invalidateQueries({
+        queryKey: ["workspace-authors", params.workspaceSlug, params.blogId],
+      });
+    } finally {
+      // Add a small delay to show the loading state
+      setTimeout(() => {
+        setIsRefreshing(false);
+      }, 500);
+    }
+  };
+
   // Prepare edit data
   const editData: AuthorFormData | undefined = selectedAuthor
     ? {
@@ -214,6 +236,10 @@ export default function AuthorsPage(props: AuthorsPageProps) {
           <span className="text-normal">
             {authors.length} <span className="text-small">Authors</span>
           </span>
+          <Button variant="outline" size="sm" className="text-normal-muted" onClick={handleRefresh}>
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </Button>
         </CardTitle>
         <Card className="p-0 shadow-none border-none">
           <CardContent className="p-0">

@@ -35,6 +35,7 @@ import {
   GripVertical,
   MoreVertical,
   Plus,
+  RefreshCw,
   Trash2,
 } from "lucide-react"; // ✅ Import Plus icon
 
@@ -68,6 +69,8 @@ import {
 // ✅ Import the required components
 import { ConfirmationDialog } from "@/components/models/confirmation-dialog";
 import { Heading } from "@/components/ui/heading";
+import { useQueryClient } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
 
 // Types
 interface CategoryWithStats {
@@ -191,6 +194,7 @@ export function BlogCategoriesView({
   const updateCategoryMutation = useUpdateCategory(workspaceSlug, blogId);
   const deleteCategoryMutation = useDeleteCategory(workspaceSlug, blogId);
   const reorderCategoriesMutation = useReorderCategories(workspaceSlug, blogId);
+  const queryClient = useQueryClient();
 
   // Local state for dialogs
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -201,6 +205,8 @@ export function BlogCategoriesView({
     useState<CategoryWithStats | null>(null);
   const [editCategoryName, setEditCategoryName] = useState("");
   const [editCategoryDescription, setEditCategoryDescription] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const categories = categoriesData?.categories || [];
 
@@ -264,6 +270,41 @@ export function BlogCategoriesView({
     });
   };
 
+  const handleRefresh = async () => {
+    if (isRefreshing) return; // Prevent multiple clicks
+
+    setIsRefreshing(true);
+    
+
+    try {
+      // Invalidate all relevant queries to trigger a refetch
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["blog-posts-table", workspaceSlug, blogId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["workspace-categories", workspaceSlug, blogId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["workspace-tags", workspaceSlug, blogId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["workspace-authors", workspaceSlug],
+        }),
+      ]);
+
+      // Call optional refresh callback if provided
+      // if (onRefresh) {
+      //   onRefresh();
+      // }
+    } finally {
+      // Add a small delay to show the loading state
+      setTimeout(() => {
+        setIsRefreshing(false);
+      }, 500);
+    }
+  };
+
   if (error) {
     return <div>Error loading categories</div>;
   }
@@ -272,6 +313,25 @@ export function BlogCategoriesView({
     <>
       <CardTitle className="text-normal ml-lg mb-sm">
         {categories.length} <span className="text-small">Categories</span>
+        <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={loading || isRefreshing}
+              className={cn(
+                "h-8 px-3 text-normal font-medium",
+                "hover:bg-muted/50 transition-colors",
+                isRefreshing && "cursor-not-allowed"
+              )}
+            >
+              <RefreshCw
+                className={cn(
+                  " size-3",
+                  (isRefreshing || loading) && "animate-spin"
+                )}
+              />
+              Refresh
+            </Button>
       </CardTitle>
       <div className="overflow-hidden">
         <div className="relative w-full overflow-x-auto">

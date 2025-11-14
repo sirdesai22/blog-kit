@@ -9,6 +9,10 @@ import { getLinkAttributes } from '@platejs/link';
 import { PlateElement } from 'platejs/react';
 
 export function LinkElement(props: PlateElementProps<TLinkElement>) {
+  const linkAttrs = getLinkAttributes(props.editor, props.element);
+  // Include rel attribute directly from element if it exists
+  const rel = (props.element as any).rel;
+  
   return (
     <PlateElement
       {...props}
@@ -16,7 +20,8 @@ export function LinkElement(props: PlateElementProps<TLinkElement>) {
       className="font-medium text-primary underline decoration-primary underline-offset-4"
       attributes={{
         ...props.attributes,
-        ...getLinkAttributes(props.editor, props.element),
+        ...linkAttrs,
+        ...(rel ? { rel } : {}),
         onMouseOver: (e) => {
           e.stopPropagation();
         },

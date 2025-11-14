@@ -15,6 +15,7 @@ import {
   insertMedia,
   insertVideoPlaceholder,
 } from '@platejs/media';
+import { getGlobalEmbedDialog } from '@/components/platejs/ui/embed-dialog-context';
 import { SuggestionPlugin } from '@platejs/suggestion/react';
 import { TablePlugin } from '@platejs/table/react';
 import { insertToc } from '@platejs/toc';
@@ -53,11 +54,28 @@ const insertBlockMap: Record<
   [KEYS.equation]: (editor) => insertEquation(editor, { select: true }),
   [KEYS.file]: (editor) => insertFilePlaceholder(editor, { select: true }),
   [KEYS.img]: (editor) => insertImagePlaceholder(editor, { select: true }),
-  [KEYS.mediaEmbed]: (editor) =>
-    insertMedia(editor, {
-      select: true,
-      type: KEYS.mediaEmbed,
-    }),
+  [KEYS.mediaEmbed]: (editor) => {
+    const openDialog = getGlobalEmbedDialog();
+    if (openDialog) {
+      // Use custom dialog
+      openDialog((url: string) => {
+        editor.tf.insertNodes(
+          {
+            children: [{ text: '' }],
+            type: KEYS.mediaEmbed,
+            url,
+          },
+          { select: true }
+        );
+      });
+    } else {
+      // Fallback to default behavior (which may use alert)
+      insertMedia(editor, {
+        select: true,
+        type: KEYS.mediaEmbed,
+      });
+    }
+  },
   [KEYS.table]: (editor) =>
     editor.getTransforms(TablePlugin).insert.table({}, { select: true }),
   [KEYS.toc]: (editor) => insertToc(editor, { select: true }),

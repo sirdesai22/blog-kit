@@ -6,6 +6,10 @@ import { getLinkAttributes } from '@platejs/link';
 import { SlateElement } from 'platejs';
 
 export function LinkElementStatic(props: SlateElementProps<TLinkElement>) {
+  const linkAttrs = getLinkAttributes(props.editor, props.element);
+  // Include rel attribute directly from element if it exists
+  const rel = (props.element as any).rel;
+  
   return (
     <SlateElement
       {...props}
@@ -13,7 +17,8 @@ export function LinkElementStatic(props: SlateElementProps<TLinkElement>) {
       className="font-medium text-primary underline decoration-primary underline-offset-4"
       attributes={{
         ...props.attributes,
-        ...getLinkAttributes(props.editor, props.element),
+        ...linkAttrs,
+        ...(rel ? { rel } : {}),
       }}
     >
       {props.children}
