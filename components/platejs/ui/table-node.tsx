@@ -11,6 +11,8 @@ import {
 } from '@platejs/selection/react';
 import { setCellBackground } from '@platejs/table';
 import {
+  TableCellHeaderPlugin,
+  TableCellPlugin,
   TablePlugin,
   TableProvider,
   useTableBordersDropdownMenuContentState,
@@ -34,6 +36,8 @@ import {
   SquareSplitHorizontalIcon,
   Trash2Icon,
   XIcon,
+  Heading1,
+  Columns,
 } from 'lucide-react';
 import {
   type TElement,
@@ -476,23 +480,180 @@ export function TableRowElement(props: PlateElementProps<TTableRowElement>) {
 
 function RowDragHandle({ dragRef }: { dragRef: React.Ref<any> }) {
   const editor = useEditorRef();
-  const element = useElement();
+  const element = useElement<TTableRowElement>();
+  const { api } = useEditorPlugin(TablePlugin);
+  const [open, setOpen] = React.useState(false);
+
+  // Get row index to check if it's the first row
+  const rowIndex = React.useMemo(() => {
+    const rowPath = editor.api.findPath(element);
+    if (!rowPath || rowPath.length === 0) return -1;
+
+    const tablePath = PathApi.parent(rowPath);
+    if (!tablePath) return -1;
+
+    // The row index is the last element in the rowPath
+    // rowPath format: [..., tableIndex, rowIndex]
+    // So rowIndex = rowPath[rowPath.length - 1]
+    const index = rowPath[rowPath.length - 1];
+    return typeof index === 'number' ? index : -1;
+  }, [editor, element]);
+
+  console.log('rowIndex', rowIndex);
+  const isFirstRow = rowIndex === 0;
+
+  // Get plugin keys
+  const headerType = React.useMemo(
+    () => editor.getType(TableCellHeaderPlugin.key),
+    [editor]
+  );
+  const cellType = React.useMemo(
+    () => editor.getType(TableCellPlugin.key),
+    [editor]
+  );
+
+  // Check if first row is a header row
+  const isHeaderRow = React.useMemo(() => {
+    if (!isFirstRow) return false;
+    const rowPath = editor.api.findPath(element);
+    if (!rowPath) return false;
+
+    const row = editor.api.node({ at: rowPath });
+    if (!row) return false;
+
+    const rowElement = row[0] as TTableRowElement;
+    const cells = rowElement.children as TTableCellElement[];
+    if (cells.length === 0) return false;
+
+    return cells.some((cell) => cell.type === headerType);
+  }, [editor, element, isFirstRow, headerType]);
+
+  // Check if first column is a header column
+  const isHeaderColumn = React.useMemo(() => {
+    const rowPath = editor.api.findPath(element);
+    if (!rowPath) return false;
+
+    const tablePath = PathApi.parent(rowPath);
+    if (!tablePath) return false;
+
+    const table = editor.api.node({ at: tablePath });
+    if (!table) return false;
+
+    const tableElement = table[0] as TTableElement;
+    const rows = tableElement.children as TTableRowElement[];
+    if (rows.length === 0) return false;
+
+    return rows.some((row) => {
+      const cells = row.children as TTableCellElement[];
+      return cells.length > 0 && cells[0]?.type === headerType;
+    });
+  }, [editor, element, headerType]);
+
+  const toggleHeaderRow = React.useCallback(() => {
+    if (!isFirstRow) return;
+
+    const rowPath = editor.api.findPath(element);
+    if (!rowPath) return;
+
+    const row = editor.api.node({ at: rowPath });
+    if (!row) return;
+
+    const rowElement = row[0] as TTableRowElement;
+    const cells = rowElement.children as TTableCellElement[];
+
+    cells.forEach((cell, index) => {
+      const cellPath = [...rowPath, index];
+      const newType = isHeaderRow ? cellType : headerType;
+      editor.tf.setNodes({ type: newType }, { at: cellPath });
+    });
+
+    setOpen(false);
+    editor.tf.focus();
+  }, [editor, element, isFirstRow, isHeaderRow, headerType, cellType]);
+
+  const toggleHeaderColumn = React.useCallback(() => {
+    const rowPath = editor.api.findPath(element);
+    if (!rowPath) return;
+
+    const tablePath = PathApi.parent(rowPath);
+    if (!tablePath) return;
+
+    const table = editor.api.node({ at: tablePath });
+    if (!table) return;
+
+    const tableElement = table[0] as TTableElement;
+    const rows = tableElement.children as TTableRowElement[];
+
+    rows.forEach((row, rowIndex) => {
+      const rowPath = [...tablePath, rowIndex];
+      const rowElement = row as TTableRowElement;
+      const cells = rowElement.children as TTableCellElement[];
+      if (cells.length > 0) {
+        const cellPath = [...rowPath, 0];
+        const newType = isHeaderColumn ? cellType : headerType;
+        editor.tf.setNodes({ type: newType }, { at: cellPath });
+      }
+    });
+
+    setOpen(false);
+    editor.tf.focus();
+  }, [editor, element, isHeaderColumn, headerType, cellType]);
 
   return (
-    <Button
-      ref={dragRef}
-      variant="outline"
-      className={cn(
-        'absolute top-1/2 left-0 z-51 h-6 w-4 -translate-y-1/2 p-0 focus-visible:ring-0 focus-visible:ring-offset-0',
-        'cursor-grab active:cursor-grabbing',
-        'opacity-0 transition-opacity duration-100 group-hover/row:opacity-100 group-has-data-[resizing="true"]/row:opacity-0'
-      )}
-      onClick={() => {
-        editor.tf.select(element);
-      }}
-    >
-      <GripVertical className="text-muted-foreground" />
-    </Button>
+    <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          ref={dragRef}
+          variant="outline"
+          className={cn(
+            'absolute top-1/2 left-0 z-51 h-6 w-4 -translate-y-1/2 p-0 focus-visible:ring-0 focus-visible:ring-offset-0',
+            'cursor-grab active:cursor-grabbing',
+            'opacity-0 transition-opacity duration-100 group-hover/row:opacity-100 group-has-data-[resizing="true"]/row:opacity-0'
+          )}
+          onClick={(e) => {
+            // Open menu on click, but allow drag on drag
+            e.stopPropagation();
+          }}
+        >
+          <GripVertical className="text-muted-foreground" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="start"
+        side="right"
+        onCloseAutoFocus={(e) => {
+          e.preventDefault();
+          editor.tf.focus();
+        }}
+      >
+        <DropdownMenuGroup>
+          {isFirstRow && (
+            <>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.preventDefault();
+                  toggleHeaderRow();
+                }}
+              >
+                <Heading1 className="mr-2 h-4 w-4" />
+                <span>{isHeaderRow ? 'Remove Header Row' : 'Make Header Row'}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.preventDefault();
+                  toggleHeaderColumn();
+                }}
+              >
+                <Columns className="mr-2 h-4 w-4" />
+                <span>
+                  {isHeaderColumn ? 'Remove Header Column' : 'Make Header Column'}
+                </span>
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
