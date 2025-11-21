@@ -71,6 +71,7 @@ import { ConfirmationDialog } from "@/components/models/confirmation-dialog";
 import { Heading } from "@/components/ui/heading";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { ManageFeaturedPostsDialog } from "@/modules/blogs/components/manage-featured-posts-dialog";
 
 // Types
 interface CategoryWithStats {
@@ -97,10 +98,14 @@ function SortableTableRow({
   category,
   onEdit,
   onDelete,
+  workspaceSlug,
+  blogId,
 }: {
   category: CategoryWithStats;
   onEdit: (category: CategoryWithStats) => void;
   onDelete: (category: CategoryWithStats) => void;
+  workspaceSlug: string;
+  blogId: string;
 }) {
   const {
     attributes,
@@ -111,6 +116,8 @@ function SortableTableRow({
     isDragging,
   } = useSortable({ id: category.id });
 
+  const [isFeaturedDialogOpen, setIsFeaturedDialogOpen] = useState(false);
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -119,6 +126,7 @@ function SortableTableRow({
   };
 
   return (
+    <>
     <TableRow ref={setNodeRef} style={style} className="group">
       <TableCell className="w-14">
         <div
@@ -144,7 +152,7 @@ function SortableTableRow({
       <TableCell>{category.posts}</TableCell>
       <TableCell className="sticky right-0 bg-background group-hover:bg-accent/50">
         <div className="flex items-center justify-end gap-2">
-          <Button variant="outline" size="sm" className="text-normal-muted">
+          <Button variant="outline" size="sm" className="text-normal-muted" onClick={() => setIsFeaturedDialogOpen(true)}>
             Manage featured posts
           </Button>
           <Button variant="outline" size="sm" className="text-normal-muted">
@@ -178,6 +186,14 @@ function SortableTableRow({
         </div>
       </TableCell>
     </TableRow>
+    <ManageFeaturedPostsDialog
+      isOpen={isFeaturedDialogOpen}
+      onClose={() => setIsFeaturedDialogOpen(false)}
+      workspaceSlug={workspaceSlug}
+      pageId={blogId}
+      categoryId={category.id}
+    />
+  </>
   );
 }
 
@@ -412,6 +428,8 @@ export function BlogCategoriesView({
                       <SortableTableRow
                         key={category.id}
                         category={category}
+                        workspaceSlug={workspaceSlug}
+                        blogId={blogId}
                         onEdit={(cat) => {
                           setSelectedCategory(cat);
                           setEditCategoryName(cat.name);
