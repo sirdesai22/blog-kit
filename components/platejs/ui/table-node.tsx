@@ -156,6 +156,7 @@ function TableFloatingToolbar({
   children,
   ...props
 }: React.ComponentProps<typeof PopoverContent>) {
+  const editor = useEditorRef();
   const { tf } = useEditorPlugin(TablePlugin);
   const selected = useSelected();
   const element = useElement<TTableElement>();
@@ -167,6 +168,148 @@ function TableFloatingToolbar({
   const isFocusedLast = useFocusedLast();
 
   const { canMerge, canSplit } = useTableMergeState();
+
+  // Get plugin keys for header toggle
+  const headerType = React.useMemo(
+    () => editor.getType(TableCellHeaderPlugin.key),
+    [editor]
+  );
+  const cellType = React.useMemo(
+    () => editor.getType(TableCellPlugin.key),
+    [editor]
+  );
+
+  // Get current cell path to determine row/column position
+  const currentCellPath = useEditorSelector(
+    (editor) => {
+      if (!collapsedInside) return null;
+      const selection = editor.selection;
+      if (!selection) return null;
+      
+      // Find the cell containing the selection
+      const cellEntry = editor.api.above({
+        at: selection.anchor.path,
+        match: (n) => n.type === headerType || n.type === cellType,
+      });
+      
+      if (!cellEntry) return null;
+      return editor.api.findPath(cellEntry[0]);
+    },
+    [collapsedInside, headerType, cellType]
+  );
+
+  // Check if we're in the first row
+  const isFirstRow = React.useMemo(() => {
+    if (!currentCellPath || currentCellPath.length < 2) return false;
+    // The row index is the second-to-last element in the path
+    // Path format: [..., tableIndex, rowIndex, cellIndex]
+    const rowIndex = currentCellPath[currentCellPath.length - 2];
+    return typeof rowIndex === 'number' && rowIndex === 0;
+  }, [currentCellPath]);
+
+  // Check if first row is a header row
+  const isHeaderRow = React.useMemo(() => {
+    if (!isFirstRow) return false;
+    const tablePath = editor.api.findPath(element);
+    if (!tablePath) return false;
+
+    const table = editor.api.node({ at: tablePath });
+    if (!table) return false;
+
+    const tableElement = table[0] as TTableElement;
+    const rows = tableElement.children as TTableRowElement[];
+    if (rows.length === 0) return false;
+
+    const firstRow = rows[0];
+    const cells = firstRow.children as TTableCellElement[];
+    return cells.some((cell) => cell.type === headerType);
+  }, [editor, element, isFirstRow, headerType]);
+
+  // Check if first column is a header column
+  const isHeaderColumn = React.useMemo(() => {
+    const tablePath = editor.api.findPath(element);
+    if (!tablePath) return false;
+
+    const table = editor.api.node({ at: tablePath });
+    if (!table) return false;
+
+    const tableElement = table[0] as TTableElement;
+    const rows = tableElement.children as TTableRowElement[];
+    if (rows.length === 0) return false;
+
+    return rows.some((row) => {
+      const cells = row.children as TTableCellElement[];
+      return cells.length > 0 && cells[0]?.type === headerType;
+    });
+  }, [editor, element, headerType]);
+
+  // Toggle header row
+  const toggleHeaderRow = React.useCallback(() => {
+    if (!isFirstRow) return;
+
+    const tablePath = editor.api.findPath(element);
+    if (!tablePath) return;
+
+    const table = editor.api.node({ at: tablePath });
+    if (!table) return;
+
+    const tableElement = table[0] as TTableElement;
+    const rows = tableElement.children as TTableRowElement[];
+    if (rows.length === 0) return;
+
+    const firstRow = rows[0];
+    const rowPath = [...tablePath, 0];
+    const cells = firstRow.children as TTableCellElement[];
+    const newType = isHeaderRow ? cellType : headerType;
+
+    editor.tf.withoutNormalizing(() => {
+      cells.forEach((cell, index) => {
+        const cellPath = [...rowPath, index];
+        const currentCell = editor.api.node({ at: cellPath });
+        if (currentCell && currentCell[0]) {
+          const cellElement = currentCell[0] as TTableCellElement;
+          if (cellElement.type !== newType) {
+            editor.tf.setNodes({ type: newType }, { at: cellPath });
+          }
+        }
+      });
+    });
+
+    editor.tf.focus();
+  }, [editor, element, isFirstRow, isHeaderRow, headerType, cellType]);
+
+  // Toggle header column
+  const toggleHeaderColumn = React.useCallback(() => {
+    const tablePath = editor.api.findPath(element);
+    if (!tablePath) return;
+
+    const table = editor.api.node({ at: tablePath });
+    if (!table) return;
+
+    const tableElement = table[0] as TTableElement;
+    const rows = tableElement.children as TTableRowElement[];
+    const newType = isHeaderColumn ? cellType : headerType;
+
+    editor.tf.withoutNormalizing(() => {
+      rows.forEach((row, rowIndex) => {
+        const rowPath = [...tablePath, rowIndex];
+        const rowElement = row as TTableRowElement;
+        const cells = rowElement.children as TTableCellElement[];
+        if (cells.length > 0) {
+          const cellPath = [...rowPath, 0];
+          const currentCell = editor.api.node({ at: cellPath });
+          if (currentCell && currentCell[0]) {
+            const cellElement = currentCell[0] as TTableCellElement;
+            if (cellElement.type !== newType) {
+              editor.tf.setNodes({ type: newType }, { at: cellPath });
+            }
+          }
+        }
+      });
+    });
+
+    editor.tf.focus();
+  }, [editor, element, isHeaderColumn, headerType, cellType]);
 
   return (
     <Popover
@@ -218,6 +361,44 @@ function TableFloatingToolbar({
                 <TableBordersDropdownMenuContent />
               </DropdownMenuPortal>
             </DropdownMenu>
+
+            {isFirstRow && collapsedInside && (
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                  <ToolbarButton tooltip="Header options">
+                    <Heading1 />
+                  </ToolbarButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.preventDefault();
+                        toggleHeaderRow();
+                      }}
+                    >
+                      <Heading1 className="mr-2 h-4 w-4" />
+                      <span>
+                        {isHeaderRow ? 'Remove Header Row' : 'Make Header Row'}
+                      </span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.preventDefault();
+                        toggleHeaderColumn();
+                      }}
+                    >
+                      <Columns className="mr-2 h-4 w-4" />
+                      <span>
+                        {isHeaderColumn
+                          ? 'Remove Header Column'
+                          : 'Make Header Column'}
+                      </span>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
 
             {collapsedInside && (
               <ToolbarGroup>
@@ -499,7 +680,6 @@ function RowDragHandle({ dragRef }: { dragRef: React.Ref<any> }) {
     return typeof index === 'number' ? index : -1;
   }, [editor, element]);
 
-  console.log('rowIndex', rowIndex);
   const isFirstRow = rowIndex === 0;
 
   // Get plugin keys
@@ -560,11 +740,21 @@ function RowDragHandle({ dragRef }: { dragRef: React.Ref<any> }) {
 
     const rowElement = row[0] as TTableRowElement;
     const cells = rowElement.children as TTableCellElement[];
+    const newType = isHeaderRow ? cellType : headerType;
 
-    cells.forEach((cell, index) => {
-      const cellPath = [...rowPath, index];
-      const newType = isHeaderRow ? cellType : headerType;
-      editor.tf.setNodes({ type: newType }, { at: cellPath });
+    // Batch all cell type changes
+    editor.tf.withoutNormalizing(() => {
+      cells.forEach((cell, index) => {
+        const cellPath = [...rowPath, index];
+        const currentCell = editor.api.node({ at: cellPath });
+        if (currentCell && currentCell[0]) {
+          const cellElement = currentCell[0] as TTableCellElement;
+          // Only change if the type is different
+          if (cellElement.type !== newType) {
+            editor.tf.setNodes({ type: newType }, { at: cellPath });
+          }
+        }
+      });
     });
 
     setOpen(false);
@@ -583,16 +773,26 @@ function RowDragHandle({ dragRef }: { dragRef: React.Ref<any> }) {
 
     const tableElement = table[0] as TTableElement;
     const rows = tableElement.children as TTableRowElement[];
+    const newType = isHeaderColumn ? cellType : headerType;
 
-    rows.forEach((row, rowIndex) => {
-      const rowPath = [...tablePath, rowIndex];
-      const rowElement = row as TTableRowElement;
-      const cells = rowElement.children as TTableCellElement[];
-      if (cells.length > 0) {
-        const cellPath = [...rowPath, 0];
-        const newType = isHeaderColumn ? cellType : headerType;
-        editor.tf.setNodes({ type: newType }, { at: cellPath });
-      }
+    // Batch all cell type changes
+    editor.tf.withoutNormalizing(() => {
+      rows.forEach((row, rowIndex) => {
+        const rowPath = [...tablePath, rowIndex];
+        const rowElement = row as TTableRowElement;
+        const cells = rowElement.children as TTableCellElement[];
+        if (cells.length > 0) {
+          const cellPath = [...rowPath, 0];
+          const currentCell = editor.api.node({ at: cellPath });
+          if (currentCell && currentCell[0]) {
+            const cellElement = currentCell[0] as TTableCellElement;
+            // Only change if the type is different
+            if (cellElement.type !== newType) {
+              editor.tf.setNodes({ type: newType }, { at: cellPath });
+            }
+          }
+        }
+      });
     });
 
     setOpen(false);

@@ -68,6 +68,7 @@ interface ManageFeaturedPostsDialogProps {
   onClose: () => void;
   workspaceSlug: string;
   pageId: string;
+  categoryId?: string;
 }
 
 interface FeaturedPost {
@@ -134,19 +135,36 @@ export function ManageFeaturedPostsDialog({
   onClose,
   workspaceSlug,
   pageId,
+  categoryId,
 }: ManageFeaturedPostsDialogProps) {
   const queryClient = useQueryClient();
-  const [selectedCategory, setSelectedCategory] = useState<string>("global");
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    categoryId || "global"
+  );
   const [featuredPosts, setFeaturedPosts] = useState<FeaturedPost[]>([]);
   const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const { categories } = useBlogFilterOptions(workspaceSlug, pageId);
 
+  // Build filters - include category filter based on categoryId prop or selectedCategory
+  const filters = useMemo(() => {
+    const filterObj: { search?: string; categories?: string[] } = {};
+    if (searchQuery) {
+      filterObj.search = searchQuery;
+    }
+    // Use categoryId prop if provided, otherwise use selectedCategory (if not "global")
+    const categoryToFilter = categoryId || (selectedCategory !== "global" ? selectedCategory : undefined);
+    if (categoryToFilter) {
+      filterObj.categories = [categoryToFilter];
+    }
+    return Object.keys(filterObj).length > 0 ? filterObj : undefined;
+  }, [searchQuery, categoryId, selectedCategory]);
+
   const { data: postsData } = useBlogPostsTable({
     workspaceSlug,
     blogId: pageId,
-    filters: searchQuery ? { search: searchQuery } : undefined,
+    filters,
     pagination: { page: 1, pageSize: 50 },
   });
 
@@ -171,6 +189,13 @@ export function ManageFeaturedPostsDialog({
       console.error("Featured posts update error:", error);
     },
   });
+
+  // Initialize selectedCategory when categoryId prop changes
+  useEffect(() => {
+    if (categoryId) {
+      setSelectedCategory(categoryId);
+    }
+  }, [categoryId]);
 
   useEffect(() => {
     if (featuredData?.featuredPosts) {
@@ -276,25 +301,27 @@ export function ManageFeaturedPostsDialog({
         </DialogHeader>
 
         <div className="space-y-4 ">
-          {/* Category Selection */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Category</label>
-            <Select
-              value={selectedCategory}
-              onValueChange={setSelectedCategory}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categoryOptions.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Category Selection - Hide if categoryId is provided */}
+          {!categoryId && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Category</label>
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categoryOptions.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Featured Posts Section */}
           <div className="space-y-3">
